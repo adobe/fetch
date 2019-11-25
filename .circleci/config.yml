@@ -1,0 +1,82 @@
+version: 2.1
+executors:
+  node8:
+    docker:
+    - image: circleci/node:8
+    environment:
+      NPM_CONFIG_PREFIX: ~/.npm-global
+
+commands:
+  setup:
+    steps:
+    - checkout
+    # - restore_cache:
+    #     keys:
+    #     - v1-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
+    - run:
+        name: install npm 6.9.0
+        command: sudo npm -g install npm@6.9.0
+    - run:
+        name: Installing Dependencies
+        command: npm ci
+    # - save_cache:
+    #     paths:
+    #     - node_modules
+    #     key: v1-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
+    - run:
+        name: prepare test git user
+        command: git config --global user.email "circleci@example.com" && git config --global user.name "CircleCi Build"
+
+jobs:
+  build:
+    executor: node8
+
+    steps:
+    - setup
+    - run: mkdir junit
+    - run:
+        name: Lint
+        command: npm run lint
+
+    - run:
+        name: Getting Code Coverage
+        command: npm run test-ci
+
+    - store_test_results:
+        path: junit
+
+    - store_artifacts:
+        path: junit
+
+  release:
+    executor: node8
+
+    steps:
+      - setup
+      - run:
+          name: revert changes to package-lock.json
+          command: git checkout -- package-lock.json
+
+      - run:
+          name: Check for Updated Package name
+          command: node -e "if (require('./package.json').name=='@adobe/helix-library') { process.exit(1) };"
+
+      - run:
+          name: Semantic Release
+          command: npm run semantic-release
+
+workflows:
+  version: 2
+  build:
+    jobs:
+    - build
+    # the release jobs needs a $NPM_TOKEN and $GH_TOKEN environment to be setup
+    # but this should be covered by the CircleCI contexts setting below
+    - release:
+        context: Project Helix
+        requires:
+        - build
+        filters:
+          branches:
+            # rename to `master` once the tokens have been setup
+            only: master

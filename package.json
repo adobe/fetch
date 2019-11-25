@@ -1,0 +1,63 @@
+{
+  "name": "@adobe/helix-fetch",
+  "version": "0.0.1",
+  "description": "Helix Fetch Library",
+  "main": "src/index.js",
+  "scripts": {
+    "test": " nyc --reporter=text --reporter=lcov --check-coverage --branches 100 --statements 100 --lines 100 mocha",
+    "test-ci": "nyc --reporter=text --reporter=lcov --check-coverage --branches 100 --statements 100 --lines 100 mocha --reporter xunit --reporter-options output=./junit/test-results.xml && codecov",
+    "lint": "./node_modules/.bin/eslint .",
+    "semantic-release": "semantic-release",
+    "docs": "npx jsdoc2md -c .jsdoc.json --files 'src/*.js'  > docs/API.md",
+    "commit": "git-cz"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stefan-guggisberg/helix-fetch"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/stefan-guggisberg/helix-fetch/issues"
+  },
+  "homepage": "https://github.com/stefan-guggisberg/helix-fetch#readme",
+  "dependencies": {
+    "got": "^9.6.0",
+    "spdy": "^4.0.1"
+  },
+  "devDependencies": {
+    "@adobe/eslint-config-helix": "1.1.0",
+    "@semantic-release/changelog": "3.0.5",
+    "@semantic-release/commit-analyzer": "6.3.3",
+    "@semantic-release/git": "7.0.18",
+    "@semantic-release/github": "5.5.5",
+    "@semantic-release/npm": "5.3.4",
+    "@semantic-release/release-notes-generator": "7.3.3",
+    "ajv": "6.10.2",
+    "codecov": "3.6.1",
+    "commitizen": "4.0.3",
+    "cz-conventional-changelog": "3.0.2",
+    "eslint": "6.6.0",
+    "eslint-plugin-header": "3.0.0",
+    "eslint-plugin-import": "2.18.2",
+    "istanbul": "1.1.0-alpha.1",
+    "jsdoc-to-markdown": "5.0.2",
+    "junit-report-builder": "1.3.3",
+    "lint-staged": "9.4.3",
+    "lodash": "4.17.15",
+    "mocha": "6.2.2",
+    "nyc": "14.1.1",
+    "semantic-release": "15.13.30"
+  },
+  "lint-staged": {
+    "*.js": "eslint"
+  },
+  "config": {
+    "commitizen": {
+      "path": "node_modules/cz-conventional-changelog"
+    },
+    "ghooks": {
+      "pre-commit": "npx lint-staged"
+    }
+  }
+}
