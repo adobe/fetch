@@ -2,6 +2,14 @@
 
 > Simplified HTTP/2 requests with Server Push Support
 
+## Features
+
+- [ ] Http/2 Server Push support
+- [ ] Http/2 request and response multiplexing support
+- [ ] [RFC 7234](https://httpwg.org/specs/rfc7234.html) compliant cache
+- [ ] Streaming support
+- [ ] Promise API/`async & await`
+
 ## Status
 [![codecov](https://img.shields.io/codecov/c/github/stefan-guggisberg/helix-fetch.svg)](https://codecov.io/gh/stefan-guggisberg/helix-fetch)
 [![CircleCI](https://img.shields.io/circleci/project/github/stefan-guggisberg/helix-fetch.svg)](https://circleci.com/gh/stefan-guggisberg/helix-fetch)
