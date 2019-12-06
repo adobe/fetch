@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/stefan-guggisberg/helix-fetch#readme",
   "dependencies": {
+    "fetch-h2": "^2.2.2",
     "got": "^9.6.0",
     "http-cache-semantics": "^4.0.3",
     "http2-wrapper": "^1.0.0-beta.1",

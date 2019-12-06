@@ -10,13 +10,74 @@
  * governing permissions and limitations under the License.
  */
 
-/**
- * This is the main function
- * @param {string} name name of the person to greet
- * @returns {string} a greeting
- */
-function main(name = 'world') {
-  return `Hello, ${name}.`;
-}
+'use strict';
 
-module.exports = { main };
+const CachePolicy = require('http-cache-semantics');
+const {
+  setup,
+  context,
+  fetch,
+  disconnect,
+  disconnectAll,
+  onPush,
+  // Fetch API
+  Body,
+  Headers,
+  Request,
+  Response,
+  
+  AbortError,
+  AbortController,
+  TimeoutError,
+
+  ContextOptions,
+  DecodeFunction,
+  Decoder,
+
+  CookieJar,
+
+  // TypeScript types:
+  OnTrailers,
+} = require('fetch-h2');
+const LRU = require('lru-cache');
+
+const pushHandler = async (origin, request, getResponse) => {
+//  if (shouldReceivePush(request)) {
+      const response = await getResponse();
+      // do something with response...
+//  }
+});
+
+
+const ctx = context({
+  userAgent: 'helix-fetch',
+  overwriteUserAgent: true,
+});
+
+ctx.cache = LRU({ max: 500 });
+
+const wrappedFetch = async (uri, options = { method: 'GET' }) => {
+  // TODO lookup cache, cache result
+  //ctx.cache.get
+
+  options.mode = 'no-cors';
+  options.allowForbiddenHeaders = true;
+  const req = new Request(uri, options);
+  const resp = await ctx.fetch(req);
+  
+  const policy = new CachePolicy(req, resp, {
+    shared: true,
+    cacheHeuristic: 0.1,
+    immutableMinTimeToLive: 24 * 3600 * 1000, // 24h
+    ignoreCargoCult: false,
+    trustServerDate: true,
+  });
+  if (policy.storable()) {
+    ctx.cache.set(req.url, { policy, resp }, policy.timeToLive());
+  }
+
+  return resp;
+};
+
+module.exports.fetch = wrappedFetch;
+module.exports.disconnectAll = ctx.disconnectAll;

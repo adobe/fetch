@@ -9,8 +9,10 @@
 - [ ] [RFC 7234](https://httpwg.org/specs/rfc7234.html) compliant cache
 - [ ] Streaming support
 - [ ] Promise API/`async & await`
+- [ ] Transparent handling of HTTP/1(.1) and HTTP/2 connections
 
 ## Status
+
 [![codecov](https://img.shields.io/codecov/c/github/stefan-guggisberg/helix-fetch.svg)](https://codecov.io/gh/stefan-guggisberg/helix-fetch)
 [![CircleCI](https://img.shields.io/circleci/project/github/stefan-guggisberg/helix-fetch.svg)](https://circleci.com/gh/stefan-guggisberg/helix-fetch)
 [![GitHub license](https://img.shields.io/github/license/stefan-guggisberg/helix-fetch.svg)](https://github.com/stefan-guggisberg/helix-fetch/blob/master/LICENSE.txt)
