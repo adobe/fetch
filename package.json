@@ -41,7 +41,7 @@
     "codecov": "3.6.1",
     "commitizen": "4.0.3",
     "cz-conventional-changelog": "3.0.2",
-    "eslint": "6.6.0",
+    "eslint": "6.7.2",
     "eslint-plugin-header": "3.0.0",
     "eslint-plugin-import": "2.18.2",
     "istanbul": "1.1.0-alpha.1",

@@ -12,10 +12,11 @@
 
 'use strict';
 
-const CachePolicy = require('http-cache-semantics');
 const {
-  setup,
   context,
+  Request,
+/*
+  setup,
   fetch,
   disconnect,
   disconnectAll,
@@ -23,9 +24,8 @@ const {
   // Fetch API
   Body,
   Headers,
-  Request,
   Response,
-  
+
   AbortError,
   AbortController,
   TimeoutError,
@@ -38,45 +38,79 @@ const {
 
   // TypeScript types:
   OnTrailers,
+*/
 } = require('fetch-h2');
 const LRU = require('lru-cache');
 
-const pushHandler = async (origin, request, getResponse) => {
-//  if (shouldReceivePush(request)) {
-      const response = await getResponse();
-      // do something with response...
-//  }
-});
+const CachePolicy = require('./policy');
 
+const CACHEABLE_METHODS = ['GET', 'HEAD'];
 
 const ctx = context({
   userAgent: 'helix-fetch',
   overwriteUserAgent: true,
 });
 
-ctx.cache = LRU({ max: 500 });
+ctx.cache = new LRU({ max: 500 });
 
-const wrappedFetch = async (uri, options = { method: 'GET' }) => {
-  // TODO lookup cache, cache result
-  //ctx.cache.get
-
-  options.mode = 'no-cors';
-  options.allowForbiddenHeaders = true;
-  const req = new Request(uri, options);
-  const resp = await ctx.fetch(req);
-  
-  const policy = new CachePolicy(req, resp, {
-    shared: true,
-    cacheHeuristic: 0.1,
-    immutableMinTimeToLive: 24 * 3600 * 1000, // 24h
-    ignoreCargoCult: false,
-    trustServerDate: true,
-  });
+/**
+ * Cache the response as appropriate
+ *
+ * @param {Request} request
+ * @param {Response} response
+ */
+const cacheResponse = async (request, response) => {
+  if (!CACHEABLE_METHODS.includes(request.method)) {
+    return;
+  }
+  const policy = new CachePolicy(request, response, { shared: false });
   if (policy.storable()) {
-    ctx.cache.set(req.url, { policy, resp }, policy.timeToLive());
+    // update cache
+    // TODO: need to fully consume body stream first?
+    ctx.cache.set(request.uri, { policy, response }, policy.timeToLive());
+  }
+};
+
+const pushHandler = async (origin, request, getResponse) => {
+  // check if we've already cached the pushed resource
+  const { policy } = ctx.cache.get(request.uri) || {};
+  if (!policy || policy.satisfiesWithoutRevalidation(request)) {
+    // consume pushed response
+    const response = await getResponse();
+    // update cache
+    // TODO: need to fully consume body stream first?
+    await cacheResponse(request, response);
+  }
+};
+
+// register push handler
+ctx.onPush(pushHandler);
+
+const wrappedFetch = async (uri, options = { method: 'GET', cache: 'default' }) => {
+  const lookupCache = CACHEABLE_METHODS.includes(options.method)
+    // respect cache mode (https://developer.mozilla.org/en-US/docs/Web/API/Request/cache)
+    && !['no-store', 'reload'].includes(options.cache);
+  if (lookupCache) {
+    // check cache
+    const { policy, response } = ctx.cache.get(uri) || {};
+    if (policy && policy.satisfiesWithoutRevalidation(new Request(uri, options))) {
+      // response headers have to be updated, e.g. to add Age and remove uncacheable headers.
+      response.headers = policy.responseHeaders();
+      return response;
+    }
   }
 
-  return resp;
+  // fetch
+  const opts = { ...options };
+  opts.mode = 'no-cors';
+  opts.allowForbiddenHeaders = true;
+  const request = new Request(uri, opts);
+  const response = await ctx.fetch(request);
+
+  if (options.cache !== 'no-store') {
+    await cacheResponse(request, response);
+  }
+  return response;
 };
 
 module.exports.fetch = wrappedFetch;

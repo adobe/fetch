@@ -1,0 +1,15 @@
+coverage
+.nyc_output/
+node_modules/
+.vscode/
+junit
+.idea
+.snyk
+*.tgz
+build
+logs
+test-results.xml
+snykmocha.js
+.releaserc.js
+.eslintignore
+.eslintrc.js

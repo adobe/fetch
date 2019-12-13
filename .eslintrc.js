@@ -10,18 +10,7 @@
  * governing permissions and limitations under the License.
  */
 
-/* eslint-env mocha */
-
-'use strict';
-
-const assert = require('assert');
-const { fetch } = require('../src/index.js');
-
-describe('Fetch Tests', () => {
-  it('fetch supports http/2', async () => {
-    const resp = await fetch('https://www.project-helix.info/index.html');
-    // TODO: check pushed resource
-    // TODO: check cache
-    assert.equal(resp.status, 200);
-  });
-});
+module.exports = {
+  root: true,
+  extends: '@adobe/helix',
+};

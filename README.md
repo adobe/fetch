@@ -4,12 +4,12 @@
 
 ## Features
 
-- [ ] Http/2 Server Push support
-- [ ] Http/2 request and response multiplexing support
+- [x] Http/2 Server Push support
+- [x] Http/2 request and response multiplexing support
 - [ ] [RFC 7234](https://httpwg.org/specs/rfc7234.html) compliant cache
 - [ ] Streaming support
-- [ ] Promise API/`async & await`
-- [ ] Transparent handling of HTTP/1(.1) and HTTP/2 connections
+- [x] Promise API/`async & await`
+- [x] Transparent handling of HTTP/1(.1) and HTTP/2 connections
 
 ## Status
 
