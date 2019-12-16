@@ -34,7 +34,7 @@ const headersAsObject = (headers) => {
  * @returns {Object}
  */
 const convertRequest = (req) => ({
-  url: req.uri,
+  url: req.url,
   method: req.method,
   headers: headersAsObject(req.headers),
 });

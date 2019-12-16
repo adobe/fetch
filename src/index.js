@@ -67,34 +67,38 @@ const cacheResponse = async (request, response) => {
   if (policy.storable()) {
     // update cache
     // TODO: need to fully consume body stream first?
-    ctx.cache.set(request.uri, { policy, response }, policy.timeToLive());
+    ctx.cache.set(request.url, { policy, response }, policy.timeToLive());
   }
 };
 
 const pushHandler = async (origin, request, getResponse) => {
+  // request.url is the relative URL for pushed resources
+  // need to convert to absolute url
+  const req = request.clone(new URL(request.url, origin).toString());
   // check if we've already cached the pushed resource
-  const { policy } = ctx.cache.get(request.uri) || {};
-  if (!policy || policy.satisfiesWithoutRevalidation(request)) {
+  const { policy } = ctx.cache.get(req.url) || {};
+  if (!policy || policy.satisfiesWithoutRevalidation(req)) {
     // consume pushed response
     const response = await getResponse();
     // update cache
     // TODO: need to fully consume body stream first?
-    await cacheResponse(request, response);
+    await cacheResponse(req, response);
   }
 };
 
 // register push handler
 ctx.onPush(pushHandler);
 
-const wrappedFetch = async (uri, options = { method: 'GET', cache: 'default' }) => {
+const wrappedFetch = async (url, options = { method: 'GET', cache: 'default' }) => {
   const lookupCache = CACHEABLE_METHODS.includes(options.method)
     // respect cache mode (https://developer.mozilla.org/en-US/docs/Web/API/Request/cache)
     && !['no-store', 'reload'].includes(options.cache);
   if (lookupCache) {
     // check cache
-    const { policy, response } = ctx.cache.get(uri) || {};
-    if (policy && policy.satisfiesWithoutRevalidation(new Request(uri, options))) {
+    const { policy, response } = ctx.cache.get(url) || {};
+    if (policy && policy.satisfiesWithoutRevalidation(new Request(url, options))) {
       // response headers have to be updated, e.g. to add Age and remove uncacheable headers.
+      // TODO: the following line throws because .headers is read-only...
       response.headers = policy.responseHeaders();
       return response;
     }
@@ -104,7 +108,7 @@ const wrappedFetch = async (uri, options = { method: 'GET', cache: 'default' }) 
   const opts = { ...options };
   opts.mode = 'no-cors';
   opts.allowForbiddenHeaders = true;
-  const request = new Request(uri, opts);
+  const request = new Request(url, opts);
   const response = await ctx.fetch(request);
 
   if (options.cache !== 'no-store') {

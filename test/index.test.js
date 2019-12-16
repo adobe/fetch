@@ -19,9 +19,15 @@ const { fetch } = require('../src/index.js');
 
 describe('Fetch Tests', () => {
   it('fetch supports http/2', async () => {
+    // https://http2.golang.org/serverpush
     const resp = await fetch('https://www.project-helix.info/index.html');
-    // TODO: check pushed resource
-    // TODO: check cache
+    assert.equal(resp.httpVersion, 2);
     assert.equal(resp.status, 200);
+    // TODO: check cache for pushed resource(s)
+
+    const pushedResp = await fetch('https://www.project-helix.info/helix_logo.png');
+    assert.equal(pushedResp.httpVersion, 2);
+    assert.equal(pushedResp.cached);
+    assert.equal(pushedResp.status, 200);
   });
 });
