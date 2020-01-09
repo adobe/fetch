@@ -15,19 +15,66 @@
 'use strict';
 
 const assert = require('assert');
-const { fetch } = require('../src/index.js');
+
+const nock = require('nock');
+
+const { fetch, disconnectAll } = require('../src/index.js');
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 describe('Fetch Tests', () => {
-  it('fetch supports http/2', async () => {
-    // https://http2.golang.org/serverpush
-    const resp = await fetch('https://www.project-helix.info/index.html');
+  afterEach(async () => {
+    // disconnect all sessions
+    await disconnectAll();
+  });
+
+  it.skip('fetch supports HTTP/1(.1)', async () => {
+    const resp = await fetch('https://httpbin.org/status/200');
+    assert.equal(resp.status, 200);
+    assert.equal(resp.httpVersion, 1);
+  });
+
+  it('fetch supports HTTP/2', async () => {
+    const resp = await fetch('https://www.nghttp2.org/httpbin/status/200');
+    assert.equal(resp.status, 200);
+    assert.equal(resp.httpVersion, 2);
+  });
+
+  it('fetch provides caching', async () => {
+    const url = 'https://httpbin.org/cache/60';
+    // send request
+    const resp = await fetch(url);
+    assert.equal(resp.status, 200);
+
+    // send same request again, this time with network disabled
+    nock.disableNetConnect();
+    try {
+      const resp2 = await fetch(url);
+      assert.equal(resp2.status, 200);
+      assert(resp2.fromCache);
+    } finally {
+      nock.cleanAll();
+      nock.enableNetConnect();
+    }
+
+    // send same request again, this time with cache disabled
+    const resp3 = await fetch(url, { cache: 'no-cache' });
+    assert.equal(resp3.status, 200);
+    assert(!resp3.fromCache);
+  });
+
+  it('fetch supports HTTP/2 server push', async () => {
+    // see https://nghttp2.org/blog/2015/02/10/nghttp2-dot-org-enabled-http2-server-push/
+    const resp = await fetch('https://nghttp2.org');
     assert.equal(resp.httpVersion, 2);
     assert.equal(resp.status, 200);
-    // TODO: check cache for pushed resource(s)
-
-    const pushedResp = await fetch('https://www.project-helix.info/helix_logo.png');
+    // wait a second...
+    await sleep(1000);
+    // check cache for pushed resource (stylesheets/screen.css)
+    const pushedResp = await fetch('https://nghttp2.org/stylesheets/screen.css');
     assert.equal(pushedResp.httpVersion, 2);
-    assert.equal(pushedResp.cached);
     assert.equal(pushedResp.status, 200);
+    // make sure it's delivered from cache
+    assert(pushedResp.fromCache);
   });
 });

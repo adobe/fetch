@@ -15,30 +15,6 @@
 const {
   context,
   Request,
-/*
-  setup,
-  fetch,
-  disconnect,
-  disconnectAll,
-  onPush,
-  // Fetch API
-  Body,
-  Headers,
-  Response,
-
-  AbortError,
-  AbortController,
-  TimeoutError,
-
-  ContextOptions,
-  DecodeFunction,
-  Decoder,
-
-  CookieJar,
-
-  // TypeScript types:
-  OnTrailers,
-*/
 } = require('fetch-h2');
 const LRU = require('lru-cache');
 
@@ -72,17 +48,21 @@ const cacheResponse = async (request, response) => {
 };
 
 const pushHandler = async (origin, request, getResponse) => {
-  // request.url is the relative URL for pushed resources
-  // need to convert to absolute url
+  // request.url is the relative URL for pushed resources => need to convert to absolute url
   const req = request.clone(new URL(request.url, origin).toString());
   // check if we've already cached the pushed resource
   const { policy } = ctx.cache.get(req.url) || {};
-  if (!policy || policy.satisfiesWithoutRevalidation(req)) {
+  if (!policy || !policy.satisfiesWithoutRevalidation(req)) {
     // consume pushed response
     const response = await getResponse();
     // update cache
     // TODO: need to fully consume body stream first?
     await cacheResponse(req, response);
+  /*
+    console.log(`accepted pushed resource: ${req.url}`);
+  } else {
+    console.log(`declined pushed resource: ${req.url}`);
+  */
   }
 };
 
@@ -97,18 +77,13 @@ const wrappedFetch = async (url, options = { method: 'GET', cache: 'default' }) 
     // check cache
     const { policy, response } = ctx.cache.get(url) || {};
     if (policy && policy.satisfiesWithoutRevalidation(new Request(url, options))) {
-      // response headers have to be updated, e.g. to add Age and remove uncacheable headers.
-      // TODO: the following line throws because .headers is read-only...
-      response.headers = policy.responseHeaders();
-      return response;
+      // response headers need to be updated, e.g. to add Age and remove uncacheable headers.
+      return { ...response, headers: policy.responseHeaders(), fromCache: true };
     }
   }
 
   // fetch
-  const opts = { ...options };
-  opts.mode = 'no-cors';
-  opts.allowForbiddenHeaders = true;
-  const request = new Request(url, opts);
+  const request = new Request(url, { ...options, mode: 'no-cors', allowForbiddenHeaders: true });
   const response = await ctx.fetch(request);
 
   if (options.cache !== 'no-store') {
@@ -118,4 +93,5 @@ const wrappedFetch = async (url, options = { method: 'GET', cache: 'default' }) 
 };
 
 module.exports.fetch = wrappedFetch;
-module.exports.disconnectAll = ctx.disconnectAll;
+module.exports.disconnect = (url) => ctx.disconnect(url);
+module.exports.disconnectAll = () => ctx.disconnectAll();

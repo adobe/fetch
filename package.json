@@ -23,11 +23,8 @@
   "homepage": "https://github.com/stefan-guggisberg/helix-fetch#readme",
   "dependencies": {
     "fetch-h2": "^2.2.2",
-    "got": "^9.6.0",
     "http-cache-semantics": "^4.0.3",
-    "http2-wrapper": "^1.0.0-beta.1",
-    "lru-cache": "^5.1.1",
-    "spdy": "^4.0.1"
+    "lru-cache": "^5.1.1"
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "1.1.0",
@@ -48,8 +45,8 @@
     "jsdoc-to-markdown": "5.0.2",
     "junit-report-builder": "1.3.3",
     "lint-staged": "9.4.3",
-    "lodash": "4.17.15",
     "mocha": "6.2.2",
+    "nock": "^11.7.2",
     "nyc": "14.1.1",
     "semantic-release": "15.13.30"
   },

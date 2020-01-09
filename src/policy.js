@@ -51,7 +51,7 @@ const convertResponse = (res) => ({
 
 /**
  * Wrapper for CachePolicy, supporting Request and Response argument types
- * as specified iby the Fetch API.
+ * as specified by the Fetch API.
  */
 class CachePolicyWrapper {
   /**
