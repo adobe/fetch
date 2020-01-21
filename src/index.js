@@ -19,6 +19,7 @@ const {
 const LRU = require('lru-cache');
 
 const CachePolicy = require('./policy');
+const { ResponseWrapper } = require('./response');
 
 const CACHEABLE_METHODS = ['GET', 'HEAD'];
 
@@ -30,20 +31,30 @@ const ctx = context({
 ctx.cache = new LRU({ max: 500 });
 
 /**
- * Cache the response as appropriate
+ * Cache the response as appropriate. The body stream of the
+ * response is consumed & buffered to allow repeated reads.
  *
  * @param {Request} request
  * @param {Response} response
+ * @returns {Response} cached response with buffered body or original response if uncached.
  */
 const cacheResponse = async (request, response) => {
   if (!CACHEABLE_METHODS.includes(request.method)) {
-    return;
+    // return original un-cacheable response
+    return response;
   }
   const policy = new CachePolicy(request, response, { shared: false });
   if (policy.storable()) {
     // update cache
-    // TODO: need to fully consume body stream first?
-    ctx.cache.set(request.url, { policy, response }, policy.timeToLive());
+    // wrap response in order to make it re-readable
+    const wrappedResponse = new ResponseWrapper(response);
+    // FIXME: ensure body stream is fully read and bufferd
+    await wrappedResponse.arrayBuffer();
+    ctx.cache.set(request.url, { policy, response: wrappedResponse }, policy.timeToLive());
+    return wrappedResponse;
+  } else {
+    // return original un-cacheable response
+    return response;
   }
 };
 
@@ -56,7 +67,6 @@ const pushHandler = async (origin, request, getResponse) => {
     // consume pushed response
     const response = await getResponse();
     // update cache
-    // TODO: need to fully consume body stream first?
     await cacheResponse(req, response);
   /*
     console.log(`accepted pushed resource: ${req.url}`);
@@ -86,10 +96,7 @@ const wrappedFetch = async (url, options = { method: 'GET', cache: 'default' }) 
   const request = new Request(url, { ...options, mode: 'no-cors', allowForbiddenHeaders: true });
   const response = await ctx.fetch(request);
 
-  if (options.cache !== 'no-store') {
-    await cacheResponse(request, response);
-  }
-  return response;
+  return options.cache !== 'no-store' ? cacheResponse(request, response) : response;
 };
 
 module.exports.fetch = wrappedFetch;

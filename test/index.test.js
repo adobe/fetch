@@ -28,7 +28,7 @@ describe('Fetch Tests', () => {
     await disconnectAll();
   });
 
-  it.skip('fetch supports HTTP/1(.1)', async () => {
+  it('fetch supports HTTP/1(.1)', async () => {
     const resp = await fetch('https://httpbin.org/status/200');
     assert.equal(resp.status, 200);
     assert.equal(resp.httpVersion, 1);
@@ -63,11 +63,15 @@ describe('Fetch Tests', () => {
     assert(!resp3.fromCache);
   });
 
-  it('fetch supports HTTP/2 server push', async () => {
+  // eslint-disable-next-line func-names
+  it('fetch supports HTTP/2 server push', async function () {
+    this.timeout(5000);
     // see https://nghttp2.org/blog/2015/02/10/nghttp2-dot-org-enabled-http2-server-push/
     const resp = await fetch('https://nghttp2.org');
     assert.equal(resp.httpVersion, 2);
     assert.equal(resp.status, 200);
+    assert.equal(resp.headers['content-type'], 'text/html');
+    assert.equal(resp.headers['content-length'], (await resp.text()).length);
     // wait a second...
     await sleep(1000);
     // check cache for pushed resource (stylesheets/screen.css)
