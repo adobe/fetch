@@ -16,9 +16,10 @@
 
 const assert = require('assert');
 
+const isStream = require('is-stream');
 const nock = require('nock');
 
-const { fetch, disconnectAll } = require('../src/index.js');
+const { fetch, onPush, offPush, disconnectAll } = require('../src/index.js');
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -38,6 +39,22 @@ describe('Fetch Tests', () => {
     const resp = await fetch('https://www.nghttp2.org/httpbin/status/200');
     assert.equal(resp.status, 200);
     assert.equal(resp.httpVersion, 2);
+  });
+
+  it('response.body is a readable stream', async () => {
+    const resp = await fetch('https://httpbin.org/status/200');
+    assert.equal(resp.status, 200);
+    assert.equal(resp.httpVersion, 1);
+    assert(isStream.readable(resp.body));
+  });
+
+  it('fetch supports json response body', async () => {
+    const resp = await fetch('https://httpbin.org/json');
+    assert.equal(resp.status, 200);
+    assert.equal(resp.httpVersion, 1);
+    assert.equal(resp.headers.get('content-type'), 'application/json');
+    const json = await resp.json();
+    assert(json !== null && typeof json === 'object');
   });
 
   it('fetch provides caching', async () => {
@@ -66,19 +83,38 @@ describe('Fetch Tests', () => {
   // eslint-disable-next-line func-names
   it('fetch supports HTTP/2 server push', async function () {
     this.timeout(5000);
+
+    const pushUrlPromise = new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject();
+      }, 2000);
+      const handler = (url) => {
+        offPush(handler);
+        clearTimeout(timeout);
+        resolve(url);
+      };
+      // register event handler
+      onPush(handler);
+    });
+
     // see https://nghttp2.org/blog/2015/02/10/nghttp2-dot-org-enabled-http2-server-push/
     const resp = await fetch('https://nghttp2.org');
     assert.equal(resp.httpVersion, 2);
     assert.equal(resp.status, 200);
-    assert.equal(resp.headers['content-type'], 'text/html');
-    assert.equal(resp.headers['content-length'], (await resp.text()).length);
-    // wait a second...
-    await sleep(1000);
+    assert.equal(resp.headers.get('content-type'), 'text/html');
+    assert.equal(resp.headers.get('content-length'), (await resp.text()).length);
+
+    const url = await pushUrlPromise;
     // check cache for pushed resource (stylesheets/screen.css)
-    const pushedResp = await fetch('https://nghttp2.org/stylesheets/screen.css');
-    assert.equal(pushedResp.httpVersion, 2);
-    assert.equal(pushedResp.status, 200);
-    // make sure it's delivered from cache
-    assert(pushedResp.fromCache);
+    nock.disableNetConnect();
+    try {
+      const pushedResp = await fetch(url);
+      assert.equal(pushedResp.httpVersion, 2);
+      assert.equal(pushedResp.status, 200);
+      assert(pushedResp.fromCache);
+      } finally {
+      nock.cleanAll();
+      nock.enableNetConnect();
+    }
   });
 });

@@ -12,6 +12,8 @@
 
 'use strict';
 
+const { EventEmitter } = require('events');
+
 const {
   context,
   Request,
@@ -23,12 +25,16 @@ const { ResponseWrapper } = require('./response');
 
 const CACHEABLE_METHODS = ['GET', 'HEAD'];
 
+// events
+const PUSH_EVENT = 'push';
+
 const ctx = context({
   userAgent: 'helix-fetch',
   overwriteUserAgent: true,
 });
 
 ctx.cache = new LRU({ max: 500 });
+ctx.eventEmitter = new EventEmitter();
 
 /**
  * Cache the response as appropriate. The body stream of the
@@ -68,12 +74,8 @@ const pushHandler = async (origin, request, getResponse) => {
     const response = await getResponse();
     // update cache
     await cacheResponse(req, response);
-  /*
-    console.log(`accepted pushed resource: ${req.url}`);
-  } else {
-    console.log(`declined pushed resource: ${req.url}`);
-  */
   }
+  ctx.eventEmitter.emit(PUSH_EVENT, req.url);
 };
 
 // register push handler
@@ -100,5 +102,7 @@ const wrappedFetch = async (url, options = { method: 'GET', cache: 'default' }) 
 };
 
 module.exports.fetch = wrappedFetch;
+module.exports.onPush = (fn) => ctx.eventEmitter.on(PUSH_EVENT, fn);
+module.exports.offPush = (fn) => ctx.eventEmitter.off(PUSH_EVENT, fn);
 module.exports.disconnect = (url) => ctx.disconnect(url);
 module.exports.disconnectAll = () => ctx.disconnectAll();

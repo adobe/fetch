@@ -16,8 +16,6 @@ const { PassThrough } = require('stream');
 
 const getStream = require('get-stream');
 
-const Headers = require('./headers');
-
 /**
  * Convert a NodeJS Buffer to an ArrayBuffer
  *
@@ -40,15 +38,15 @@ class ResponseWrapper {
    */
   constructor(res) {
     this._res = res;
+    this.headers = res.headers;
     this.ok = res.ok;
-    this.redirected = res.redirected;
     this.status = res.status;
     this.statusText = res.statusText;
+    this.redirected = res.redirected;
     this.type = res.type;
     this.url = res.url;
     this.httpVersion = res.httpVersion;
     this.bodyUsed = false;
-    this.headers = new Headers(res.headers);
     this._body = null;
   }
 

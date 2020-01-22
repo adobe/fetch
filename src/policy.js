@@ -76,16 +76,16 @@ class CachePolicyWrapper {
     return new Headers(this.policy.responseHeaders());
   }
 
+  timeToLive() {
+    return this.policy.timeToLive();
+  }
+/*
   age() {
     return this.policy.age();
   }
 
   maxAge() {
     return this.policy.maxAge();
-  }
-
-  timeToLive() {
-    return this.policy.timeToLive();
   }
 
   stale() {
@@ -99,6 +99,7 @@ class CachePolicyWrapper {
   revalidatedPolicy(request, response) {
     return this.policy.revalidatedPolicy(convertRequest(request), convertResponse(response));
   }
+*/
 }
 
 module.exports = CachePolicyWrapper;
