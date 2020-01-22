@@ -57,6 +57,19 @@ describe('Fetch Tests', () => {
     assert(json !== null && typeof json === 'object');
   });
 
+  it('fetch supports json POST', async () => {
+    const method = 'POST';
+    const json = { foo: 'bar' };
+    const headers = { accept: 'application/json' };
+    const resp = await fetch('https://httpbin.org/post', { method, json, headers });
+    assert.equal(resp.status, 200);
+    assert.equal(resp.httpVersion, 1);
+    assert.equal(resp.headers.get('content-type'), 'application/json');
+    const jsonResponseBody = await resp.json();
+    assert(jsonResponseBody !== null && typeof jsonResponseBody === 'object');
+    assert.deepEqual(jsonResponseBody.json, json);
+  });
+
   it('fetch provides caching', async () => {
     const url = 'https://httpbin.org/cache/60';
     // send request
