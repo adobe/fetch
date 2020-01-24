@@ -24,6 +24,7 @@ const CachePolicy = require('./policy');
 const { ResponseWrapper } = require('./response');
 
 const CACHEABLE_METHODS = ['GET', 'HEAD'];
+const DEFAULT_FETCH_OPTIONS = { method: 'GET', cache: 'default' };
 
 // events
 const PUSH_EVENT = 'push';
@@ -52,9 +53,9 @@ const cacheResponse = async (request, response) => {
   const policy = new CachePolicy(request, response, { shared: false });
   if (policy.storable()) {
     // update cache
-    // wrap response in order to make it re-readable
+    // wrap response in order to make it reusable
     const wrappedResponse = new ResponseWrapper(response);
-    // FIXME: ensure body stream is fully read and bufferd
+    // FIXME: ensure body stream is fully read and buffered
     await wrappedResponse.arrayBuffer();
     ctx.cache.set(request.url, { policy, response: wrappedResponse }, policy.timeToLive());
     return wrappedResponse;
@@ -70,7 +71,7 @@ const pushHandler = async (origin, request, getResponse) => {
   // check if we've already cached the pushed resource
   const { policy } = ctx.cache.get(req.url) || {};
   if (!policy || !policy.satisfiesWithoutRevalidation(req)) {
-    // consume pushed response
+    // consume pushed responsefewewfefw
     const response = await getResponse();
     // update cache
     await cacheResponse(req, response);
@@ -81,28 +82,33 @@ const pushHandler = async (origin, request, getResponse) => {
 // register push handler
 ctx.onPush(pushHandler);
 
-const wrappedFetch = async (url, options = { method: 'GET', cache: 'default' }) => {
-  const lookupCache = CACHEABLE_METHODS.includes(options.method)
+const wrappedFetch = async (url, options = DEFAULT_FETCH_OPTIONS) => {
+  const opts = { ...DEFAULT_FETCH_OPTIONS, ...options };
+  const lookupCache = CACHEABLE_METHODS.includes(opts.method)
     // respect cache mode (https://developer.mozilla.org/en-US/docs/Web/API/Request/cache)
-    && !['no-store', 'reload'].includes(options.cache);
+    && !['no-store', 'reload'].includes(opts.cache);
   if (lookupCache) {
     // check cache
     const { policy, response } = ctx.cache.get(url) || {};
-    if (policy && policy.satisfiesWithoutRevalidation(new Request(url, options))) {
-      // response headers need to be updated, e.g. to add Age and remove uncacheable headers.
-      return { ...response, headers: policy.responseHeaders(), fromCache: true };
+    // TODO: respect cache mode (https://developer.mozilla.org/en-US/docs/Web/API/Request/cache)
+    if (policy && policy.satisfiesWithoutRevalidation(new Request(url, opts))) {
+      // update headers of cached response: update age, remove uncacheable headers, etc.
+      response.headers = policy.responseHeaders(response);
+
+      return { ...response, fromCache: true };
     }
   }
 
   // fetch
-  const request = new Request(url, { ...options, mode: 'no-cors', allowForbiddenHeaders: true });
+  const request = new Request(url, { ...opts, mode: 'no-cors', allowForbiddenHeaders: true });
   const response = await ctx.fetch(request);
 
-  return options.cache !== 'no-store' ? cacheResponse(request, response) : response;
+  return opts.cache !== 'no-store' ? cacheResponse(request, response) : response;
 };
 
 module.exports.fetch = wrappedFetch;
 module.exports.onPush = (fn) => ctx.eventEmitter.on(PUSH_EVENT, fn);
 module.exports.offPush = (fn) => ctx.eventEmitter.off(PUSH_EVENT, fn);
-module.exports.disconnect = (url) => ctx.disconnect(url);
+module.exports.clearCache = () => ctx.cache.reset();
+// module.exports.disconnect = (url) => ctx.disconnect(url);
 module.exports.disconnectAll = () => ctx.disconnectAll();

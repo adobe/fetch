@@ -68,12 +68,22 @@ class CachePolicyWrapper {
     return this.policy.storable();
   }
 
+  /**
+   *
+   * @param {Request} req
+   * @returns boolean
+   */
   satisfiesWithoutRevalidation(req) {
     return this.policy.satisfiesWithoutRevalidation(convertRequest(req));
   }
 
-  responseHeaders() {
-    return new Headers(this.policy.responseHeaders());
+  /**
+   *
+   * @param {Response} res
+   * @returns {Headers}
+   */
+  responseHeaders(res) {
+    return new Headers(this.policy.responseHeaders(convertResponse(res)));
   }
 
   timeToLive() {
