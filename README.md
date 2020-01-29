@@ -1,15 +1,18 @@
 # Helix Fetch Library
 
-> Simplified HTTP/2 requests with Server Push Support
+> Library for making transparent HTTP/1(.1) and HTTP/2 requests.
+
+Based on [fetch-h2](https://github.com/grantila/fetch-h2).
 
 ## Features
 
-- [x] HTTP/2 Server Push support
-- [x] HTTP/2 request and response multiplexing support
-- [x] [RFC 7234](https://httpwg.org/specs/rfc7234.html) compliant cache
-- [x] Streaming support
-- [x] Promise API/`async & await`
+- [x] [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) implementation 
 - [x] Transparent handling of HTTP/1(.1) and HTTP/2 connections
+- [x] Promise API/`async & await`
+- [x] Streaming support
+- [x] [RFC 7234](https://httpwg.org/specs/rfc7234.html) compliant cache
+- [x] HTTP/2 request and response multiplexing support
+- [x] HTTP/2 Server Push support
 
 ## Status
 
@@ -26,9 +29,66 @@
 $ npm install @adobe/helix-fetch
 ```
 
-## Usage
+## Usage Examples
 
-See the [API documentation](docs/API.md).
+### Fetch JSON
+
+```javascript
+  const { fetch } = require('helix-fetch');
+
+  const resp = await fetch('https://httpbin.org/json');
+  const jsonData = await resp.json();
+```
+
+### Fetch text data
+
+```javascript
+  const { fetch } = require('helix-fetch');
+
+  const resp = await fetch('https://httpbin.org/');
+  const textData = await resp.text();
+```
+
+### Fetch binary data
+
+```javascript
+  const { fetch } = require('helix-fetch');
+
+  const resp = await fetch('https://httpbin.org//stream-bytes/65535');
+  const imageData = await resp.arrayBuffer();
+```
+
+### Stream an image
+
+```javascript
+  const fs = require('fs');
+  const { fetch } = require('helix-fetch');
+
+  const resp = await fetch('https://httpbin.org/image/jpeg');
+  (await resp.readable()).pipe(fs.createWriteStream('saved-image.jpg'));
+```
+
+### Post JSON
+
+```javascript
+  const { fetch } = require('helix-fetch');
+
+  const method = 'POST';
+  const json = { foo: 'bar' };
+  const resp = await fetch('https://httpbin.org/post', { method, json });
+```
+
+### Post JPEG image
+
+```javascript
+  const fs = require('fs');
+  const { fetch } = require('helix-fetch');
+
+  const method = 'POST';
+  const body = fs.createReadStream('some-image.jpg');
+  const headers = { 'content-type': 'image/jpeg' };
+  const resp = await fetch('https://httpbin.org/post', { method, body, headers });
+```
 
 ## Development
 

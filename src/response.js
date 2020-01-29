@@ -62,6 +62,11 @@ class ResponseWrapper {
     return stream;
   }
 
+  async readable() {
+    await this._ensureBodyConsumed();
+    return this.body;
+  }
+
   async arrayBuffer() {
     await this._ensureBodyConsumed();
     return toArrayBuffer(this._body);

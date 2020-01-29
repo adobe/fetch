@@ -106,9 +106,33 @@ const wrappedFetch = async (url, options = DEFAULT_FETCH_OPTIONS) => {
   return opts.cache !== 'no-store' ? cacheResponse(request, response) : response;
 };
 
+/**
+ * Fetches a resource from the network or from the cache if the cached response
+ * can be reused according to HTTP RFC 7234 rules. Returns a Promise which resolves once
+ * the Response is available.
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch
+ * @see https://httpwg.org/specs/rfc7234.html
+ */
 module.exports.fetch = wrappedFetch;
+/**
+ * Register a callback which gets called once a server Push has been received.
+ *
+ * @param {Function} fn callback function invoked with the url of the pushed resource
+ */
 module.exports.onPush = (fn) => ctx.eventEmitter.on(PUSH_EVENT, fn);
+/**
+ * Deregister a callback previously registered with {#onPush}.
+ *
+ * @param {Function} fn callback function registered with {#onPush}
+ */
 module.exports.offPush = (fn) => ctx.eventEmitter.off(PUSH_EVENT, fn);
+/**
+ * Clears the cache i.e. removes all entries.
+ */
 module.exports.clearCache = () => ctx.cache.reset();
-// module.exports.disconnect = (url) => ctx.disconnect(url);
+/**
+ * Disconnect all open/pending sessions.
+ */
 module.exports.disconnectAll = () => ctx.disconnectAll();
+// module.exports.disconnect = (url) => ctx.disconnect(url);

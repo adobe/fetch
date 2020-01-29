@@ -15,10 +15,13 @@
 'use strict';
 
 const assert = require('assert');
+const stream = require('stream');
+const util = require('util');
 
 const isStream = require('is-stream');
 const nock = require('nock');
 const parseCacheControl = require('parse-cache-control');
+const { WritableStreamBuffer } = require('stream-buffers');
 
 const {
   fetch, onPush, offPush, disconnectAll, clearCache,
@@ -47,10 +50,10 @@ describe('Fetch Tests', () => {
     assert.equal(resp.httpVersion, 2);
   });
 
-  it('response.body is a readable stream', async () => {
+  it('response.readable() is a readable stream', async () => {
     const resp = await fetch('https://httpbin.org/status/200');
     assert.equal(resp.status, 200);
-    assert(isStream.readable(resp.body));
+    assert(isStream.readable(resp.readable()));
   });
 
   it('fetch supports json response body', async () => {
@@ -61,11 +64,41 @@ describe('Fetch Tests', () => {
     assert(json !== null && typeof json === 'object');
   });
 
+  it('fetch supports binary response body (ArrayBuffer)', async () => {
+    const dataLen = 64 * 1024; // httpbin.org/stream-bytes has a limit of 100kb ...
+    const contentType = 'application/octet-stream';
+    const resp = await fetch(`https://httpbin.org/stream-bytes/${dataLen}`, {
+      headers: { accept: contentType },
+    });
+    assert.equal(resp.status, 200);
+    assert.equal(resp.headers.get('content-type'), contentType);
+    const buffer = await resp.arrayBuffer();
+    assert(buffer !== null && buffer instanceof ArrayBuffer);
+    assert.equal(buffer.byteLength, dataLen);
+  });
+
+  it('fetch supports binary response body (Stream)', async () => {
+    const dataLen = 64 * 1024; // httpbin.org/stream-bytes has a limit of 100kb ...
+    const contentType = 'application/octet-stream';
+    const resp = await fetch(`https://httpbin.org/stream-bytes/${dataLen}`, {
+      headers: { accept: contentType },
+    });
+    assert.equal(resp.status, 200);
+    assert.equal(resp.headers.get('content-type'), contentType);
+    const imageStream = await resp.readable();
+    assert(isStream.readable(imageStream));
+
+    const finished = util.promisify(stream.finished);
+    const out = new WritableStreamBuffer();
+    imageStream.pipe(out);
+    await finished(out);
+    assert.equal(out.getContents().length, dataLen);
+  });
+
   it('fetch supports json POST', async () => {
     const method = 'POST';
     const json = { foo: 'bar' };
-    const headers = { accept: 'application/json' };
-    const resp = await fetch('https://httpbin.org/post', { method, json, headers });
+    const resp = await fetch('https://httpbin.org/post', { method, json });
     assert.equal(resp.status, 200);
     assert.equal(resp.headers.get('content-type'), 'application/json');
     const jsonResponseBody = await resp.json();

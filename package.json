@@ -51,7 +51,8 @@
     "nock": "^11.7.2",
     "nyc": "14.1.1",
     "parse-cache-control": "^1.0.1",
-    "semantic-release": "15.13.30"
+    "semantic-release": "15.13.30",
+    "stream-buffers": "^3.0.2"
   },
   "lint-staged": {
     "*.js": "eslint"

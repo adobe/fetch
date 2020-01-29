@@ -52,10 +52,18 @@ const convertResponse = (res) => ({
 /**
  * Wrapper for CachePolicy, supporting Request and Response argument types
  * as specified by the Fetch API.
+ *
+ * @class
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API
+ * @see https://github.com/kornelski/http-cache-semantics
  */
 class CachePolicyWrapper {
   /**
+   * Creates a new CachePolicyWrapper instance.
    *
+   * @see https://github.com/kornelski/http-cache-semantics#constructor-options
+   *
+   * @constructor
    * @param {Request} req
    * @param {Response} res
    * @param {Object} options
@@ -64,11 +72,15 @@ class CachePolicyWrapper {
     this.policy = new CachePolicy(convertRequest(req), convertResponse(res), options);
   }
 
+  /**
+   * @see https://github.com/kornelski/http-cache-semantics#storable
+   */
   storable() {
     return this.policy.storable();
   }
 
   /**
+   * @see https://github.com/kornelski/http-cache-semantics#satisfieswithoutrevalidationnewrequest
    *
    * @param {Request} req
    * @returns boolean
@@ -78,6 +90,7 @@ class CachePolicyWrapper {
   }
 
   /**
+   * @see https://github.com/kornelski/http-cache-semantics#responseheaders
    *
    * @param {Response} res
    * @returns {Headers}
@@ -86,6 +99,9 @@ class CachePolicyWrapper {
     return new Headers(this.policy.responseHeaders(convertResponse(res)));
   }
 
+  /**
+   * @see https://github.com/kornelski/http-cache-semantics#timetolive
+   */
   timeToLive() {
     return this.policy.timeToLive();
   }
