@@ -53,7 +53,7 @@ describe('Fetch Tests', () => {
   it('response.readable() is a readable stream', async () => {
     const resp = await fetch('https://httpbin.org/status/200');
     assert.equal(resp.status, 200);
-    assert(isStream.readable(resp.readable()));
+    assert(isStream.readable(await resp.readable()));
   });
 
   it('fetch supports json response body', async () => {
