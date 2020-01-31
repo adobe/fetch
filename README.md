@@ -55,7 +55,7 @@ $ npm install @adobe/helix-fetch
   const { fetch } = require('helix-fetch');
 
   const resp = await fetch('https://httpbin.org//stream-bytes/65535');
-  const imageData = await resp.arrayBuffer();
+  const imageData = await resp.buffer();
 ```
 
 ### Stream an image
@@ -89,6 +89,19 @@ $ npm install @adobe/helix-fetch
   const headers = { 'content-type': 'image/jpeg' };
   const resp = await fetch('https://httpbin.org/post', { method, body, headers });
 ```
+
+### HTTP/2 Server Push
+
+```javascript
+  const { fetch, onPush } = require('helix-fetch');
+
+  onPush((url) => console.log(`received server push: ${url}`));
+
+  const resp = await fetch('https://nghttp2.org');
+  console.log(`Http version: ${resp.httpVersion}`);
+```
+
+More example code can be found [here](/test/index.test.js).
 
 ## Development
 
