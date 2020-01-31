@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Adobe. All rights reserved.
+ * Copyright 2020 Adobe. All rights reserved.
  * This file is licensed to you under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License. You may obtain a copy
  * of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -15,6 +15,8 @@
 const { PassThrough } = require('stream');
 
 const getStream = require('get-stream');
+
+const { decorateHeaders } = require('./headers');
 
 /**
  * Convert a NodeJS Buffer to an ArrayBuffer
@@ -32,13 +34,13 @@ const toArrayBuffer = (buf) => buf.buffer.slice(buf.byteOffset, buf.byteOffset +
  *
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Response
  */
-class ResponseWrapper {
+class CacheableResponse {
   /**
    * @param {Response} res
    */
   constructor(res) {
     this._res = res;
-    this.headers = res.headers;
+    this.headers = decorateHeaders(res.headers);
     this.ok = res.ok;
     this.status = res.status;
     this.statusText = res.statusText;
@@ -56,15 +58,32 @@ class ResponseWrapper {
     }
   }
 
+  /**
+   * Return a Node Readable stream instead of a Fetch API ReadableStream.
+   * (deviation from spec)
+   */
   get body() {
     const stream = new PassThrough();
     stream.end(this._body);
     return stream;
   }
 
+  /**
+   * Return a Node Readable stream.
+   * (extension)
+   */
   async readable() {
     await this._ensureBodyConsumed();
     return this.body;
+  }
+
+  /**
+   * Return a Node Buffer.
+   * (extension)
+   */
+  async buffer() {
+    await this._ensureBodyConsumed();
+    return this._body;
   }
 
   async arrayBuffer() {
@@ -80,6 +99,55 @@ class ResponseWrapper {
   async json() {
     return JSON.parse(await this.text());
   }
+
+  /**
+   * Create a shallow clone
+   */
+  clone() {
+    return {
+      ...this,
+      readable: async () => this.readable(),
+      text: async () => this.text(),
+      json: async () => this.json(),
+      arrayBuffer: async () => this.arrayBuffer(),
+      buffer: async () => this.buffer(),
+    };
+  }
 }
 
-module.exports = { ResponseWrapper };
+/**
+ * Creates a cacheable response.
+ *
+ * According to the Fetch API the body of a response can be read only once.
+ * In order to allow caching we need to serialize the body into a buffer first.
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/Body
+ *
+ * @param {Response} res
+ */
+const cacheableResponse = async (res) => {
+  const cacheable = new CacheableResponse(res);
+  // ensure body stream is fully read and buffered
+  await cacheable.buffer();
+  return cacheable;
+};
+
+/**
+ * Decorates the Fetch API Response instance with the same extensions
+ * as CacheableResponse but without interfering/buffering the body.
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/Body
+ *
+ * @param {Response} res
+ */
+const decoratedResponse = async (res) => {
+  const body = await res.readable();
+  return {
+    ...res,
+    headers: decorateHeaders(res.headers),
+    body,
+    buffer: async () => getStream.buffer(body),
+  };
+};
+
+module.exports = { cacheableResponse, decoratedResponse };

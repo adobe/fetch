@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Adobe. All rights reserved.
+ * Copyright 2020 Adobe. All rights reserved.
  * This file is licensed to you under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License. You may obtain a copy
  * of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -56,6 +56,12 @@ describe('Fetch Tests', () => {
     assert(isStream.readable(await resp.readable()));
   });
 
+  it('response.body is a readable stream', async () => {
+    const resp = await fetch('https://httpbin.org/status/200');
+    assert.equal(resp.status, 200);
+    assert(isStream.readable(resp.body));
+  });
+
   it('fetch supports json response body', async () => {
     const resp = await fetch('https://httpbin.org/json');
     assert.equal(resp.status, 200);
@@ -85,7 +91,8 @@ describe('Fetch Tests', () => {
     });
     assert.equal(resp.status, 200);
     assert.equal(resp.headers.get('content-type'), contentType);
-    const imageStream = await resp.readable();
+    // const imageStream = await resp.readable();
+    const imageStream = resp.body;
     assert(isStream.readable(imageStream));
 
     const finished = util.promisify(stream.finished);
@@ -108,7 +115,7 @@ describe('Fetch Tests', () => {
 
   it('fetch supports caching', async () => {
     const url = 'https://httpbin.org/cache/60'; // -> max-age=2 (seconds)
-    // send request (prime cache)
+    // send initial request, priming cache
     let resp = await fetch(url);
     assert.equal(resp.status, 200);
 
@@ -136,7 +143,7 @@ describe('Fetch Tests', () => {
 
   it('clearCache works', async () => {
     const url = 'https://httpbin.org/cache/60'; // -> max-age=2 (seconds)
-    // send request (prime cache)
+    // send initial request, priming cache
     let resp = await fetch(url);
     assert.equal(resp.status, 200);
     const cc = parseCacheControl(resp.headers.get('cache-control'));
@@ -201,6 +208,51 @@ describe('Fetch Tests', () => {
     const resp = await fetch('https://httpbin.org/image/jpeg', { headers: { 'cache-control': 'no-store' } });
     assert.equal(resp.status, 200);
     assert(!resp.fromCache);
+  });
+
+  it('buffer() et al work on un-cached response', async () => {
+    // send initial request with no-store directive
+    let resp = await fetch('https://httpbin.org/image/jpeg', { cache: 'no-store' });
+    assert.equal(resp.status, 200);
+    // re-send request
+    resp = await fetch('https://httpbin.org/image/jpeg', { cache: 'no-store' });
+    assert.equal(resp.status, 200);
+    // make sure it's not delivered from cache
+    assert(!resp.fromCache);
+
+    const buf = await resp.buffer();
+    assert(Buffer.isBuffer(buf));
+    const contentLength = resp.headers.raw()['content-length'];
+    assert.equal(buf.length, contentLength);
+  });
+
+  it('body accessor methods work on cached response', async () => {
+    const url = 'https://httpbin.org/cache/60';
+    // send initial request, priming cache
+    let resp = await fetch(url);
+    assert.equal(resp.status, 200);
+    // re-send request, to be delivered from cache
+    resp = await fetch(url);
+    assert.equal(resp.status, 200);
+    // make sure it's delivered from cache
+    assert(resp.fromCache);
+
+    const buf = await resp.buffer();
+    assert(Buffer.isBuffer(buf));
+    const contentLength = resp.headers.raw()['content-length'];
+    assert.equal(buf.length, contentLength);
+
+    const arrBuf = await resp.arrayBuffer();
+    assert(arrBuf !== null && arrBuf instanceof ArrayBuffer);
+    assert.equal(arrBuf.byteLength, contentLength);
+
+    assert(isStream.readable(await resp.readable()));
+
+    assert.equal(resp.headers.raw()['content-type'], 'application/json');
+    const json = await resp.json();
+    assert.equal(json.url, url);
+
+    assert.deepEqual(JSON.parse(await resp.text()), json);
   });
 
   // eslint-disable-next-line func-names

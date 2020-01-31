@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Adobe. All rights reserved.
+ * Copyright 2020 Adobe. All rights reserved.
  * This file is licensed to you under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License. You may obtain a copy
  * of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -21,7 +21,8 @@ const {
 const LRU = require('lru-cache');
 
 const CachePolicy = require('./policy');
-const { ResponseWrapper } = require('./response');
+const { cacheableResponse, decoratedResponse } = require('./response');
+const { decorateHeaders } = require('./headers');
 
 const CACHEABLE_METHODS = ['GET', 'HEAD'];
 const DEFAULT_FETCH_OPTIONS = { method: 'GET', cache: 'default' };
@@ -53,15 +54,14 @@ const cacheResponse = async (request, response) => {
   const policy = new CachePolicy(request, response, { shared: false });
   if (policy.storable()) {
     // update cache
-    // wrap response in order to make it reusable
-    const wrappedResponse = new ResponseWrapper(response);
-    // FIXME: ensure body stream is fully read and buffered
-    await wrappedResponse.arrayBuffer();
-    ctx.cache.set(request.url, { policy, response: wrappedResponse }, policy.timeToLive());
-    return wrappedResponse;
+    // create cacheable response (i.e. make it reusable)
+    const cacheable = await cacheableResponse(response);
+    ctx.cache.set(request.url, { policy, response: cacheable }, policy.timeToLive());
+    return cacheable;
   } else {
     // return original un-cacheable response
-    return response;
+    // (decorate original response providing the same extensions as the cacheable response)
+    return decoratedResponse(response);
   }
 };
 
@@ -71,7 +71,7 @@ const pushHandler = async (origin, request, getResponse) => {
   // check if we've already cached the pushed resource
   const { policy } = ctx.cache.get(req.url) || {};
   if (!policy || !policy.satisfiesWithoutRevalidation(req)) {
-    // consume pushed responsefewewfefw
+    // consume pushed response
     const response = await getResponse();
     // update cache
     await cacheResponse(req, response);
@@ -93,9 +93,12 @@ const wrappedFetch = async (url, options = DEFAULT_FETCH_OPTIONS) => {
     // TODO: respect cache mode (https://developer.mozilla.org/en-US/docs/Web/API/Request/cache)
     if (policy && policy.satisfiesWithoutRevalidation(new Request(url, opts))) {
       // update headers of cached response: update age, remove uncacheable headers, etc.
-      response.headers = policy.responseHeaders(response);
+      response.headers = decorateHeaders(policy.responseHeaders(response));
 
-      return { ...response, fromCache: true };
+      // decorate response before delivering it (fromCache=true)
+      const resp = response.clone();
+      resp.fromCache = true;
+      return resp;
     }
   }
 
@@ -103,7 +106,7 @@ const wrappedFetch = async (url, options = DEFAULT_FETCH_OPTIONS) => {
   const request = new Request(url, { ...opts, mode: 'no-cors', allowForbiddenHeaders: true });
   const response = await ctx.fetch(request);
 
-  return opts.cache !== 'no-store' ? cacheResponse(request, response) : response;
+  return opts.cache !== 'no-store' ? cacheResponse(request, response) : decoratedResponse(response);
 };
 
 /**
