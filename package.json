@@ -1,6 +1,6 @@
 {
   "name": "@adobe/helix-fetch",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Helix Fetch Library",
   "main": "src/index.js",
   "scripts": {
@@ -13,14 +13,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/stefan-guggisberg/helix-fetch"
+    "url": "https://github.com/adobe/helix-fetch"
   },
   "author": "",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/stefan-guggisberg/helix-fetch/issues"
+    "url": "https://github.com/adobe/helix-fetch/issues"
   },
-  "homepage": "https://github.com/stefan-guggisberg/helix-fetch#readme",
+  "homepage": "https://github.com/adobe/helix-fetch#readme",
   "dependencies": {
     "fetch-h2": "^2.2.2",
     "get-stream": "^5.1.0",
