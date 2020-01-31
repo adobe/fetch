@@ -48,18 +48,14 @@ jobs:
     - store_artifacts:
         path: junit
 
-  release:
-    executor: node8
+  semantic-release:
+    executor: node10
 
     steps:
       - setup
       - run:
           name: revert changes to package-lock.json
           command: git checkout -- package-lock.json
-
-      - run:
-          name: Check for Updated Package name
-          command: node -e "if (require('./package.json').name=='@adobe/helix-library') { process.exit(1) };"
 
       - run:
           name: Semantic Release
@@ -72,11 +68,10 @@ workflows:
     - build
     # the release jobs needs a $NPM_TOKEN and $GH_TOKEN environment to be setup
     # but this should be covered by the CircleCI contexts setting below
-    - release:
+    - semantic-release:
         context: Project Helix
         requires:
         - build
         filters:
           branches:
-            # rename to `master` once the tokens have been setup
             only: master
