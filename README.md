@@ -2,7 +2,21 @@
 
 > Library for making transparent HTTP/1(.1) and HTTP/2 requests.
 
-Based on [fetch-h2](https://github.com/grantila/fetch-h2).
+`helix-fetch` is based on [fetch-h2](https://github.com/grantila/fetch-h2). `helix-fetch` in general adheres to the [Fetch API Specification](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API), implementing a subset of the API. However, there are some notable deviations:
+
+* `Response.body` is not implemented. Use `Response.readable()` instead.
+* `Response.blob()` is not implemented. Use `Response.buffer()` instead.
+* `Response.formData()` is not implemented.
+* The following `fetch()` options are ignored since `helix-fetch` doesn't have the concept of web pages: `mode`, `referrer` and `referrerPolicy`.
+
+`helix-fetch` also supports the following extensions:
+
+* `Response.buffer()` returns a Node.js `Buffer`.
+* The `body` that can be sent in a `Request` can also be a `Readable` Node.js stream, a `Buffer` or a string.
+* `fetch()` has an extra option, `json` that can be used instead of `body` to send an object that will be JSON stringified. The appropriate content-type will be set if it isn't already.
+* `fetch()` has an extra option, `timeout` which is a timeout in milliseconds before the request should be aborted and the returned promise thereby rejected (with a `TimeoutError`).
+* The `Response` object has an extra property `httpVersion` which is either `1` or `2` (numbers), depending on what was negotiated with the server.
+* `Response.headers.raw()` returns the headers as a plain object.
 
 ## Features
 
@@ -30,6 +44,20 @@ $ npm install @adobe/helix-fetch
 ```
 
 ## Usage Examples
+
+### Access Response Headers and other Meta data
+
+```javascript
+  const { fetch } = require('helix-fetch');
+
+  const resp = await fetch('https://httpbin.org/get');
+  console.log(resp.ok);
+  console.log(resp.status);
+  console.log(resp.statusText);
+  console.log(resp.method);
+  console.log(resp.headers.raw());
+  console.log(resp.headers.get('content-type'));
+```
 
 ### Fetch JSON
 

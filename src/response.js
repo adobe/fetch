@@ -59,22 +59,14 @@ class CacheableResponse {
   }
 
   /**
-   * Return a Node Readable stream instead of a Fetch API ReadableStream.
-   * (deviation from spec)
-   */
-  get body() {
-    const stream = new PassThrough();
-    stream.end(this._body);
-    return stream;
-  }
-
-  /**
    * Return a Node Readable stream.
    * (extension)
    */
   async readable() {
     await this._ensureBodyConsumed();
-    return this.body;
+    const stream = new PassThrough();
+    stream.end(this._body);
+    return stream;
   }
 
   /**
@@ -134,20 +126,20 @@ const cacheableResponse = async (res) => {
 
 /**
  * Decorates the Fetch API Response instance with the same extensions
- * as CacheableResponse but without interfering/buffering the body.
+ * as CacheableResponse but without interfering with/buffering the body.
  *
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Body
  *
  * @param {Response} res
  */
-const decoratedResponse = async (res) => {
-  const body = await res.readable();
-  return {
-    ...res,
-    headers: decorateHeaders(res.headers),
-    body,
-    buffer: async () => getStream.buffer(body),
-  };
-};
+const decoratedResponse = async (res) => ({
+  ...res,
+  headers: decorateHeaders(res.headers),
+  readable: async () => res.readable(),
+  text: async () => res.text(),
+  json: async () => res.json(),
+  arrayBuffer: async () => res.arrayBuffer(),
+  buffer: async () => getStream.buffer(await res.readable()),
+});
 
 module.exports = { cacheableResponse, decoratedResponse };

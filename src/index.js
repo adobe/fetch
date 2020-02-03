@@ -17,6 +17,7 @@ const { EventEmitter } = require('events');
 const {
   context,
   Request,
+  TimeoutError,
 } = require('fetch-h2');
 const LRU = require('lru-cache');
 
@@ -103,8 +104,10 @@ const wrappedFetch = async (url, options = DEFAULT_FETCH_OPTIONS) => {
   }
 
   // fetch
-  const request = new Request(url, { ...opts, mode: 'no-cors', allowForbiddenHeaders: true });
-  const response = await ctx.fetch(request);
+  const fetchOptions = { ...opts, mode: 'no-cors', allowForbiddenHeaders: true };
+  const request = new Request(url, fetchOptions);
+  // workaround for https://github.com/grantila/fetch-h2/issues/84
+  const response = await ctx.fetch(request, fetchOptions);
 
   return opts.cache !== 'no-store' ? cacheResponse(request, response) : decoratedResponse(response);
 };
@@ -139,3 +142,8 @@ module.exports.clearCache = () => ctx.cache.reset();
  */
 module.exports.disconnectAll = () => ctx.disconnectAll();
 // module.exports.disconnect = (url) => ctx.disconnect(url);
+
+/**
+ * Error thrown when a request timed out.
+ */
+module.exports.TimeoutError = TimeoutError;

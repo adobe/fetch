@@ -24,7 +24,7 @@ const parseCacheControl = require('parse-cache-control');
 const { WritableStreamBuffer } = require('stream-buffers');
 
 const {
-  fetch, onPush, offPush, disconnectAll, clearCache,
+  fetch, onPush, offPush, disconnectAll, clearCache, TimeoutError,
 } = require('../src/index.js');
 
 const WOKEUP = 'woke up!';
@@ -48,18 +48,6 @@ describe('Fetch Tests', () => {
     const resp = await fetch('https://www.nghttp2.org/httpbin/status/200');
     assert.equal(resp.status, 200);
     assert.equal(resp.httpVersion, 2);
-  });
-
-  it('response.readable() is a readable stream', async () => {
-    const resp = await fetch('https://httpbin.org/status/200');
-    assert.equal(resp.status, 200);
-    assert(isStream.readable(await resp.readable()));
-  });
-
-  it('response.body is a readable stream', async () => {
-    const resp = await fetch('https://httpbin.org/status/200');
-    assert.equal(resp.status, 200);
-    assert(isStream.readable(resp.body));
   });
 
   it('fetch supports json response body', async () => {
@@ -91,8 +79,7 @@ describe('Fetch Tests', () => {
     });
     assert.equal(resp.status, 200);
     assert.equal(resp.headers.get('content-type'), contentType);
-    // const imageStream = await resp.readable();
-    const imageStream = resp.body;
+    const imageStream = await resp.readable();
     assert(isStream.readable(imageStream));
 
     const finished = util.promisify(stream.finished);
@@ -220,10 +207,76 @@ describe('Fetch Tests', () => {
     // make sure it's not delivered from cache
     assert(!resp.fromCache);
 
+    // buffer()
     const buf = await resp.buffer();
     assert(Buffer.isBuffer(buf));
     const contentLength = resp.headers.raw()['content-length'];
     assert.equal(buf.length, contentLength);
+  });
+
+  it('readable() works on un-cached response', async () => {
+    const url = 'https://httpbin.org/image/jpeg';
+    // send initial request with no-store directive
+    let resp = await fetch(url, { cache: 'no-store' });
+    assert.equal(resp.status, 200);
+    // re-send request
+    resp = await fetch(url, { cache: 'no-store' });
+    assert.equal(resp.status, 200);
+    // make sure it's not delivered from cache
+    assert(!resp.fromCache);
+
+    // body
+    assert(isStream.readable(await resp.readable()));
+  });
+
+  it('text() works on un-cached response', async () => {
+    const url = 'https://httpbin.org/get';
+    // send initial request with no-store directive
+    let resp = await fetch(url, { cache: 'no-store' });
+    assert.equal(resp.status, 200);
+    // re-send request
+    resp = await fetch(url, { cache: 'no-store' });
+    assert.equal(resp.status, 200);
+    // make sure it's not delivered from cache
+    assert(!resp.fromCache);
+
+    // text()
+    assert.doesNotReject(() => resp.text());
+  });
+
+  it('arrayBuffer() works on un-cached response', async () => {
+    const url = 'https://httpbin.org/get';
+    // send initial request with no-store directive
+    let resp = await fetch(url, { cache: 'no-store' });
+    assert.equal(resp.status, 200);
+    // re-send request
+    resp = await fetch(url, { cache: 'no-store' });
+    assert.equal(resp.status, 200);
+    const contentLength = resp.headers.raw()['content-length'];
+    // make sure it's not delivered from cache
+    assert(!resp.fromCache);
+
+    // arrayBuffer()
+    const arrBuf = await resp.arrayBuffer();
+    assert(arrBuf !== null && arrBuf instanceof ArrayBuffer);
+    assert.equal(arrBuf.byteLength, contentLength);
+  });
+
+  it('json() works on un-cached response', async () => {
+    const url = 'https://httpbin.org/get';
+    // send initial request with no-store directive
+    let resp = await fetch(url, { cache: 'no-store' });
+    assert.equal(resp.status, 200);
+    // re-send request
+    resp = await fetch(url, { cache: 'no-store' });
+    assert.equal(resp.status, 200);
+    // make sure it's not delivered from cache
+    assert(!resp.fromCache);
+
+    // json()
+    assert.equal(resp.headers.raw()['content-type'], 'application/json');
+    const json = await resp.json();
+    assert.equal(json.url, url);
   });
 
   it('body accessor methods work on cached response', async () => {
@@ -303,7 +356,7 @@ describe('Fetch Tests', () => {
       // see https://nghttp2.org/blog/2015/02/10/nghttp2-dot-org-enabled-http2-server-push/
       fetch('https://nghttp2.org', { cache: 'no-store' }),
       // resolves with either WOKEUP or the url of the pushed resource
-      Promise.race([sleep(2000), receivedPush()]),
+      Promise.race([sleep(3000), receivedPush()]),
     ]);
     assert.equal(resp.httpVersion, 2);
     assert.equal(resp.status, 200);
@@ -312,10 +365,25 @@ describe('Fetch Tests', () => {
     // re-trigger push
     [resp, result] = await Promise.all([
       fetch('https://nghttp2.org', { cache: 'no-store' }),
-      Promise.race([sleep(2000), receivedPush()]),
+      Promise.race([sleep(3000), receivedPush()]),
     ]);
     assert.equal(resp.httpVersion, 2);
     assert.equal(resp.status, 200);
     assert.notEqual(result, WOKEUP);
+  });
+
+  // eslint-disable-next-line func-names
+  it('timeout works', async function () {
+    this.timeout(5000);
+    const ts0 = Date.now();
+    try {
+      // the server responds with a 2 second delay, the timeout is set to 1 second.
+      await fetch('https://httpbin.org/delay/2', { cache: 'no-store', timeout: 1000 });
+      assert.fail();
+    } catch (err) {
+      assert(err instanceof TimeoutError);
+    }
+    const ts1 = Date.now();
+    assert((ts1 - ts0) < 2000);
   });
 });
