@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/adobe/helix-fetch/compare/v1.0.0...v1.1.0) (2020-02-03)
+
+
+### Features
+
+* support timeout on fetch requests; doc and test ([ce6c1ce](https://github.com/adobe/helix-fetch/commit/ce6c1cea8ae204de232447e97e2b98bbd4f0fd3a)), closes [#1](https://github.com/adobe/helix-fetch/issues/1)
+
 # 1.0.0 (2020-01-31)
 
 
