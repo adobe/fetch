@@ -48,7 +48,7 @@ $ npm install @adobe/helix-fetch
 ### Access Response Headers and other Meta data
 
 ```javascript
-  const { fetch } = require('helix-fetch');
+  const { fetch } = require('@adobe/helix-fetch');
 
   const resp = await fetch('https://httpbin.org/get');
   console.log(resp.ok);
@@ -62,7 +62,7 @@ $ npm install @adobe/helix-fetch
 ### Fetch JSON
 
 ```javascript
-  const { fetch } = require('helix-fetch');
+  const { fetch } = require('@adobe/helix-fetch');
 
   const resp = await fetch('https://httpbin.org/json');
   const jsonData = await resp.json();
@@ -71,7 +71,7 @@ $ npm install @adobe/helix-fetch
 ### Fetch text data
 
 ```javascript
-  const { fetch } = require('helix-fetch');
+  const { fetch } = require('@adobe/helix-fetch');
 
   const resp = await fetch('https://httpbin.org/');
   const textData = await resp.text();
@@ -80,7 +80,7 @@ $ npm install @adobe/helix-fetch
 ### Fetch binary data
 
 ```javascript
-  const { fetch } = require('helix-fetch');
+  const { fetch } = require('@adobe/helix-fetch');
 
   const resp = await fetch('https://httpbin.org//stream-bytes/65535');
   const imageData = await resp.buffer();
@@ -90,7 +90,7 @@ $ npm install @adobe/helix-fetch
 
 ```javascript
   const fs = require('fs');
-  const { fetch } = require('helix-fetch');
+  const { fetch } = require('@adobe/helix-fetch');
 
   const resp = await fetch('https://httpbin.org/image/jpeg');
   (await resp.readable()).pipe(fs.createWriteStream('saved-image.jpg'));
@@ -99,7 +99,7 @@ $ npm install @adobe/helix-fetch
 ### Post JSON
 
 ```javascript
-  const { fetch } = require('helix-fetch');
+  const { fetch } = require('@adobe/helix-fetch');
 
   const method = 'POST';
   const json = { foo: 'bar' };
@@ -110,7 +110,7 @@ $ npm install @adobe/helix-fetch
 
 ```javascript
   const fs = require('fs');
-  const { fetch } = require('helix-fetch');
+  const { fetch } = require('@adobe/helix-fetch');
 
   const method = 'POST';
   const body = fs.createReadStream('some-image.jpg');
@@ -121,7 +121,7 @@ $ npm install @adobe/helix-fetch
 ### HTTP/2 Server Push
 
 ```javascript
-  const { fetch, onPush } = require('helix-fetch');
+  const { fetch, onPush } = require('@adobe/helix-fetch');
 
   onPush((url) => console.log(`received server push: ${url}`));
 
