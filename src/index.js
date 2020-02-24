@@ -103,9 +103,15 @@ const wrappedFetch = async (url, options = DEFAULT_FETCH_OPTIONS) => {
     }
   }
 
+  if (opts.qs) {
+    var urlWithQuery = new URL(url);
+    Object.keys(opts.qs).forEach(key => urlWithQuery.searchParams.append(key, opts.qs[key]));
+    urlWithQuery = urlWithQuery.toString();
+  }
+
   // fetch
   const fetchOptions = { ...opts, mode: 'no-cors', allowForbiddenHeaders: true };
-  const request = new Request(url, fetchOptions);
+  const request = new Request(urlWithQuery || url, fetchOptions);
   // workaround for https://github.com/grantila/fetch-h2/issues/84
   const response = await ctx.fetch(request, fetchOptions);
 

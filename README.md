@@ -118,6 +118,21 @@ $ npm install @adobe/helix-fetch
   const resp = await fetch('https://httpbin.org/post', { method, body, headers });
 ```
 
+### GET with query parameters object
+
+```javascript
+
+const { fetch } = require('@adobe/helix-fetch');
+
+const qs = {
+  helix: 'dummy',
+  foo: 'bar',
+  rumple: "stiltskin",
+};
+
+const resp = await fetch('https://httpbin.org/delay/2', {qs});
+```
+
 ### HTTP/2 Server Push
 
 ```javascript
