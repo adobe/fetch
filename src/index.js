@@ -85,6 +85,7 @@ ctx.onPush(pushHandler);
 
 const wrappedFetch = async (url, options = DEFAULT_FETCH_OPTIONS) => {
   const opts = { ...DEFAULT_FETCH_OPTIONS, ...options };
+  let urlWithQuery;
   const lookupCache = CACHEABLE_METHODS.includes(opts.method)
     // respect cache mode (https://developer.mozilla.org/en-US/docs/Web/API/Request/cache)
     && !['no-store', 'reload'].includes(opts.cache);
@@ -104,8 +105,8 @@ const wrappedFetch = async (url, options = DEFAULT_FETCH_OPTIONS) => {
   }
 
   if (opts.qs) {
-    var urlWithQuery = new URL(url);
-    Object.keys(opts.qs).forEach(key => urlWithQuery.searchParams.append(key, opts.qs[key]));
+    urlWithQuery = new URL(url);
+    Object.keys(opts.qs).forEach((key) => urlWithQuery.searchParams.append(key, opts.qs[key]));
     urlWithQuery = urlWithQuery.toString();
   }
 
