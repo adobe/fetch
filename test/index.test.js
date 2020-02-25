@@ -387,7 +387,7 @@ describe('Fetch Tests', () => {
     assert((ts1 - ts0) < 2000);
   });
 
-  it.only('fetch supports querystrings', async () => {
+  it('fetch supports querystrings', async () => {
     const EXPECTED = 'https://httpbin.org/delay/2?helix=dummy&foo=bar&rumple=stiltskin';
     const qs = {
       helix: 'dummy',
