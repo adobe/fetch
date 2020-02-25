@@ -387,19 +387,14 @@ describe('Fetch Tests', () => {
     assert((ts1 - ts0) < 2000);
   });
 
-  it('fetch supports querystrings', async () => {
+  it.only('fetch supports querystrings', async () => {
     const EXPECTED = 'https://httpbin.org/delay/2?helix=dummy&foo=bar&rumple=stiltskin';
-    let res;
-    try {
-      const qs = {
-        helix: 'dummy',
-        foo: 'bar',
-        rumple: 'stiltskin',
-      };
-      res = await fetch('https://httpbin.org/delay/2', { qs });
-    } catch (err) {
-      assert.fail('Querystring functionality failed', err);
-    }
+    const qs = {
+      helix: 'dummy',
+      foo: 'bar',
+      rumple: 'stiltskin',
+    };
+    const res = await fetch('https://httpbin.org/delay/2', { qs });
     const result = await res.json();
     assert.equal(result.url, EXPECTED);
   }).timeout(3000);
