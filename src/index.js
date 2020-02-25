@@ -107,7 +107,7 @@ const wrappedFetch = async (url, options = DEFAULT_FETCH_OPTIONS) => {
   if (opts.qs) {
     urlWithQuery = new URL(url);
     Object.entries(opts.qs).forEach(([k, v]) => urlWithQuery.searchParams.append(k, v));
-    urlWithQuery = urlWithQuery.toString();
+    urlWithQuery = urlWithQuery.href;
   }
 
   // fetch
