@@ -388,14 +388,13 @@ describe('Fetch Tests', () => {
   });
 
   it('fetch supports querystrings', async () => {
-    const EXPECTED = 'https://httpbin.org/delay/2?helix=dummy&foo=bar&rumple=stiltskin';
+    const EXPECTED = 'https://httpbin.org/json?helix=dummy&foo=bar&rumple=stiltskin';
     const qs = {
       helix: 'dummy',
       foo: 'bar',
       rumple: 'stiltskin',
     };
-    const res = await fetch('https://httpbin.org/delay/2', { qs });
-    const result = await res.json();
-    assert.equal(result.url, EXPECTED);
-  }).timeout(3000);
+    const res = await fetch('https://httpbin.org/json', { qs });
+    assert.equal(res.url, EXPECTED);
+  });
 });
