@@ -130,7 +130,7 @@ const qs = {
   rumple: "stiltskin",
 };
 
-const resp = await fetch('https://httpbin.org/delay/2', {qs});
+const resp = await fetch('https://httpbin.org/json', {qs});
 ```
 
 ### HTTP/2 Server Push
