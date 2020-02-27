@@ -406,4 +406,21 @@ describe('Fetch Tests', () => {
     assert.equal(json['user-agent'], customUserAgent);
     assert(!resp.fromCache);
   });
+
+  it('forcing HTTP/1(.1) works', async () => {
+    // endpoint supporting http2 & http1
+    const url = 'https://www.nghttp2.org/httpbin/status/200';
+    // default context defaults to http2
+    let resp = await fetch(url);
+    assert.equal(resp.status, 200);
+    assert.equal(resp.httpVersion, 2);
+
+    // custom context forces http1
+    const { fetch: customFetch } = context({
+      httpsProtocols: ['http1'],
+    });
+    resp = await customFetch(url);
+    assert.equal(resp.status, 200);
+    assert.equal(resp.httpVersion, 1);
+  });
 });
