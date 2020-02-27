@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/adobe/helix-fetch/compare/v1.1.0...v1.2.0) (2020-02-27)
+
+
+### Features
+
+* expose fetch context to allow custom configuration ([6be0b6c](https://github.com/adobe/helix-fetch/commit/6be0b6cdb172702d2f4068cc632dd9f2643072da)), closes [#15](https://github.com/adobe/helix-fetch/issues/15)
+
 # [1.1.0](https://github.com/adobe/helix-fetch/compare/v1.0.0...v1.1.0) (2020-02-03)
 
 
