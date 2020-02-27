@@ -24,7 +24,7 @@ const parseCacheControl = require('parse-cache-control');
 const { WritableStreamBuffer } = require('stream-buffers');
 
 const {
-  fetch, onPush, offPush, disconnectAll, clearCache, TimeoutError,
+  fetch, onPush, offPush, disconnectAll, clearCache, context, TimeoutError,
 } = require('../src/index.js');
 
 const WOKEUP = 'woke up!';
@@ -385,5 +385,25 @@ describe('Fetch Tests', () => {
     }
     const ts1 = Date.now();
     assert((ts1 - ts0) < 2000);
+  });
+
+  it('creating custom fetch context works', async () => {
+    const { fetch: customFetch } = context();
+    const resp = await customFetch('https://httpbin.org/status/200');
+    assert.equal(resp.status, 200);
+  });
+
+  it('overriding user-agent works', async () => {
+    const customUserAgent = 'helix-custom-fetch';
+    const { fetch: customFetch } = context({
+      userAgent: customUserAgent,
+      overwriteUserAgent: true,
+    });
+    const resp = await customFetch('https://httpbin.org/user-agent');
+    assert.equal(resp.status, 200);
+    assert.equal(resp.headers.get('content-type'), 'application/json');
+    const json = await resp.json();
+    assert.equal(json['user-agent'], customUserAgent);
+    assert(!resp.fromCache);
   });
 });
