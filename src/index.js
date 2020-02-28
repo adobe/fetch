@@ -20,6 +20,7 @@ const {
   TimeoutError,
 } = require('fetch-h2');
 const LRU = require('lru-cache');
+const sizeof = require('object-sizeof');
 
 const CachePolicy = require('./policy');
 const { cacheableResponse, decoratedResponse } = require('./response');
@@ -28,7 +29,7 @@ const { decorateHeaders } = require('./headers');
 const CACHEABLE_METHODS = ['GET', 'HEAD'];
 const DEFAULT_FETCH_OPTIONS = { method: 'GET', cache: 'default' };
 const DEFAULT_CONTEXT_OPTIONS = { userAgent: 'helix-fetch', overwriteUserAgent: true };
-const DEFAULT_MAX_CACHE_ENTRIES = 100;
+const DEFAULT_MAX_CACHE_SIZE = 100 * 1024 * 1024; // 100mb
 
 // events
 const PUSH_EVENT = 'push';
@@ -108,9 +109,14 @@ const wrappedFetch = async (ctx, url, options = {}) => {
 
 class FetchContext {
   constructor(options = {}) {
-    this._ctx = context({ ...DEFAULT_CONTEXT_OPTIONS, ...options });
-
-    this._ctx.cache = new LRU({ max: DEFAULT_MAX_CACHE_ENTRIES });
+    // setup context
+    const opts = { ...DEFAULT_CONTEXT_OPTIONS, ...options };
+    this._ctx = context(opts);
+    // setup cache
+    const max = typeof opts.maxCacheSize === 'number' && opts.maxCacheSize >= 0 ? opts.maxCacheSize : DEFAULT_MAX_CACHE_SIZE;
+    const length = ({ response }, _) => sizeof(response);
+    this._ctx.cache = new LRU({ max, length });
+    // event emitter
     this._ctx.eventEmitter = new EventEmitter();
     // register push handler
     this._ctx.onPush(createPushHandler(this._ctx));
@@ -159,7 +165,16 @@ class FetchContext {
        */
       offPush: (fn) => this.offPush(fn),
 
+      /**
+       * Clear the cache entirely, throwing away all values.
+       */
       clearCache: () => this.clearCache(),
+
+      /**
+       * Cache stats for diagnostic purposes
+       */
+      cacheStats: () => this.cacheStats(),
+
       /**
        * Error thrown when a request timed out.
        */
@@ -186,6 +201,13 @@ class FetchContext {
 
   clearCache() {
     this._ctx.cache.reset();
+  }
+
+  cacheStats() {
+    return {
+      size: this._ctx.cache.length,
+      count: this._ctx.cache.itemCount,
+    };
   }
 
   async fetch(url, options) {

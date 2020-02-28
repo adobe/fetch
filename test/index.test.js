@@ -24,7 +24,7 @@ const parseCacheControl = require('parse-cache-control');
 const { WritableStreamBuffer } = require('stream-buffers');
 
 const {
-  fetch, onPush, offPush, disconnectAll, clearCache, context, TimeoutError,
+  fetch, onPush, offPush, disconnectAll, clearCache, cacheStats, context, TimeoutError,
 } = require('../src/index.js');
 
 const WOKEUP = 'woke up!';
@@ -59,7 +59,7 @@ describe('Fetch Tests', () => {
   });
 
   it('fetch supports binary response body (ArrayBuffer)', async () => {
-    const dataLen = 64 * 1024; // httpbin.org/stream-bytes has a limit of 100kb ...
+    const dataLen = 64 * 1024; // httpbin.org/stream-bytes/{n} has a limit of 100kb ...
     const contentType = 'application/octet-stream';
     const resp = await fetch(`https://httpbin.org/stream-bytes/${dataLen}`, {
       headers: { accept: contentType },
@@ -72,7 +72,7 @@ describe('Fetch Tests', () => {
   });
 
   it('fetch supports binary response body (Stream)', async () => {
-    const dataLen = 64 * 1024; // httpbin.org/stream-bytes has a limit of 100kb ...
+    const dataLen = 64 * 1024; // httpbin.org/stream-bytes/{n} has a limit of 100kb ...
     const contentType = 'application/octet-stream';
     const resp = await fetch(`https://httpbin.org/stream-bytes/${dataLen}`, {
       headers: { accept: contentType },
@@ -145,10 +145,33 @@ describe('Fetch Tests', () => {
     // clear client cache
     clearCache();
 
+    const { size, count } = cacheStats();
+    assert.equal(size, 0);
+    assert.equal(count, 0);
+
     // re-send request, make sure it's returning a fresh response
     resp = await fetch(url);
     assert.equal(resp.status, 200);
     assert(!resp.fromCache);
+  });
+
+  it('cache size limit is configurable', async () => {
+    const maxCacheSize = 100 * 1024; // 100kb
+    // custom context with cache size limit
+    const ctx = context({ maxCacheSize });
+
+    const sizes = [34 * 1024, 35 * 1024, 36 * 1024]; // sizes add up to >100kb
+    const urls = sizes.map((size) => `http://httpbin.org/bytes/${size}`);
+    // prime cache with multiple requests that together hit the cache size limit of 100kb
+    const resps = await Promise.all(urls.map((url) => ctx.fetch(url)));
+    assert.equal(resps.filter((resp) => resp.status === 200).length, urls.length);
+
+    const { size, count } = ctx.cacheStats();
+    assert(size < maxCacheSize);
+    assert.equal(count, urls.length - 1);
+
+    ctx.clearCache();
+    await ctx.disconnectAll();
   });
 
   // eslint-disable-next-line func-names
@@ -388,18 +411,18 @@ describe('Fetch Tests', () => {
   });
 
   it('creating custom fetch context works', async () => {
-    const { fetch: customFetch } = context();
-    const resp = await customFetch('https://httpbin.org/status/200');
+    const ctx = context();
+    const resp = await ctx.fetch('https://httpbin.org/status/200');
     assert.equal(resp.status, 200);
   });
 
   it('overriding user-agent works', async () => {
     const customUserAgent = 'helix-custom-fetch';
-    const { fetch: customFetch } = context({
+    const ctx = context({
       userAgent: customUserAgent,
       overwriteUserAgent: true,
     });
-    const resp = await customFetch('https://httpbin.org/user-agent');
+    const resp = await ctx.fetch('https://httpbin.org/user-agent');
     assert.equal(resp.status, 200);
     assert.equal(resp.headers.get('content-type'), 'application/json');
     const json = await resp.json();
@@ -416,10 +439,10 @@ describe('Fetch Tests', () => {
     assert.equal(resp.httpVersion, 2);
 
     // custom context forces http1
-    const { fetch: customFetch } = context({
+    const ctx = context({
       httpsProtocols: ['http1'],
     });
-    resp = await customFetch(url);
+    resp = await ctx.fetch(url);
     assert.equal(resp.status, 200);
     assert.equal(resp.httpVersion, 1);
   });

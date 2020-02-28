@@ -131,6 +131,18 @@ $ npm install @adobe/helix-fetch
 
 ### Customization
 
+Set cache size limit (Default: 100 \* 1024 \* 1024 bytes, i.e. 100mb):
+
+```javascript
+  const { fetch, cacheStats } = require('@adobe/helix-fetch').context({
+    maxCacheSize: 100 * 1024, // 100kb
+  });
+
+  let resp = await fetch('http://httpbin.org/bytes/60000'); // ~60kb response
+  resp = await fetch('http://httpbin.org/bytes/50000'); // ~50kb response
+  console.log(cacheStats());
+```
+
 Force HTTP/1(.1) protocol:
 
 ```javascript

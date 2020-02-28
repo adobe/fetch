@@ -25,7 +25,8 @@
     "fetch-h2": "^2.2.2",
     "get-stream": "^5.1.0",
     "http-cache-semantics": "^4.0.3",
-    "lru-cache": "^5.1.1"
+    "lru-cache": "^5.1.1",
+    "object-sizeof": "^1.5.3"
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "1.1.0",
