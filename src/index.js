@@ -129,7 +129,7 @@ class FetchContext {
        * @see https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch
        * @see https://httpwg.org/specs/rfc7234.html
        */
-      fetch: async (url, options = {}) => this.fetch(url, options),
+      fetch: async (url, options) => this.fetch(url, options),
 
       /**
        * This function returns an object which looks like the global `helix-fetch` API,
@@ -168,7 +168,7 @@ class FetchContext {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  context(options = {}) {
+  context(options) {
     return new FetchContext(options).api();
   }
 
@@ -188,7 +188,7 @@ class FetchContext {
     this._ctx.cache.reset();
   }
 
-  async fetch(url, options = {}) {
+  async fetch(url, options) {
     return wrappedFetch(this._ctx, url, options);
   }
 }
