@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/adobe/helix-fetch/compare/v1.2.0...v1.3.0) (2020-02-28)
+
+
+### Features
+
+* option to force HTTP/1(.1) protocol ([501d6a2](https://github.com/adobe/helix-fetch/commit/501d6a2fb08fe08657238ea4ee7e558caef392fd)), closes [#8](https://github.com/adobe/helix-fetch/issues/8)
+
 # [1.2.0](https://github.com/adobe/helix-fetch/compare/v1.1.0...v1.2.0) (2020-02-27)
 
 
