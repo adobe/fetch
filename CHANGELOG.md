@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/adobe/helix-fetch/compare/v1.3.0...v1.4.0) (2020-02-28)
+
+
+### Features
+
+* make cache size limit configurable ([7fd632d](https://github.com/adobe/helix-fetch/commit/7fd632df0f875b701156132be58e68b8f9c37526)), closes [#9](https://github.com/adobe/helix-fetch/issues/9)
+
 # [1.3.0](https://github.com/adobe/helix-fetch/compare/v1.2.0...v1.3.0) (2020-02-28)
 
 
