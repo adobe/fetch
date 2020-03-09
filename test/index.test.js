@@ -174,8 +174,7 @@ describe('Fetch Tests', () => {
     await ctx.disconnectAll();
   });
 
-  // eslint-disable-next-line func-names
-  it('fetch supports max-age directive', async function () {
+  it('fetch supports max-age directive', async function test() {
     this.timeout(5000);
 
     // max-age=3 seconds
@@ -331,8 +330,7 @@ describe('Fetch Tests', () => {
     assert.deepEqual(JSON.parse(await resp.text()), json);
   });
 
-  // eslint-disable-next-line func-names
-  it('fetch supports HTTP/2 server push', async function () {
+  it('fetch supports HTTP/2 server push', async function test() {
     this.timeout(5000);
 
     // returns a promise which resolves with the url of the pushed resource
@@ -369,8 +367,7 @@ describe('Fetch Tests', () => {
     }
   });
 
-  // eslint-disable-next-line func-names
-  it('test redundant server push', async function () {
+  it('test redundant server push', async function test() {
     this.timeout(5000);
 
     const receivedPush = () => new Promise((resolve) => onPush(resolve));
@@ -395,8 +392,7 @@ describe('Fetch Tests', () => {
     assert.notEqual(result, WOKEUP);
   });
 
-  // eslint-disable-next-line func-names
-  it('timeout works', async function () {
+  it('timeout works', async function test() {
     this.timeout(5000);
     const ts0 = Date.now();
     try {
@@ -441,8 +437,7 @@ describe('Fetch Tests', () => {
     assert(!resp.fromCache);
   });
 
-  // eslint-disable-next-line func-names
-  it('forcing HTTP/1(.1) works', async function () {
+  it('forcing HTTP/1(.1) works', async function test() {
     this.timeout(5000);
 
     // endpoint supporting http2 & http1
