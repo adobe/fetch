@@ -20,6 +20,7 @@ const {
   TimeoutError,
 } = require('fetch-h2');
 const LRU = require('lru-cache');
+const sizeof = require('object-sizeof');
 
 const CachePolicy = require('./policy');
 const { cacheableResponse, decoratedResponse } = require('./response');
@@ -27,27 +28,22 @@ const { decorateHeaders } = require('./headers');
 
 const CACHEABLE_METHODS = ['GET', 'HEAD'];
 const DEFAULT_FETCH_OPTIONS = { method: 'GET', cache: 'default' };
+const DEFAULT_CONTEXT_OPTIONS = { userAgent: 'helix-fetch', overwriteUserAgent: true };
+const DEFAULT_MAX_CACHE_SIZE = 100 * 1024 * 1024; // 100mb
 
 // events
 const PUSH_EVENT = 'push';
-
-const ctx = context({
-  userAgent: 'helix-fetch',
-  overwriteUserAgent: true,
-});
-
-ctx.cache = new LRU({ max: 500 });
-ctx.eventEmitter = new EventEmitter();
 
 /**
  * Cache the response as appropriate. The body stream of the
  * response is consumed & buffered to allow repeated reads.
  *
+ * @param {Object} ctx context
  * @param {Request} request
  * @param {Response} response
  * @returns {Response} cached response with buffered body or original response if uncached.
  */
-const cacheResponse = async (request, response) => {
+const cacheResponse = async (ctx, request, response) => {
   if (!CACHEABLE_METHODS.includes(request.method)) {
     // return original un-cacheable response
     return response;
@@ -66,24 +62,23 @@ const cacheResponse = async (request, response) => {
   }
 };
 
-const pushHandler = async (origin, request, getResponse) => {
-  // request.url is the relative URL for pushed resources => need to convert to absolute url
-  const req = request.clone(new URL(request.url, origin).toString());
-  // check if we've already cached the pushed resource
-  const { policy } = ctx.cache.get(req.url) || {};
-  if (!policy || !policy.satisfiesWithoutRevalidation(req)) {
-    // consume pushed response
-    const response = await getResponse();
-    // update cache
-    await cacheResponse(req, response);
-  }
-  ctx.eventEmitter.emit(PUSH_EVENT, req.url);
-};
+function createPushHandler(ctx) {
+  return async (origin, request, getResponse) => {
+    // request.url is the relative URL for pushed resources => need to convert to absolute url
+    const req = request.clone(new URL(request.url, origin).toString());
+    // check if we've already cached the pushed resource
+    const { policy } = ctx.cache.get(req.url) || {};
+    if (!policy || !policy.satisfiesWithoutRevalidation(req)) {
+      // consume pushed response
+      const response = await getResponse();
+      // update cache
+      await cacheResponse(ctx, req, response);
+    }
+    ctx.eventEmitter.emit(PUSH_EVENT, req.url);
+  };
+}
 
-// register push handler
-ctx.onPush(pushHandler);
-
-const wrappedFetch = async (url, options = DEFAULT_FETCH_OPTIONS) => {
+const wrappedFetch = async (ctx, url, options = {}) => {
   const opts = { ...DEFAULT_FETCH_OPTIONS, ...options };
   let urlWithQuery;
   const lookupCache = CACHEABLE_METHODS.includes(opts.method)
@@ -116,41 +111,115 @@ const wrappedFetch = async (url, options = DEFAULT_FETCH_OPTIONS) => {
   // workaround for https://github.com/grantila/fetch-h2/issues/84
   const response = await ctx.fetch(request, fetchOptions);
 
-  return opts.cache !== 'no-store' ? cacheResponse(request, response) : decoratedResponse(response);
+  return opts.cache !== 'no-store' ? cacheResponse(ctx, request, response) : decoratedResponse(response);
 };
 
-/**
- * Fetches a resource from the network or from the cache if the cached response
- * can be reused according to HTTP RFC 7234 rules. Returns a Promise which resolves once
- * the Response is available.
- *
- * @see https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch
- * @see https://httpwg.org/specs/rfc7234.html
- */
-module.exports.fetch = wrappedFetch;
-/**
- * Register a callback which gets called once a server Push has been received.
- *
- * @param {Function} fn callback function invoked with the url of the pushed resource
- */
-module.exports.onPush = (fn) => ctx.eventEmitter.on(PUSH_EVENT, fn);
-/**
- * Deregister a callback previously registered with {#onPush}.
- *
- * @param {Function} fn callback function registered with {#onPush}
- */
-module.exports.offPush = (fn) => ctx.eventEmitter.off(PUSH_EVENT, fn);
-/**
- * Clears the cache i.e. removes all entries.
- */
-module.exports.clearCache = () => ctx.cache.reset();
-/**
- * Disconnect all open/pending sessions.
- */
-module.exports.disconnectAll = () => ctx.disconnectAll();
-// module.exports.disconnect = (url) => ctx.disconnect(url);
+class FetchContext {
+  constructor(options = {}) {
+    // setup context
+    const opts = { ...DEFAULT_CONTEXT_OPTIONS, ...options };
+    this._ctx = context(opts);
+    // setup cache
+    const max = typeof opts.maxCacheSize === 'number' && opts.maxCacheSize >= 0 ? opts.maxCacheSize : DEFAULT_MAX_CACHE_SIZE;
+    const length = ({ response }, _) => sizeof(response);
+    this._ctx.cache = new LRU({ max, length });
+    // event emitter
+    this._ctx.eventEmitter = new EventEmitter();
+    // register push handler
+    this._ctx.onPush(createPushHandler(this._ctx));
+  }
 
-/**
- * Error thrown when a request timed out.
- */
-module.exports.TimeoutError = TimeoutError;
+  /**
+   * Returns the `helix-fetch` API.
+   */
+  api() {
+    return {
+      /**
+       * Fetches a resource from the network or from the cache if the cached response
+       * can be reused according to HTTP RFC 7234 rules. Returns a Promise which resolves once
+       * the Response is available.
+       *
+       * @see https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch
+       * @see https://httpwg.org/specs/rfc7234.html
+       */
+      fetch: async (url, options) => this.fetch(url, options),
+
+      /**
+       * This function returns an object which looks like the global `helix-fetch` API,
+       * i.e. it will have the functions `fetch`, `disconnectAll`, etc. and provide its
+       * own isolated cache.
+       *
+       * @param {Object} options
+       */
+      context: (options = {}) => this.context(options),
+
+      /**
+       * Disconnect all open/pending sessions.
+       */
+      disconnectAll: async () => this.disconnectAll(),
+
+      /**
+       * Register a callback which gets called once a server Push has been received.
+       *
+       * @param {Function} fn callback function invoked with the url of the pushed resource
+       */
+      onPush: (fn) => this.onPush(fn),
+
+      /**
+       * Deregister a callback previously registered with {#onPush}.
+       *
+       * @param {Function} fn callback function registered with {#onPush}
+       */
+      offPush: (fn) => this.offPush(fn),
+
+      /**
+       * Clear the cache entirely, throwing away all values.
+       */
+      clearCache: () => this.clearCache(),
+
+      /**
+       * Cache stats for diagnostic purposes
+       */
+      cacheStats: () => this.cacheStats(),
+
+      /**
+       * Error thrown when a request timed out.
+       */
+      TimeoutError,
+    };
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  context(options) {
+    return new FetchContext(options).api();
+  }
+
+  disconnectAll() {
+    this._ctx.disconnectAll();
+  }
+
+  onPush(fn) {
+    return this._ctx.eventEmitter.on(PUSH_EVENT, fn);
+  }
+
+  offPush(fn) {
+    return this._ctx.eventEmitter.off(PUSH_EVENT, fn);
+  }
+
+  clearCache() {
+    this._ctx.cache.reset();
+  }
+
+  cacheStats() {
+    return {
+      size: this._ctx.cache.length,
+      count: this._ctx.cache.itemCount,
+    };
+  }
+
+  async fetch(url, options) {
+    return wrappedFetch(this._ctx, url, options);
+  }
+}
+
+module.exports = new FetchContext().api();
