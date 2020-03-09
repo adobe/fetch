@@ -409,7 +409,7 @@ describe('Fetch Tests', () => {
     const ts1 = Date.now();
     assert((ts1 - ts0) < 2000);
   });
-  
+
   it('fetch supports querystrings', async () => {
     const EXPECTED = 'https://httpbin.org/json?helix=dummy&foo=bar&rumple=stiltskin';
     const qs = {
@@ -420,7 +420,7 @@ describe('Fetch Tests', () => {
     const res = await fetch('https://httpbin.org/json', { qs });
     assert.equal(res.url, EXPECTED);
   });
-  
+
   it('creating custom fetch context works', async () => {
     const ctx = context();
     const resp = await ctx.fetch('https://httpbin.org/status/200');
