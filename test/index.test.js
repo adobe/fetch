@@ -441,7 +441,10 @@ describe('Fetch Tests', () => {
     assert(!resp.fromCache);
   });
 
-  it('forcing HTTP/1(.1) works', async () => {
+  // eslint-disable-next-line func-names
+  it('forcing HTTP/1(.1) works', async function () {
+    this.timeout(5000);
+
     // endpoint supporting http2 & http1
     const url = 'https://www.nghttp2.org/httpbin/status/200';
     // default context defaults to http2
