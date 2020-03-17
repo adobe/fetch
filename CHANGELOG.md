@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/adobe/helix-fetch/compare/v1.4.0...v1.4.1) (2020-03-17)
+
+
+### Performance Improvements
+
+* bumped fetch-h2 dependency and some housekeeping ([db66e1e](https://github.com/adobe/helix-fetch/commit/db66e1e0240ac7626ff911ea970e073d9f4e3a45)), closes [#14](https://github.com/adobe/helix-fetch/issues/14)
+
 # [1.4.0](https://github.com/adobe/helix-fetch/compare/v1.3.0...v1.4.0) (2020-02-28)
 
 
