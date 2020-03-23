@@ -83,8 +83,6 @@ const wrappedFetch = async (ctx, url, options = {}) => {
   // sanitze method name (#24)
   if (typeof opts.method === 'string') {
     opts.method = opts.method.toUpperCase();
-  } else {
-    delete opts.method;
   }
   const lookupCache = CACHEABLE_METHODS.includes(opts.method)
     // respect cache mode (https://developer.mozilla.org/en-US/docs/Web/API/Request/cache)

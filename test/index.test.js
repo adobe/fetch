@@ -111,11 +111,8 @@ describe('Fetch Tests', () => {
     assert.deepEqual(jsonResponseBody.json, json);
   });
 
-  it('fetch sanitizes non-string method option', async () => {
-    // non-string method falls back to default ('GET')
-    const resp = await fetch('http://httpbin.org/status/200', { method: true });
-    assert.equal(resp.status, 200);
-    assert.equal(resp.httpVersion, 1);
+  it('fetch rejects on non-string method option', async () => {
+    assert.rejects(() => fetch('http://httpbin.org/status/200', { method: true }));
   });
 
   it('fetch supports caching', async () => {
