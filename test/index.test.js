@@ -111,6 +111,13 @@ describe('Fetch Tests', () => {
     assert.deepEqual(jsonResponseBody.json, json);
   });
 
+  it('fetch sanitizes non-string method option', async () => {
+    // non-string method falls back to default ('GET')
+    const resp = await fetch('http://httpbin.org/status/200', { method: true });
+    assert.equal(resp.status, 200);
+    assert.equal(resp.httpVersion, 1);
+  });
+
   it('fetch supports caching', async () => {
     const url = 'https://httpbin.org/cache/60'; // -> max-age=2 (seconds)
     // send initial request, priming cache
