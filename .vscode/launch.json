@@ -17,6 +17,9 @@
       "type": "node",
       "request": "launch",
       "name": "Launch Program",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
       "program": "${workspaceFolder}/index.js"
     },
     {
@@ -24,6 +27,9 @@
         "request": "launch",
         "name": "Mocha All",
         "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+        "skipFiles": [
+          "<node_internals>/**"
+        ],
         "args": [
             "--timeout",
             "999999",
@@ -37,6 +43,9 @@
         "type": "node",
         "request": "launch",
         "name": "Mocha Current File",
+        "skipFiles": [
+          "<node_internals>/**"
+        ],
         "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
         "args": [
             "--timeout",

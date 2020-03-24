@@ -20,13 +20,13 @@
 
 ## Features
 
-- [x] [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) implementation
-- [x] Transparent handling of HTTP/1(.1) and HTTP/2 connections
-- [x] Promise API/`async & await`
-- [x] Streaming support
-- [x] [RFC 7234](https://httpwg.org/specs/rfc7234.html) compliant cache
-- [x] HTTP/2 request and response multiplexing support
-- [x] HTTP/2 Server Push support
+* [x] [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) implementation
+* [x] Transparent handling of HTTP/1(.1) and HTTP/2 connections
+* [x] Promise API/`async & await`
+* [x] Streaming support
+* [x] [RFC 7234](https://httpwg.org/specs/rfc7234.html) compliant cache
+* [x] HTTP/2 request and response multiplexing support
+* [x] HTTP/2 Server Push support
 
 ## Status
 
@@ -35,6 +35,7 @@
 [![GitHub license](https://img.shields.io/github/license/adobe/helix-fetch.svg)](https://github.com/adobe/helix-fetch/blob/master/LICENSE.txt)
 [![GitHub issues](https://img.shields.io/github/issues/adobe/helix-fetch.svg)](https://github.com/adobe/helix-fetch/issues)
 [![LGTM Code Quality Grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/adobe/helix-fetch.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/adobe/helix-fetch)
+[![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com/)
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
 
 ## Installation
@@ -143,6 +144,35 @@ const resp = await fetch('https://httpbin.org/delay/2', {qs});
   const resp = await fetch('https://nghttp2.org');
   console.log(`Http version: ${resp.httpVersion}`);
 ```
+
+### Customization
+
+Set cache size limit (Default: 100 \* 1024 \* 1024 bytes, i.e. 100mb):
+
+```javascript
+  const { fetch, cacheStats } = require('@adobe/helix-fetch').context({
+    maxCacheSize: 100 * 1024, // 100kb
+  });
+
+  let resp = await fetch('http://httpbin.org/bytes/60000'); // ~60kb response
+  resp = await fetch('http://httpbin.org/bytes/50000'); // ~50kb response
+  console.log(cacheStats());
+```
+
+Force HTTP/1(.1) protocol:
+
+```javascript
+  const { fetch } = require('@adobe/helix-fetch').context({
+    httpsProtocols: ['http1'],
+  });
+
+  const resp = await fetch('https://nghttp2.org');
+  console.log(`Http version: ${resp.httpVersion}`);
+```
+
+See [Contexts](https://github.com/grantila/fetch-h2#contexts) for more options.
+
+### Misc
 
 More example code can be found [here](/test/index.test.js).
 
