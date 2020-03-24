@@ -1,3 +1,10 @@
+## [1.4.2](https://github.com/adobe/helix-fetch/compare/v1.4.1...v1.4.2) (2020-03-24)
+
+
+### Bug Fixes
+
+* **index:** sanitize method name ([fc539e1](https://github.com/adobe/helix-fetch/commit/fc539e1cf740a148e0371b76dbbf69811bdf1d5f)), closes [#24](https://github.com/adobe/helix-fetch/issues/24)
+
 ## [1.4.1](https://github.com/adobe/helix-fetch/compare/v1.4.0...v1.4.1) (2020-03-17)
 
 
