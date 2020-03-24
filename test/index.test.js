@@ -100,6 +100,21 @@ describe('Fetch Tests', () => {
     assert.deepEqual(jsonResponseBody.json, json);
   });
 
+  it('fetch sanitizes lowercase method names', async () => {
+    const method = 'post';
+    const json = { foo: 'bar' };
+    const resp = await fetch('https://httpbin.org/post', { method, json });
+    assert.equal(resp.status, 200);
+    assert.equal(resp.headers.get('content-type'), 'application/json');
+    const jsonResponseBody = await resp.json();
+    assert(jsonResponseBody !== null && typeof jsonResponseBody === 'object');
+    assert.deepEqual(jsonResponseBody.json, json);
+  });
+
+  it('fetch rejects on non-string method option', async () => {
+    assert.rejects(() => fetch('http://httpbin.org/status/200', { method: true }));
+  });
+
   it('fetch supports caching', async () => {
     const url = 'https://httpbin.org/cache/60'; // -> max-age=2 (seconds)
     // send initial request, priming cache
