@@ -78,9 +78,14 @@ function createPushHandler(ctx) {
   };
 }
 
+function createUrl(url, qs={}) {
+  const urlWithQuery = new URL(url);
+  Object.entries(qs).forEach(([k, v]) => urlWithQuery.searchParams.append(k, v));
+  return urlWithQuery.href;
+}
+
 const wrappedFetch = async (ctx, url, options = {}) => {
   const opts = { ...DEFAULT_FETCH_OPTIONS, ...options };
-  let urlWithQuery;
   // sanitze method name (#24)
   if (typeof opts.method === 'string') {
     opts.method = opts.method.toUpperCase();
@@ -103,15 +108,9 @@ const wrappedFetch = async (ctx, url, options = {}) => {
     }
   }
 
-  if (opts.qs) {
-    urlWithQuery = new URL(url);
-    Object.entries(opts.qs).forEach(([k, v]) => urlWithQuery.searchParams.append(k, v));
-    urlWithQuery = urlWithQuery.href;
-  }
-
   // fetch
   const fetchOptions = { ...opts, mode: 'no-cors', allowForbiddenHeaders: true };
-  const request = new Request(urlWithQuery || url, fetchOptions);
+  const request = new Request(url, fetchOptions);
   // workaround for https://github.com/grantila/fetch-h2/issues/84
   const response = await ctx.fetch(request, fetchOptions);
 
@@ -190,6 +189,14 @@ class FetchContext {
        * Error thrown when a request timed out.
        */
       TimeoutError,
+
+      /**
+       * Create a URL with query parameters
+       * 
+       * @param {string} url request url
+       * @param {object} qs request query parameters 
+       */
+      createUrl,
     };
   }
 
