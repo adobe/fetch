@@ -123,7 +123,7 @@ $ npm install @adobe/helix-fetch
 
 ```javascript
 
-const { fetch } = require('@adobe/helix-fetch');
+const { createUrl, fetch } = require('@adobe/helix-fetch');
 
 const qs = {
   helix: 'dummy',
@@ -131,7 +131,8 @@ const qs = {
   rumple: "stiltskin",
 };
 
-const resp = await fetch('https://httpbin.org/delay/2', {qs});
+const resp = await fetch(createUrl('https://httpbin.org/json',
+qs));
 ```
 
 ### HTTP/2 Server Push
