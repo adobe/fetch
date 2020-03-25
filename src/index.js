@@ -78,7 +78,7 @@ function createPushHandler(ctx) {
   };
 }
 
-function createUrl(url, qs={}) {
+function createUrl(url, qs = {}) {
   const urlWithQuery = new URL(url);
   Object.entries(qs).forEach(([k, v]) => urlWithQuery.searchParams.append(k, v));
   return urlWithQuery.href;
@@ -192,9 +192,9 @@ class FetchContext {
 
       /**
        * Create a URL with query parameters
-       * 
+       *
        * @param {string} url request url
-       * @param {object} qs request query parameters 
+       * @param {object} qs request query parameters
        */
       createUrl,
     };

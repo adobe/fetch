@@ -24,7 +24,7 @@ const parseCacheControl = require('parse-cache-control');
 const { WritableStreamBuffer } = require('stream-buffers');
 
 const {
-  fetch, onPush, offPush, disconnectAll, clearCache, cacheStats, context, TimeoutError, createUrl
+  fetch, onPush, offPush, disconnectAll, clearCache, cacheStats, context, TimeoutError, createUrl,
 } = require('../src/index.js');
 
 const WOKEUP = 'woke up!';
@@ -434,10 +434,10 @@ describe('Fetch Tests', () => {
 
   it('createUrl works without qs object', async () => {
     const EXPECTED = 'https://httpbin.org/json';
-    
+
     const res = await fetch(createUrl('https://httpbin.org/json'));
     assert.equal(res.url, EXPECTED);
-  })
+  });
 
   it('creating custom fetch context works', async () => {
     const ctx = context();
