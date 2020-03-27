@@ -24,7 +24,7 @@ const parseCacheControl = require('parse-cache-control');
 const { WritableStreamBuffer } = require('stream-buffers');
 
 const {
-  fetch, onPush, offPush, disconnectAll, clearCache, cacheStats, context, TimeoutError,
+  fetch, onPush, offPush, disconnectAll, clearCache, cacheStats, context, TimeoutError, createUrl,
 } = require('../src/index.js');
 
 const WOKEUP = 'woke up!';
@@ -419,6 +419,30 @@ describe('Fetch Tests', () => {
     }
     const ts1 = Date.now();
     assert((ts1 - ts0) < 2000);
+  });
+
+  it('createUrl encodes query paramters', async () => {
+    const EXPECTED = 'https://httpbin.org/json?helix=dummy&foo=bar&rumple=stiltskin';
+    const qs = {
+      helix: 'dummy',
+      foo: 'bar',
+      rumple: 'stiltskin',
+    };
+    const ACTUAL = createUrl('https://httpbin.org/json', qs);
+    assert.equal(ACTUAL, EXPECTED);
+  });
+
+  it('createUrl works without qs object', async () => {
+    const EXPECTED = 'https://httpbin.org/json';
+    const ACTUAL = createUrl('https://httpbin.org/json');
+    assert.equal(ACTUAL, EXPECTED);
+  });
+
+  it('createUrl checks arguments types', async () => {
+    assert.throws(() => createUrl(true));
+    assert.throws(() => createUrl('https://httpbin.org/json', 'abc'));
+    assert.throws(() => createUrl('https://httpbin.org/json', 123));
+    assert.throws(() => createUrl('https://httpbin.org/json', ['foo', 'bar']));
   });
 
   it('creating custom fetch context works', async () => {

@@ -78,6 +78,15 @@ function createPushHandler(ctx) {
   };
 }
 
+function createUrl(url, qs = {}) {
+  const urlWithQuery = new URL(url);
+  if (typeof qs !== 'object' || Array.isArray(qs)) {
+    throw new TypeError('qs: objet expected');
+  }
+  Object.entries(qs).forEach(([k, v]) => urlWithQuery.searchParams.append(k, v));
+  return urlWithQuery.href;
+}
+
 const wrappedFetch = async (ctx, url, options = {}) => {
   const opts = { ...DEFAULT_FETCH_OPTIONS, ...options };
   // sanitze method name (#24)
@@ -183,6 +192,14 @@ class FetchContext {
        * Error thrown when a request timed out.
        */
       TimeoutError,
+
+      /**
+       * Create a URL with query parameters
+       *
+       * @param {string} url request url
+       * @param {object} [qs={}] request query parameters
+       */
+      createUrl,
     };
   }
 
