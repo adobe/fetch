@@ -1,3 +1,13 @@
+# [1.5.0](https://github.com/adobe/helix-fetch/compare/v1.4.2...v1.5.0) (2020-03-27)
+
+
+### Features
+
+* **index:** allow queryParams ([961b3a2](https://github.com/adobe/helix-fetch/commit/961b3a2febabb05bd11ea5ff9a256801853ba9fe))
+* **index:** query strings allowed ([a776286](https://github.com/adobe/helix-fetch/commit/a776286caa0734336bbbe683dd9e411aa9d7c7a8)), closes [#12](https://github.com/adobe/helix-fetch/issues/12)
+* **index:** querystring support ([45da799](https://github.com/adobe/helix-fetch/commit/45da7990a29a1f6f185760e4758fbd0319cc59c0)), closes [#11](https://github.com/adobe/helix-fetch/issues/11)
+* minor tweaks and added test ([6c41275](https://github.com/adobe/helix-fetch/commit/6c41275d5b2019e62ad37fcdaaa24972365c0d8f)), closes [#11](https://github.com/adobe/helix-fetch/issues/11)
+
 ## [1.4.2](https://github.com/adobe/helix-fetch/compare/v1.4.1...v1.4.2) (2020-03-24)
 
 
