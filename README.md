@@ -131,8 +131,7 @@ const qs = {
   rumple: "stiltskin",
 };
 
-const resp = await fetch(createUrl('https://httpbin.org/json',
-qs));
+const resp = await fetch(createUrl('https://httpbin.org/json', qs));
 ```
 
 ### HTTP/2 Server Push

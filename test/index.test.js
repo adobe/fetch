@@ -421,22 +421,28 @@ describe('Fetch Tests', () => {
     assert((ts1 - ts0) < 2000);
   });
 
-  it('fetch supports querystrings', async () => {
+  it('createUrl encodes query paramters', async () => {
     const EXPECTED = 'https://httpbin.org/json?helix=dummy&foo=bar&rumple=stiltskin';
     const qs = {
       helix: 'dummy',
       foo: 'bar',
       rumple: 'stiltskin',
     };
-    const res = await fetch(createUrl('https://httpbin.org/json', qs));
-    assert.equal(res.url, EXPECTED);
+    const ACTUAL = createUrl('https://httpbin.org/json', qs);
+    assert.equal(ACTUAL, EXPECTED);
   });
 
   it('createUrl works without qs object', async () => {
     const EXPECTED = 'https://httpbin.org/json';
+    const ACTUAL = createUrl('https://httpbin.org/json');
+    assert.equal(ACTUAL, EXPECTED);
+  });
 
-    const res = await fetch(createUrl('https://httpbin.org/json'));
-    assert.equal(res.url, EXPECTED);
+  it('createUrl checks arguments types', async () => {
+    assert.throws(() => createUrl(true));
+    assert.throws(() => createUrl('https://httpbin.org/json', 'abc'));
+    assert.throws(() => createUrl('https://httpbin.org/json', 123));
+    assert.throws(() => createUrl('https://httpbin.org/json', ['foo', 'bar']));
   });
 
   it('creating custom fetch context works', async () => {
