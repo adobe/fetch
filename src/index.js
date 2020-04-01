@@ -83,7 +83,13 @@ function createUrl(url, qs = {}) {
   if (typeof qs !== 'object' || Array.isArray(qs)) {
     throw new TypeError('qs: objet expected');
   }
-  Object.entries(qs).forEach(([k, v]) => urlWithQuery.searchParams.append(k, v));
+  Object.entries(qs).forEach(([k, v]) => {
+    if (Array.isArray(v)) {
+      v.forEach((entry) => urlWithQuery.searchParams.append(k, entry));
+    } else {
+      urlWithQuery.searchParams.append(k, v);
+    }
+  });
   return urlWithQuery.href;
 }
 
