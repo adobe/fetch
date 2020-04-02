@@ -422,11 +422,13 @@ describe('Fetch Tests', () => {
   });
 
   it('createUrl encodes query paramters', async () => {
-    const EXPECTED = 'https://httpbin.org/json?helix=dummy&foo=bar&rumple=stiltskin';
+    const EXPECTED = 'https://httpbin.org/json?helix=42&dummy=true&name=Andr%C3%A9+Citro%C3%ABn&rumple=stiltskin&nephews=Huey&nephews=Louie&nephews=Dewey';
     const qs = {
-      helix: 'dummy',
-      foo: 'bar',
+      helix: 42,
+      dummy: true,
+      name: 'André Citroën',
       rumple: 'stiltskin',
+      nephews: ['Huey', 'Louie', 'Dewey'],
     };
     const ACTUAL = createUrl('https://httpbin.org/json', qs);
     assert.equal(ACTUAL, EXPECTED);
