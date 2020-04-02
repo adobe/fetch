@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/adobe/helix-fetch/compare/v1.5.0...v1.6.0) (2020-04-02)
+
+
+### Features
+
+* **index:** support array-type query param values ([fc07e7c](https://github.com/adobe/helix-fetch/commit/fc07e7c25c4b3f3e5329fde153598cb0e4ea41d8)), closes [#14](https://github.com/adobe/helix-fetch/issues/14)
+
 # [1.5.0](https://github.com/adobe/helix-fetch/compare/v1.4.2...v1.5.0) (2020-03-27)
 
 
