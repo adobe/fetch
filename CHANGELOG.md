@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/adobe/helix-fetch/compare/v1.6.0...v1.6.1) (2020-05-14)
+
+
+### Bug Fixes
+
+* make sure returned Response is wrapped ([5b7c0d7](https://github.com/adobe/helix-fetch/commit/5b7c0d7afb13ac3df55c153c5e053451926aaaf5)), closes [#41](https://github.com/adobe/helix-fetch/issues/41)
+
 # [1.6.0](https://github.com/adobe/helix-fetch/compare/v1.5.0...v1.6.0) (2020-04-02)
 
 
