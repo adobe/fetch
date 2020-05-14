@@ -46,7 +46,8 @@ const PUSH_EVENT = 'push';
 const cacheResponse = async (ctx, request, response) => {
   if (!CACHEABLE_METHODS.includes(request.method)) {
     // return original un-cacheable response
-    return response;
+    // (decorate original response providing the same extensions as the cacheable response)
+    return decoratedResponse(response);
   }
   const policy = new CachePolicy(request, response, { shared: false });
   if (policy.storable()) {

@@ -484,4 +484,19 @@ describe('Fetch Tests', () => {
     assert.equal(resp.status, 200);
     assert.equal(resp.httpVersion, 1);
   });
+
+  it('test for issue #41', async () => {
+    const resp = await fetch('https://httpbin.org/put', {
+      method: 'PUT',
+      body: JSON.stringify({ foo: 'bar' }),
+      headers: {
+        'content-type': 'application/json',
+        accept: 'application/json',
+      },
+    });
+    assert.equal(resp.status, 200);
+    assert.equal(resp.headers.raw()['content-type'], 'application/json');
+    const json = await resp.json();
+    assert(json !== null && typeof json === 'object');
+  });
 });
