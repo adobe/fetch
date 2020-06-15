@@ -94,12 +94,24 @@ function createUrl(url, qs = {}) {
   return urlWithQuery.href;
 }
 
+const sanitizeHeaders = (headers) => {
+  const result = {};
+  // make all header names lower case
+  Object.keys(headers).forEach((name) => {
+    result[name.toLowerCase()] = headers[name];
+  });
+  return result;
+};
+
 const wrappedFetch = async (ctx, url, options = {}) => {
   const opts = { ...DEFAULT_FETCH_OPTIONS, ...options };
   // sanitze method name (#24)
   if (typeof opts.method === 'string') {
     opts.method = opts.method.toUpperCase();
   }
+  // sanitize headers (lowercase names)
+  opts.headers = sanitizeHeaders(opts.headers || {});
+
   const lookupCache = CACHEABLE_METHODS.includes(opts.method)
     // respect cache mode (https://developer.mozilla.org/en-US/docs/Web/API/Request/cache)
     && !['no-store', 'reload'].includes(opts.cache);
@@ -107,7 +119,9 @@ const wrappedFetch = async (ctx, url, options = {}) => {
     // check cache
     const { policy, response } = ctx.cache.get(url) || {};
     // TODO: respect cache mode (https://developer.mozilla.org/en-US/docs/Web/API/Request/cache)
-    if (policy && policy.satisfiesWithoutRevalidation(new Request(url, opts))) {
+    if (policy && policy.satisfiesWithoutRevalidation(
+      new Request(url, { ...opts, allowForbiddenHeaders: true }),
+    )) {
       // update headers of cached response: update age, remove uncacheable headers, etc.
       response.headers = decorateHeaders(policy.responseHeaders(response));
 
@@ -121,8 +135,14 @@ const wrappedFetch = async (ctx, url, options = {}) => {
   // fetch
   const fetchOptions = { ...opts, mode: 'no-cors', allowForbiddenHeaders: true };
   const request = new Request(url, fetchOptions);
+
+  if (!fetchOptions.headers.host) {
+    // workaround for https://github.com/grantila/fetch-h2/issues/110
+    // TODO: remove once underlying issue has been fixed
+    fetchOptions.headers.host = new URL(url).host;
+  }
   // workaround for https://github.com/grantila/fetch-h2/issues/84
-  const response = await ctx.fetch(request, fetchOptions);
+  const response = await ctx.fetch(new Request(url, fetchOptions), fetchOptions);
 
   return opts.cache !== 'no-store' ? cacheResponse(ctx, request, response) : decoratedResponse(response);
 };
