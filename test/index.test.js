@@ -15,6 +15,7 @@
 'use strict';
 
 const assert = require('assert');
+const crypto = require('crypto');
 const stream = require('stream');
 const util = require('util');
 
@@ -486,6 +487,7 @@ describe('Fetch Tests', () => {
   });
 
   it('test for issue #41', async () => {
+    // https://github.com/adobe/helix-fetch/issues/41
     const resp = await fetch('https://httpbin.org/put', {
       method: 'PUT',
       body: JSON.stringify({ foo: 'bar' }),
@@ -498,5 +500,39 @@ describe('Fetch Tests', () => {
     assert.equal(resp.headers.raw()['content-type'], 'application/json');
     const json = await resp.json();
     assert(json !== null && typeof json === 'object');
+  });
+
+  it('can override host header', async () => {
+    const host = 'foobar.com';
+    const resp = await fetch('https://httpbin.org/headers', { headers: { host } });
+    assert.equal(resp.status, 200);
+    assert.equal(resp.headers.get('content-type'), 'application/json');
+    const json = await resp.json();
+    let hostHeaderValue;
+    Object.keys(json.headers || {}).forEach((name) => {
+      if (name.toLowerCase() === 'host') {
+        hostHeaderValue = json.headers[name];
+      }
+    });
+    assert.equal(hostHeaderValue, host);
+  });
+
+  it('test for issue #52', async function test() {
+    this.timeout(10000);
+    // https://github.com/adobe/helix-fetch/issues/52
+    const doFetch = async (url) => {
+      const res = await fetch(url, { cache: 'no-store' });
+      assert.equal(res.httpVersion, 2);
+      const data = await res.text();
+      return crypto.createHash('md5').update(data).digest().toString('hex');
+    };
+
+    const results = await Promise.all([
+      doFetch('https://helix-fetch--adobe.hlx.page/README.html'),
+      doFetch('https://helix-home--adobe.hlx.page/README.html'),
+    ]);
+
+    assert.equal(results.length, 2);
+    assert.notEqual(results[0], results[1]);
   });
 });
