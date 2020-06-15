@@ -1,3 +1,10 @@
+## [1.6.2](https://github.com/adobe/helix-fetch/compare/v1.6.1...v1.6.2) (2020-06-15)
+
+
+### Bug Fixes
+
+* explicitly set Host header ([331fcc9](https://github.com/adobe/helix-fetch/commit/331fcc98a43c779b4b385ba3b32d8b612aa057a8)), closes [#52](https://github.com/adobe/helix-fetch/issues/52)
+
 ## [1.6.1](https://github.com/adobe/helix-fetch/compare/v1.6.0...v1.6.1) (2020-05-14)
 
 
