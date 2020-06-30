@@ -456,7 +456,7 @@ describe('Fetch Tests', () => {
     assert((ts1 - ts0) < FETCH_TIMEOUT * 1.1);
   });
 
-  it.only('AbortController works', async function test() {
+  it('AbortController works', async function test() {
     this.timeout(5000);
 
     const controller = new AbortController();
