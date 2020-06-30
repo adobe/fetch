@@ -13,8 +13,8 @@
 
 * `Response.buffer()` returns a Node.js `Buffer`.
 * The `body` that can be sent in a `Request` can also be a `Readable` Node.js stream, a `Buffer` or a string.
-* `fetch()` has an extra option, `json` that can be used instead of `body` to send an object that will be JSON stringified. The appropriate content-type will be set if it isn't already.
-* ~~`fetch()` has an extra option, `timeout` which is a timeout in milliseconds before the request should be aborted and the returned promise thereby rejected (with a `TimeoutError`).~~
+* `fetch()` has an extra option `json` that can be used instead of `body` to send an object that will be JSON stringified. The appropriate content-type will be set if it isn't already.
+* ~~`fetch()` has an extra option `timeout` which is a timeout in milliseconds before the request should be aborted and the returned promise thereby rejected (with a `TimeoutError`).~~
   
   **Deprecated:** Use `AbortController` or `timeoutSignal(ms)` instead, see examples below.
 * The `Response` object has an extra property `httpVersion` which is either `1` or `2` (numbers), depending on what was negotiated with the server.
@@ -113,10 +113,9 @@ Using `AbortController`:
 
   const controller = new AbortController();
   setTimeout(() => controller.abort(), 1000);
-  const { signal } = controller;
 
   try {
-    const resp = await fetch('https://httpbin.org/json', { signal });
+    const resp = await fetch('https://httpbin.org/json', { signal: controller.signal });
     const jsonData = await resp.json();
   } catch (err) {
     if (err instanceof AbortError) {
