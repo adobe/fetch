@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/adobe/helix-fetch/compare/v1.6.2...v1.7.0) (2020-06-30)
+
+
+### Features
+
+* support AbortController for aborting fetch operations ([bb06b3e](https://github.com/adobe/helix-fetch/commit/bb06b3e866377f0a3d1e52a9c9310a7500441411)), closes [#64](https://github.com/adobe/helix-fetch/issues/64)
+
 ## [1.6.2](https://github.com/adobe/helix-fetch/compare/v1.6.1...v1.6.2) (2020-06-15)
 
 
