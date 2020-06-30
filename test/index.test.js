@@ -25,7 +25,8 @@ const parseCacheControl = require('parse-cache-control');
 const { WritableStreamBuffer } = require('stream-buffers');
 
 const {
-  fetch, onPush, offPush, disconnectAll, clearCache, cacheStats, context, TimeoutError, createUrl,
+  fetch, onPush, offPush, disconnectAll, clearCache, cacheStats, context,
+  TimeoutError, AbortController, AbortError, timeoutSignal, createUrl,
 } = require('../src/index.js');
 
 const WOKEUP = 'woke up!';
@@ -420,6 +421,58 @@ describe('Fetch Tests', () => {
     }
     const ts1 = Date.now();
     assert((ts1 - ts0) < 2000);
+  });
+
+  it('timeoutSignal works (slow response)', async function test() {
+    this.timeout(5000);
+    const ts0 = Date.now();
+    try {
+      // the server responds with a 2 second delay, the timeout is set to 1 second.
+      await fetch('https://httpbin.org/delay/2', { cache: 'no-store', signal: timeoutSignal(1000) });
+      assert.fail();
+    } catch (err) {
+      assert(err instanceof AbortError);
+    }
+    const ts1 = Date.now();
+    assert((ts1 - ts0) < 1000 * 1.1);
+  });
+
+  it('timeoutSignal works (dripping response)', async function test() {
+    this.timeout(10000);
+
+    const DRIPPING_DURATION = 5; // seconds
+    const FETCH_TIMEOUT = 3000; // ms
+    const TEST_URL = `https://httpbin.org/drip?duration=${DRIPPING_DURATION}&numbytes=10&code=200&delay=0`;
+
+    const ts0 = Date.now();
+    try {
+      const res = await fetch(TEST_URL, { cache: 'no-store', signal: timeoutSignal(FETCH_TIMEOUT) });
+      await res.buffer();
+      assert.fail();
+    } catch (err) {
+      assert(err instanceof AbortError);
+    }
+    const ts1 = Date.now();
+    assert((ts1 - ts0) < FETCH_TIMEOUT * 1.1);
+  });
+
+  it('AbortController works', async function test() {
+    this.timeout(5000);
+
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), 1000);
+    const { signal } = controller;
+
+    const ts0 = Date.now();
+    try {
+      // the server responds with a 2 second delay, fetch is aborted after 1 second.
+      await fetch('https://httpbin.org/delay/2', { cache: 'no-store', signal });
+      assert.fail();
+    } catch (err) {
+      assert(err instanceof AbortError);
+    }
+    const ts1 = Date.now();
+    assert((ts1 - ts0) < 1000 * 1.1);
   });
 
   it('createUrl encodes query paramters', async () => {

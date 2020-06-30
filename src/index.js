@@ -17,6 +17,8 @@ const { EventEmitter } = require('events');
 const {
   context,
   Request,
+  AbortController,
+  AbortError,
   TimeoutError,
 } = require('fetch-h2');
 const LRU = require('lru-cache');
@@ -147,6 +149,20 @@ const wrappedFetch = async (ctx, url, options = {}) => {
   return opts.cache !== 'no-store' ? cacheResponse(ctx, request, response) : decoratedResponse(response);
 };
 
+/**
+ * Creates a timeout signal which allows to specify
+ * a timeout for a `fetch` call via the `signal` option.
+ *
+ * @param {number} ms timeout in milliseconds
+ */
+const timeoutSignal = (ms) => {
+  const controller = new AbortController();
+  setTimeout(() => {
+    controller.abort();
+  }, ms);
+  return controller.signal;
+};
+
 class FetchContext {
   constructor(options = {}) {
     // setup context
@@ -217,8 +233,22 @@ class FetchContext {
 
       /**
        * Error thrown when a request timed out.
+       * Deprecated: Use `AbortController` and `AbortError` instead.
+       * @deprecated
        */
       TimeoutError,
+
+      /**
+       * AbortController represents a controller object that allows
+       * to abort one or more `fetch` operations as and when desired.
+       * @see https://developer.mozilla.org/en-US/docs/Web/API/AbortController
+       */
+      AbortController,
+
+      /**
+       * Error thrown in case of an abort signal triggered by an AbortController.
+       */
+      AbortError,
 
       /**
        * Create a URL with query parameters
@@ -227,6 +257,14 @@ class FetchContext {
        * @param {object} [qs={}] request query parameters
        */
       createUrl,
+
+      /**
+       * Creates a timeout signal which allows to specify
+       * a timeout for a `fetch` operation via the `signal` option.
+       *
+       * @param {number} ms timeout in milliseconds
+       */
+      timeoutSignal,
     };
   }
 
