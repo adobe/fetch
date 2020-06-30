@@ -14,7 +14,9 @@
 * `Response.buffer()` returns a Node.js `Buffer`.
 * The `body` that can be sent in a `Request` can also be a `Readable` Node.js stream, a `Buffer` or a string.
 * `fetch()` has an extra option, `json` that can be used instead of `body` to send an object that will be JSON stringified. The appropriate content-type will be set if it isn't already.
-* `fetch()` has an extra option, `timeout` which is a timeout in milliseconds before the request should be aborted and the returned promise thereby rejected (with a `TimeoutError`).
+* ~~`fetch()` has an extra option, `timeout` which is a timeout in milliseconds before the request should be aborted and the returned promise thereby rejected (with a `TimeoutError`).~~
+  
+  **Deprecated:** Use `AbortController` or `timeoutSignal(ms)` instead, see examples below.
 * The `Response` object has an extra property `httpVersion` which is either `1` or `2` (numbers), depending on what was negotiated with the server.
 * `Response.headers.raw()` returns the headers as a plain object.
 
@@ -85,6 +87,42 @@ $ npm install @adobe/helix-fetch
 
   const resp = await fetch('https://httpbin.org//stream-bytes/65535');
   const imageData = await resp.buffer();
+```
+
+### Specify a timeout for a `fetch` operation
+
+Using `signalTimeout(ms)` extension:
+
+```javascript
+  const { fetch, timeoutSignal, AbortError } = require('@adobe/helix-fetch');
+
+  try {
+    const resp = await fetch('https://httpbin.org/json', { signal: timeoutSignal(1000) });
+    const jsonData = await resp.json();
+  } catch (err) {
+    if (err instanceof AbortError) {
+      console.log('fetch timed out after 1s');
+    }
+  }
+```
+
+Using `AbortController`:
+
+```javascript
+  const { fetch, AbortController, AbortError } = require('@adobe/helix-fetch');
+
+  const controller = new AbortController();
+  setTimeout(() => controller.abort(), 1000);
+  const { signal } = controller;
+
+  try {
+    const resp = await fetch('https://httpbin.org/json', { signal });
+    const jsonData = await resp.json();
+  } catch (err) {
+    if (err instanceof AbortError) {
+      console.log('fetch timed out after 1s');
+    }
+  }
 ```
 
 ### Stream an image

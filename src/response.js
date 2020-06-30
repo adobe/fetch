@@ -139,7 +139,7 @@ const decoratedResponse = async (res) => ({
   text: async () => res.text(),
   json: async () => res.json(),
   arrayBuffer: async () => res.arrayBuffer(),
-  buffer: async () => getStream.buffer(await res.readable()),
+  buffer: async () => Buffer.from(await res.arrayBuffer()),
 });
 
 module.exports = { cacheableResponse, decoratedResponse };
