@@ -25,7 +25,7 @@
     "fetch-h2": "^2.4.3",
     "get-stream": "^5.1.0",
     "http-cache-semantics": "^4.0.3",
-    "lru-cache": "^5.1.1",
+    "lru-cache": "^6.0.0",
     "object-sizeof": "^1.5.3"
   },
   "devDependencies": {
