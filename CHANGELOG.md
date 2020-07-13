@@ -1,3 +1,10 @@
+## [1.7.1](https://github.com/adobe/helix-fetch/compare/v1.7.0...v1.7.1) (2020-07-13)
+
+
+### Bug Fixes
+
+* **deps:** update dependency lru-cache to v6 ([a41d842](https://github.com/adobe/helix-fetch/commit/a41d842db007d93eaecb18a3c9fba1fb7833c25b))
+
 # [1.7.0](https://github.com/adobe/helix-fetch/compare/v1.6.2...v1.7.0) (2020-06-30)
 
 
