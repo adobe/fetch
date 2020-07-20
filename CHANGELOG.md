@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/adobe/helix-fetch/compare/v1.7.1...v1.8.0) (2020-07-20)
+
+
+### Features
+
+* replace references to "master" branch with "main" ([ad9f254](https://github.com/adobe/helix-fetch/commit/ad9f254641867dabbd531861b45b7f8be12392f5)), closes [#77](https://github.com/adobe/helix-fetch/issues/77)
+
 ## [1.7.1](https://github.com/adobe/helix-fetch/compare/v1.7.0...v1.7.1) (2020-07-13)
 
 
