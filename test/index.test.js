@@ -570,6 +570,26 @@ describe('Fetch Tests', () => {
     assert.equal(hostHeaderValue, host);
   });
 
+  it('supports redirects (GET/HEAD)', async () => {
+    // default (follow)
+    let resp = await fetch('https://httpstat.us/307');
+    assert.equal(resp.status, 200);
+    assert.equal(resp.redirected, true);
+    await resp.text();
+    // manual
+    resp = await fetch('https://httpstat.us/307', { redirect: 'manual' });
+    assert.equal(resp.status, 307);
+    assert.equal(resp.headers.get('location'), 'https://httpstat.us');
+    await resp.text();
+    // follow
+    resp = await fetch('https://httpstat.us/307', { redirect: 'follow' });
+    assert.equal(resp.status, 200);
+    assert.equal(resp.redirected, true);
+    await resp.text();
+    // error
+    assert.rejects(() => fetch('https://httpstat.us/307', { redirect: 'error' }));
+  });
+
   it('test for issue #52', async function test() {
     this.timeout(10000);
     // https://github.com/adobe/helix-fetch/issues/52

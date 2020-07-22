@@ -29,7 +29,7 @@ const { cacheableResponse, decoratedResponse } = require('./response');
 const { decorateHeaders } = require('./headers');
 
 const CACHEABLE_METHODS = ['GET', 'HEAD'];
-const DEFAULT_FETCH_OPTIONS = { method: 'GET', cache: 'default' };
+const DEFAULT_FETCH_OPTIONS = { method: 'GET', cache: 'default', redirect: 'follow' };
 const DEFAULT_CONTEXT_OPTIONS = { userAgent: 'helix-fetch', overwriteUserAgent: true };
 const DEFAULT_MAX_CACHE_SIZE = 100 * 1024 * 1024; // 100mb
 
