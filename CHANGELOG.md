@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/adobe/helix-fetch/compare/v1.8.0...v1.8.1) (2020-07-22)
+
+
+### Bug Fixes
+
+* follow redirects by default ([d5901fe](https://github.com/adobe/helix-fetch/commit/d5901fec23e57ed5d4f6ae91c7dea8b8cdd9ee26)), closes [#79](https://github.com/adobe/helix-fetch/issues/79)
+
 # [1.8.0](https://github.com/adobe/helix-fetch/compare/v1.7.1...v1.8.0) (2020-07-20)
 
 
