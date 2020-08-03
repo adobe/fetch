@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/adobe/helix-fetch/compare/v1.8.1...v1.9.0) (2020-08-03)
+
+
+### Features
+
+* support URLSearchParams and FormData as body ([a8cfa92](https://github.com/adobe/helix-fetch/commit/a8cfa92a96d15434b809aea9b45e969de63735a9)), closes [#67](https://github.com/adobe/helix-fetch/issues/67)
+
 ## [1.8.1](https://github.com/adobe/helix-fetch/compare/v1.8.0...v1.8.1) (2020-07-22)
 
 
