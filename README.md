@@ -156,10 +156,23 @@ Using `AbortController`:
   const resp = await fetch('https://httpbin.org/post', { method, body, headers });
 ```
 
+### Post form data
+
+```javascript
+  const fs = require('fs');
+  const { FormData, fetch } = require('@adobe/helix-fetch');
+
+  const method = 'POST';
+  const form = new FormData();
+  form.append('foo', 'bar');
+  form.append('data', [ 0x68, 0x65, 0x6c, 0x69, 0x78, 0x2d, 0x66, 0x65, 0x74, 0x63, 0x68 ]);
+  form.append('some_file', fs.createReadStream('/foo/bar.jpg'), 'bar.jpg');
+  const resp = await fetch('https://httpbin.org/post', { method, body: form });
+```
+
 ### GET with query parameters object
 
 ```javascript
-
 const { createUrl, fetch } = require('@adobe/helix-fetch');
 
 const qs = {
@@ -169,6 +182,20 @@ const qs = {
 };
 
 const resp = await fetch(createUrl('https://httpbin.org/json', qs));
+```
+
+or using `URLSearchParams`:
+
+```javascript
+const { fetch } = require('@adobe/helix-fetch');
+
+const body = new URLSearchParams({
+  helix: 'dummy',
+  foo: 'bar',
+  rumple: "stiltskin",
+});
+
+const resp = await fetch('https://httpbin.org/json', { body });
 ```
 
 ### HTTP/2 Server Push
