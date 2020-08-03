@@ -18,6 +18,7 @@ const assert = require('assert');
 const crypto = require('crypto');
 const stream = require('stream');
 const util = require('util');
+const { URLSearchParams } = require('url');
 
 const isStream = require('is-stream');
 const nock = require('nock');
@@ -26,7 +27,7 @@ const { WritableStreamBuffer } = require('stream-buffers');
 
 const {
   fetch, onPush, offPush, disconnectAll, clearCache, cacheStats, context,
-  TimeoutError, AbortController, AbortError, timeoutSignal, createUrl,
+  TimeoutError, AbortController, AbortError, FormData, timeoutSignal, createUrl,
 } = require('../src/index.js');
 
 const WOKEUP = 'woke up!';
@@ -588,6 +589,40 @@ describe('Fetch Tests', () => {
     await resp.text();
     // error
     assert.rejects(() => fetch('https://httpstat.us/307', { redirect: 'error' }));
+  });
+
+  it('fetch supports URLSearchParams body', async () => {
+    const params = {
+      name: 'André Citroën',
+      rumple: 'stiltskin',
+    };
+    const method = 'POST';
+    const body = new URLSearchParams(params);
+    const resp = await fetch('https://httpbin.org/post', { method, body });
+    assert.equal(resp.status, 200);
+    assert.equal(resp.headers.get('content-type'), 'application/json');
+    const jsonResponseBody = await resp.json();
+    assert(jsonResponseBody !== null && typeof jsonResponseBody === 'object');
+    assert.equal(jsonResponseBody.headers['Content-Type'], 'application/x-www-form-urlencoded;charset=UTF-8');
+    assert.deepEqual(jsonResponseBody.form, params);
+  });
+
+  it('fetch supports FormData body', async () => {
+    const params = {
+      name: 'André Citroën',
+      rumple: 'stiltskin',
+    };
+    const method = 'POST';
+    const form = new FormData();
+    Object.entries(params).forEach(([k, v]) => form.append(k, v));
+
+    const resp = await fetch('https://httpbin.org/post', { method, body: form });
+    assert.equal(resp.status, 200);
+    assert.equal(resp.headers.get('content-type'), 'application/json');
+    const jsonResponseBody = await resp.json();
+    assert(jsonResponseBody !== null && typeof jsonResponseBody === 'object');
+    assert(jsonResponseBody.headers['Content-Type'].startsWith('multipart/form-data;boundary='));
+    assert.deepEqual(jsonResponseBody.form, params);
   });
 
   it('test for issue #52', async function test() {

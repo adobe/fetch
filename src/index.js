@@ -13,6 +13,7 @@
 'use strict';
 
 const { EventEmitter } = require('events');
+const { URLSearchParams } = require('url');
 
 const {
   context,
@@ -21,6 +22,7 @@ const {
   AbortError,
   TimeoutError,
 } = require('fetch-h2');
+const FormData = require('form-data');
 const LRU = require('lru-cache');
 const sizeof = require('object-sizeof');
 
@@ -84,7 +86,7 @@ function createPushHandler(ctx) {
 function createUrl(url, qs = {}) {
   const urlWithQuery = new URL(url);
   if (typeof qs !== 'object' || Array.isArray(qs)) {
-    throw new TypeError('qs: objet expected');
+    throw new TypeError('qs: object expected');
   }
   Object.entries(qs).forEach(([k, v]) => {
     if (Array.isArray(v)) {
@@ -113,6 +115,15 @@ const wrappedFetch = async (ctx, url, options = {}) => {
   }
   // sanitize headers (lowercase names)
   opts.headers = sanitizeHeaders(opts.headers || {});
+
+  if (opts.body instanceof URLSearchParams) {
+    opts.headers['content-type'] = 'application/x-www-form-urlencoded;charset=UTF-8';
+    opts.body = opts.body.toString();
+  } else if (opts.body instanceof FormData) {
+    const form = opts.body;
+    opts.headers['content-type'] = `multipart/form-data;boundary=${form.getBoundary()}`;
+    opts.body = form.getBuffer();
+  }
 
   const lookupCache = CACHEABLE_METHODS.includes(opts.method)
     // respect cache mode (https://developer.mozilla.org/en-US/docs/Web/API/Request/cache)
@@ -249,6 +260,14 @@ class FetchContext {
        * Error thrown in case of an abort signal triggered by an AbortController.
        */
       AbortError,
+
+      /**
+       * FormData implementation.
+       *
+       * See https://github.com/form-data/form-data,
+       *     https://developer.mozilla.org/en-US/docs/Web/API/FormData
+       */
+      FormData,
 
       /**
        * Create a URL with query parameters
