@@ -1,3 +1,10 @@
+## [1.9.1](https://github.com/adobe/helix-fetch/compare/v1.9.0...v1.9.1) (2020-08-10)
+
+
+### Bug Fixes
+
+* **deps:** update dependency get-stream to v6 ([1f18b4e](https://github.com/adobe/helix-fetch/commit/1f18b4e12db490cd67b24a3e422f252141dea6fb))
+
 # [1.9.0](https://github.com/adobe/helix-fetch/compare/v1.8.1...v1.9.0) (2020-08-03)
 
 
