@@ -24,7 +24,7 @@
   "dependencies": {
     "fetch-h2": "^2.4.3",
     "form-data": "^3.0.0",
-    "get-stream": "^5.1.0",
+    "get-stream": "^6.0.0",
     "http-cache-semantics": "^4.0.3",
     "lru-cache": "^6.0.0",
     "object-sizeof": "^1.5.3"
