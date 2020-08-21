@@ -149,11 +149,6 @@ const wrappedFetch = async (ctx, url, options = {}) => {
   const fetchOptions = { ...opts, mode: 'no-cors', allowForbiddenHeaders: true };
   const request = new Request(url, fetchOptions);
 
-  if (!fetchOptions.headers.host) {
-    // workaround for https://github.com/grantila/fetch-h2/issues/110
-    // TODO: remove once underlying issue has been fixed
-    fetchOptions.headers.host = new URL(url).host;
-  }
   // workaround for https://github.com/grantila/fetch-h2/issues/84
   const response = await ctx.fetch(new Request(url, fetchOptions), fetchOptions);
 
