@@ -149,8 +149,19 @@ const wrappedFetch = async (ctx, url, options = {}) => {
   const fetchOptions = { ...opts, mode: 'no-cors', allowForbiddenHeaders: true };
   const request = new Request(url, fetchOptions);
 
-  // workaround for https://github.com/grantila/fetch-h2/issues/84
-  const response = await ctx.fetch(new Request(url, fetchOptions), fetchOptions);
+  let response;
+  try {
+    // workaround for https://github.com/grantila/fetch-h2/issues/84
+    response = await ctx.fetch(new Request(url, fetchOptions), fetchOptions);
+  } catch (err) {
+    // workaround for https://github.com/grantila/fetch-h2/issues/88
+    /* istanbul ignore if */
+    if (['ECONNRESET', 'ERR_HTTP2_INVALID_SESSION'].includes(err.code)) {
+      await ctx.disconnect(url);
+    }
+    // re-throw
+    throw err;
+  }
 
   return opts.cache !== 'no-store' ? cacheResponse(ctx, request, response) : decoratedResponse(response);
 };
