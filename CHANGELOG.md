@@ -1,3 +1,10 @@
+## [1.9.2](https://github.com/adobe/helix-fetch/compare/v1.9.1...v1.9.2) (2020-12-09)
+
+
+### Bug Fixes
+
+* **index:** workaround for persistent ERR_HTTP2_INVALID_SESSION errors ([1cc78b3](https://github.com/adobe/helix-fetch/commit/1cc78b3372f1ed00561b7e88a3554878b72530a7)), closes [#103](https://github.com/adobe/helix-fetch/issues/103)
+
 ## [1.9.1](https://github.com/adobe/helix-fetch/compare/v1.9.0...v1.9.1) (2020-08-10)
 
 
