@@ -156,6 +156,7 @@ const wrappedFetch = async (ctx, url, options = {}) => {
   } catch (err) {
     // workaround for https://github.com/grantila/fetch-h2/issues/88
     if (['ECONNRESET', 'ERR_HTTP2_INVALID_SESSION'].includes(err.code)) {
+      /* istanbul ignore next */
       await ctx.disconnect(url);
     }
     // re-throw
