@@ -9,6 +9,7 @@
       "request": "launch",
       "name": "Launch current file",
       "program": "${file}",
+      "env": { "NODE_OPTIONS": "--trace-tls", "NODE_DEBUG": "*" },
       "skipFiles": [
         "<node_internals>/**"
       ]
