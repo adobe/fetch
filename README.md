@@ -1,34 +1,32 @@
 # Helix Fetch Library
 
-> Library for making transparent HTTP/1(.1) and HTTP/2 requests.
+> Lightweight Fetch implementation transparently supporting both HTTP/1(.1) and HTTP/2.
 
-`helix-fetch` is based on [fetch-h2](https://github.com/grantila/fetch-h2). `helix-fetch` in general adheres to the [Fetch API Specification](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API), implementing a subset of the API. However, there are some notable deviations:
+`helix-fetch` in general adheres to the [Fetch API Specification](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API), implementing a subset of the API. However, there are some notable deviations:
 
-* `Response.body` is not implemented. Use `Response.readable()` instead.
+* `Response.body` returns a Node.js [Readable stream](https://nodejs.org/api/stream.html#stream_readable_streams).
 * `Response.blob()` is not implemented. Use `Response.buffer()` instead.
 * `Response.formData()` is not implemented.
-* The following `fetch()` options are ignored since `helix-fetch` doesn't have the concept of web pages: `mode`, `referrer` and `referrerPolicy`.
+* The following `fetch()` options are ignored due to the nature of Node.js and since `helix-fetch` doesn't have the concept of web pages: `mode`, `referrer`, `referrerPolicy` `integrity`, `credentials` and `keepalive`.
 
 `helix-fetch` also supports the following extensions:
 
 * `Response.buffer()` returns a Node.js `Buffer`.
-* The `body` that can be sent in a `Request` can also be a `Readable` Node.js stream, a `Buffer` or a string.
-* `fetch()` has an extra option `json` that can be used instead of `body` to send an object that will be JSON stringified. The appropriate content-type will be set if it isn't already.
-* ~~`fetch()` has an extra option `timeout` which is a timeout in milliseconds before the request should be aborted and the returned promise thereby rejected (with a `TimeoutError`).~~
-  
-  **Deprecated:** Use `AbortController` or `timeoutSignal(ms)` instead, see examples below.
-* The `Response` object has an extra property `httpVersion` which is either `1` or `2` (numbers), depending on what was negotiated with the server.
-* `Response.headers.raw()` returns the headers as a plain object.
+* The `body` that can be sent in a `Request` can also be a `Readable` Node.js stream, a `Buffer`, a string or a plain object.
+* The `Response` object has an extra property `httpVersion` which is one of `'1.0'`, `'1.1'` or `'2.0'` (numbers), depending on what was negotiated with the server.
+* The `Response` object has an extra property `fromCache` which determines whether the response was retrieved from cache.
+* `Response.headers.plain()` returns the headers as a plain object.
 
 ## Features
 
-* [x] [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) implementation
+* [x] supports reasonable subset of the standard [Fetch specification](https://fetch.spec.whatwg.org/)
 * [x] Transparent handling of HTTP/1(.1) and HTTP/2 connections
-* [x] Promise API/`async & await`
-* [x] Streaming support
 * [x] [RFC 7234](https://httpwg.org/specs/rfc7234.html) compliant cache
+* [x] Support `gzip/deflate/br` content encoding
 * [x] HTTP/2 request and response multiplexing support
-* [x] HTTP/2 Server Push support
+* [x] HTTP/2 Server Push support (transparent caching and explicit listener support)
+* [x] overridable User-Agent
+* [x] low-level HTTP/1.* agent/connect options support (e.g. `keepAlive`, `rejectUnauthorized`)
 
 ## Status
 
@@ -58,7 +56,7 @@ $ npm install @adobe/helix-fetch
   console.log(resp.status);
   console.log(resp.statusText);
   console.log(resp.method);
-  console.log(resp.headers.raw());
+  console.log(resp.headers.plain());
   console.log(resp.headers.get('content-type'));
 ```
 
@@ -113,9 +111,10 @@ Using `AbortController`:
 
   const controller = new AbortController();
   setTimeout(() => controller.abort(), 1000);
+  const { signal } = controller;
 
   try {
-    const resp = await fetch('https://httpbin.org/json', { signal: controller.signal });
+    const resp = await fetch('https://httpbin.org/json', { signal });
     const jsonData = await resp.json();
   } catch (err) {
     if (err instanceof AbortError) {
@@ -131,7 +130,7 @@ Using `AbortController`:
   const { fetch } = require('@adobe/helix-fetch');
 
   const resp = await fetch('https://httpbin.org/image/jpeg');
-  (await resp.readable()).pipe(fs.createWriteStream('saved-image.jpg'));
+  resp.body.pipe(fs.createWriteStream('saved-image.jpg'));
 ```
 
 ### Post JSON
@@ -140,8 +139,8 @@ Using `AbortController`:
   const { fetch } = require('@adobe/helix-fetch');
 
   const method = 'POST';
-  const json = { foo: 'bar' };
-  const resp = await fetch('https://httpbin.org/post', { method, json });
+  const body = { foo: 'bar' };
+  const resp = await fetch('https://httpbin.org/post', { method, body });
 ```
 
 ### Post JPEG image
@@ -163,11 +162,11 @@ Using `AbortController`:
   const { FormData, fetch } = require('@adobe/helix-fetch');
 
   const method = 'POST';
-  const form = new FormData();
-  form.append('foo', 'bar');
-  form.append('data', [ 0x68, 0x65, 0x6c, 0x69, 0x78, 0x2d, 0x66, 0x65, 0x74, 0x63, 0x68 ]);
-  form.append('some_file', fs.createReadStream('/foo/bar.jpg'), 'bar.jpg');
-  const resp = await fetch('https://httpbin.org/post', { method, body: form });
+  const body = new FormData();
+  body.append('foo', 'bar');
+  body.append('data', [ 0x68, 0x65, 0x6c, 0x69, 0x78, 0x2d, 0x66, 0x65, 0x74, 0x63, 0x68 ]);
+  body.append('some_file', fs.createReadStream('/foo/bar.jpg'), 'bar.jpg');
+  const resp = await fetch('https://httpbin.org/post', { method, body });
 ```
 
 ### GET with query parameters object
@@ -200,10 +199,13 @@ const resp = await fetch('https://httpbin.org/json', { body });
 
 ### HTTP/2 Server Push
 
+Note that pushed resources will be automatically and transparently added to the cache.
+You can however add a listener which will be notified on every pushed (and cached) resource.
+
 ```javascript
   const { fetch, onPush } = require('@adobe/helix-fetch');
 
-  onPush((url) => console.log(`received server push: ${url}`));
+  onPush((url, response) => console.log(`received server push: ${url} status ${response.status}`));
 
   const resp = await fetch('https://nghttp2.org');
   console.log(`Http version: ${resp.httpVersion}`);
@@ -226,15 +228,13 @@ Set cache size limit (Default: 100 \* 1024 \* 1024 bytes, i.e. 100mb):
 Force HTTP/1(.1) protocol:
 
 ```javascript
-  const { fetch } = require('@adobe/helix-fetch').context({
-    httpsProtocols: ['http1'],
+  const { fetch, ALPN_HTTP1_1 } = require('@adobe/helix-fetch').context({
+    alpnProtocols: [ALPN_HTTP1_1],
   });
 
   const resp = await fetch('https://nghttp2.org');
   console.log(`Http version: ${resp.httpVersion}`);
 ```
-
-See [Contexts](https://github.com/grantila/fetch-h2#contexts) for more options.
 
 ### Misc
 

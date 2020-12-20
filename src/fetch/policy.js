@@ -13,9 +13,8 @@
 'use strict';
 
 const CachePolicy = require('http-cache-semantics');
-const { Headers } = require('fetch-h2');
 
-const { headersAsObject } = require('./headers');
+const { Headers } = require('./headers');
 
 /**
  *
@@ -25,7 +24,7 @@ const { headersAsObject } = require('./headers');
 const convertRequest = (req) => ({
   url: req.url,
   method: req.method,
-  headers: headersAsObject(req.headers),
+  headers: req.headers.plain(),
 });
 
 /**
@@ -35,7 +34,7 @@ const convertRequest = (req) => ({
  */
 const convertResponse = (res) => ({
   status: res.status,
-  headers: headersAsObject(res.headers),
+  headers: res.headers.plain(),
 });
 
 /**

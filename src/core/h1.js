@@ -1,0 +1,197 @@
+/*
+ * Copyright 2020 Adobe. All rights reserved.
+ * This file is licensed to you under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License. You may obtain a copy
+ * of the License at http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under
+ * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+ * OF ANY KIND, either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+
+'use strict';
+
+const http = require('http');
+const https = require('https');
+const { Readable } = require('stream');
+
+const debug = require('debug')('helix-fetch:h1');
+
+const { RequestAbortedError } = require('./errors');
+const { decodeStream } = require('../common/utils');
+
+const getAgent = (ctx, protocol) => {
+  // getAgent is synchronous, no need for lock/mutex
+  const { h1, options: { h1: opts } } = ctx;
+
+  if (protocol === 'https:') {
+    // secure http
+    if (h1.httpsAgent) {
+      return h1.httpsAgent;
+    }
+    if (opts) {
+      h1.httpsAgent = new https.Agent(opts);
+      return h1.httpsAgent;
+    }
+    // use default (global) agent
+    return undefined;
+  } else {
+    // plain http
+    if (h1.httpAgent) {
+      return h1.httpAgent;
+    }
+    if (opts) {
+      h1.httpAgent = new http.Agent(opts);
+      return h1.httpAgent;
+    }
+    // use default (global) agent
+    return undefined;
+  }
+};
+
+const setupContext = (ctx) => {
+  // const { options: { h1: opts } } = ctx;
+  ctx.h1 = {};
+  // custom agents will be lazily instantiated
+};
+
+const resetContext = async ({ h1 }) => {
+  if (h1.httpAgent) {
+    h1.httpAgent.destroy();
+    // eslint-disable-next-line no-param-reassign
+    delete h1.httpAgent;
+  }
+  if (h1.httpsAgent) {
+    h1.httpsAgent.destroy();
+    // eslint-disable-next-line no-param-reassign
+    delete h1.httpsAgent;
+  }
+};
+
+const createResponse = (incomingMessage, onError) => {
+  const {
+    statusCode,
+    statusMessage,
+    httpVersion,
+    httpVersionMajor,
+    httpVersionMinor,
+    headers, // header names are always lower-cased
+  } = incomingMessage;
+  return {
+    statusCode,
+    statusText: statusMessage,
+    httpVersion,
+    httpVersionMajor,
+    httpVersionMinor,
+    headers,
+    readable: decodeStream(statusCode, headers, incomingMessage, onError),
+  };
+};
+
+const h1Request = async (ctx, url, options) => {
+  const { request } = url.protocol === 'https:' ? https : http;
+  const agent = getAgent(ctx, url.protocol);
+  const opts = { ...options, agent };
+  const { socket, body } = opts;
+  if (socket) {
+    // we've got a socket from initial protocol negotiation via ALPN
+    delete opts.socket;
+    if (!socket.assigned) {
+      socket.assigned = true;
+      // reuse socket for actual request
+      if (agent) {
+        // if there's an agent we need to override the agent's createConnection
+        opts.agent = new Proxy(agent, {
+          get: (target, property) => {
+            if (property === 'createConnection' && !socket.inUse) {
+              return (_connectOptions, cb) => {
+                debug(`agent reusing socket #${socket.id} (${socket.servername})`);
+                socket.inUse = true;
+                cb(null, socket);
+              };
+            } else {
+              return target[property];
+            }
+          },
+        });
+      } else {
+        // no agent, provide createConnection function in options
+        opts.createConnection = (_connectOptions, cb) => {
+          debug(`reusing socket #${socket.id} (${socket.servername})`);
+          socket.inUse = true;
+          cb(null, socket);
+        };
+      }
+    }
+  }
+
+  return new Promise((resolve, reject) => {
+    debug(`${opts.method} ${url.href}`);
+    let req;
+
+    // intercept abort signal in order to cancel request
+    const { signal } = opts;
+    const onAbortSignal = () => {
+      // deregister from signal
+      signal.removeEventListener('abort', onAbortSignal);
+      if (socket && !socket.inUse) {
+        // we have no use for the passed socket
+        debug(`discarding redundant socket used for ALPN: #${socket.id} ${socket.servername}`);
+        socket.destroy();
+      }
+      reject(new RequestAbortedError());
+      if (req) {
+        req.abort();
+      }
+    };
+    if (signal) {
+      if (signal.aborted) {
+        reject(new RequestAbortedError());
+        return;
+      }
+      signal.addEventListener('abort', onAbortSignal);
+    }
+
+    req = request(url, opts);
+    req.once('response', (res) => {
+      if (signal) {
+        signal.removeEventListener('abort', onAbortSignal);
+      }
+      if (socket && !socket.inUse) {
+        // we have no use for the passed socket
+        debug(`discarding redundant socket used for ALPN: #${socket.id} ${socket.servername}`);
+        socket.destroy();
+      }
+      resolve(createResponse(res, reject));
+    });
+    req.once('error', (err) => {
+      // error occured during the request
+      if (signal) {
+        signal.removeEventListener('abort', onAbortSignal);
+      }
+      if (socket && !socket.inUse) {
+        // we have no use for the passed socket
+        debug(`discarding redundant socket used for ALPN: #${socket.id} ${socket.servername}`);
+        socket.destroy();
+      }
+      if (!req.aborted) {
+        debug(`${opts.method} ${url.href} failed with: ${err.message}`);
+        // TODO: better call req.destroy(err) instead of req.abort() ?
+        req.abort();
+        reject(err);
+      }
+    });
+    // send request body?
+    if (body instanceof Readable) {
+      body.pipe(req);
+    } else {
+      if (body) {
+        req.write(body);
+      }
+      req.end();
+    }
+  });
+};
+
+module.exports = { request: h1Request, setupContext, resetContext };
