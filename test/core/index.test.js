@@ -108,6 +108,30 @@ describe('Core Tests', () => {
     assert((ts1 - ts0) < 10);
   });
 
+  it('AbortController works (premature abort, fresh context)', async () => {
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), 0);
+    const { signal } = controller;
+
+    // make sure signal has fired
+    await sleep(10);
+    assert(signal.aborted);
+
+    const customCtx = context();
+
+    const ts0 = Date.now();
+    try {
+      await customCtx.request('https://httpbin.org/status/200', { signal });
+      assert.fail();
+    } catch (err) {
+      assert(err instanceof RequestAbortedError);
+    } finally {
+      await customCtx.reset();
+    }
+    const ts1 = Date.now();
+    assert((ts1 - ts0) < 10);
+  });
+
   it('AbortController works (slow response)', async function test() {
     this.timeout(5000);
 

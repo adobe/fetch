@@ -55,6 +55,7 @@ const connectTLS = (url, options) => new Promise((resolve, reject) => {
     signal.removeEventListener('abort', onAbortSignal);
     const err = new RequestAbortedError();
     reject(err);
+    /* istanbul ignore else */
     if (socket) {
       socket.destroy(err);
     }
