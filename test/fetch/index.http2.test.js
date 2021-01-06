@@ -20,6 +20,7 @@ const http2 = require('http2');
 const util = require('util');
 
 const pem = require('pem');
+const sinon = require('sinon');
 
 const {
   fetch,
@@ -30,6 +31,9 @@ const {
 } = require('../../src/fetch');
 
 const createCertificate = util.promisify(pem.createCertificate);
+
+const WOKEUP = 'woke up!';
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms, WOKEUP));
 
 const HELLO_WORLD = 'Hello, World!';
 
@@ -178,7 +182,32 @@ describe('HTTP/2-specific Fetch Tests', () => {
     assert.strictEqual(+response.headers.get('content-length'), buf.length);
   });
 
-  it('concurrent HTTP/2 requests to same origin', async () => {
+  it('HTTP/2 server push can be disabled', async function test() {
+    this.timeout(5000);
+
+    const ctx = context({ h2: { enablePush: false } });
+
+    const handler = sinon.fake();
+    ctx.onPush(handler);
+
+    try {
+      // see https://nghttp2.org/blog/2015/02/10/nghttp2-dot-org-enabled-http2-server-push/
+      const resp = await ctx.fetch('https://nghttp2.org');
+      assert.strictEqual(resp.httpVersion, '2.0');
+      assert.strictEqual(resp.status, 200);
+      assert.strictEqual(resp.headers.get('content-type'), 'text/html');
+      const buf = await resp.buffer();
+      assert.strictEqual(+resp.headers.get('content-length'), buf.length);
+      await sleep(1000);
+      assert(handler.notCalled);
+    } finally {
+      ctx.reset();
+    }
+  });
+
+  it('concurrent HTTP/2 requests to same origin', async function test() {
+    this.timeout(5000);
+
     const N = 500; // # of parallel requests
     const TEST_URL = 'https://httpbin.org/bytes/'; // HTTP2
     // generete array of 'randomized' urls

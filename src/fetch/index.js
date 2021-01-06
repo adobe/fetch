@@ -48,7 +48,7 @@ const PUSH_EVENT = 'push';
 const fetch = async (ctx, url, options) => {
   const { request } = ctx.context;
 
-  const req = url instanceof Request && typeof options === 'undefined' ? url : new Request(url, options);
+  const req = url instanceof Request && typeof options === 'undefined' ? url : /* istanbul ignore next */ new Request(url, options);
 
   // extract options
   const {

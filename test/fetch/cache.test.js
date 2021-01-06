@@ -15,17 +15,48 @@
 'use strict';
 
 const assert = require('assert');
+const { Readable } = require('stream');
 
 const isStream = require('is-stream');
 const nock = require('nock');
 const parseCacheControl = require('parse-cache-control');
 
 const {
-  fetch, onPush, offPush, reset, clearCache, cacheStats, context,
+  fetch, onPush, offPush, reset, clearCache, cacheStats, context, Response, Headers,
 } = require('../../src');
+const { cacheableResponse } = require('../../src/fetch/cacheableResponse');
 
 const WOKEUP = 'woke up!';
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms, WOKEUP));
+
+describe('CacheableResponse Tests', () => {
+  it('supports cacheable Response', async () => {
+    const body = Readable.from('a=1');
+    const r = new Response(body, {
+      headers: {
+        a: '1',
+      },
+      url: 'http://example.com/',
+      status: 200,
+      statusText: 'OK',
+    });
+    const cr = await cacheableResponse(r);
+    assert.strictEqual(Object.prototype.toString.call(cr), '[object CacheableResponse]');
+    assert.strictEqual(r.status, cr.status);
+    assert.strictEqual(r.headers.get('a'), '1');
+    assert.strictEqual(r.headers.get('a'), cr.headers.get('a'));
+    assert.strictEqual(r.bodyUsed, true);
+    assert.strictEqual(cr.bodyUsed, false);
+    assert.strictEqual(await cr.text(), 'a=1');
+    assert.strictEqual(cr.bodyUsed, false);
+    assert.strictEqual(await cr.text(), 'a=1');
+    assert.throws(() => {
+      cr.headers = { foo: 'bar' };
+    }, 'TypeError');
+    cr.headers = new Headers({ foo: 'bar' });
+    assert.strictEqual(cr.headers.get('foo'), 'bar');
+  });
+});
 
 describe('Cache Tests', () => {
   afterEach(async () => {

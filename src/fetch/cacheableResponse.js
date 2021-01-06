@@ -68,10 +68,6 @@ class CacheableResponse extends Response {
     }
   }
 
-  get redirected() {
-    return super.redirected;
-  }
-
   get body() {
     return Readable.from(this[INTERNALS].bufferedBody);
   }
@@ -107,10 +103,6 @@ class CacheableResponse extends Response {
         url, status, statusText, headers, httpVersion, counter,
       },
     );
-  }
-
-  get init() {
-    return super.init;
   }
 
   get [Symbol.toStringTag]() {

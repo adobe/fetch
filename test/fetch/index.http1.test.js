@@ -45,7 +45,9 @@ describe('HTTP/1.1-specific Fetch Tests', () => {
     }
   });
 
-  it('concurrent HTTP/1.1 requests to same origin', async () => {
+  it('concurrent HTTP/1.1 requests to same origin', async function test() {
+    this.timeout(5000);
+
     const { fetch, reset } = context({ alpnProtocols: [ALPN_HTTP1_1] });
     const N = 500; // # of parallel requests
     const TEST_URL = 'https://httpbin.org/bytes/';
