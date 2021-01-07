@@ -73,11 +73,6 @@ describe('Core Tests', () => {
     assert.strictEqual(resp.statusCode, 405);
   });
 
-  it('accecpts URL object', async () => {
-    const resp = await defaultCtx.request(new URL('https://httpbin.org/status/200'));
-    assert.strictEqual(resp.statusCode, 200);
-  });
-
   it('supports binary response body (Stream)', async () => {
     const dataLen = 64 * 1024; // httpbin.org/stream-bytes/{n} has a limit of 100kb ...
     const contentType = 'application/octet-stream';
@@ -294,6 +289,17 @@ describe('Core Tests', () => {
     assert(typeof jsonResponseBody === 'object');
     assert.strictEqual(jsonResponseBody.headers['Content-Type'], 'application/x-www-form-urlencoded;charset=UTF-8');
     assert.deepStrictEqual(jsonResponseBody.form, params);
+  });
+
+  it('supports POST without body', async () => {
+    const method = 'POST';
+    const resp = await defaultCtx.request('https://httpbin.org/post', { method });
+    assert.strictEqual(resp.statusCode, 200);
+    assert.strictEqual(resp.headers['content-type'], 'application/json');
+    const buf = await readStream(resp.readable);
+    const jsonResponseBody = JSON.parse(buf);
+    assert(typeof jsonResponseBody === 'object');
+    assert.strictEqual(+jsonResponseBody.headers['Content-Length'], 0);
   });
 
   it('supports gzip content encoding', async () => {

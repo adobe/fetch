@@ -112,8 +112,10 @@ const connect = async (url, options) => {
 };
 
 const determineProtocol = async (ctx, url, signal) => {
+  // url.origin is null if url.protocol is neither 'http:' nor 'https:' ...
+  const origin = `${url.protocol}//${url.host}`;
   // lookup ALPN cache
-  let protocol = ctx.alpnCache.get(url.origin);
+  let protocol = ctx.alpnCache.get(origin);
   if (protocol) {
     return { protocol };
   }
@@ -122,13 +124,13 @@ const determineProtocol = async (ctx, url, signal) => {
       // for simplicity we assume unencrypted HTTP to be HTTP/1.1
       // (although, theoretically, it could also be plain-text HTTP/2 (h2c))
       protocol = ALPN_HTTP1_1;
-      ctx.alpnCache.set(url.origin, protocol);
+      ctx.alpnCache.set(origin, protocol);
       return { protocol };
 
     case 'http2:':
       // HTTP/2 over TCP (h2c)
       protocol = ALPN_HTTP2C;
-      ctx.alpnCache.set(url.origin, protocol);
+      ctx.alpnCache.set(origin, protocol);
       return { protocol };
 
     case 'https:':
@@ -163,7 +165,7 @@ const determineProtocol = async (ctx, url, signal) => {
   if (!protocol) {
     protocol = ALPN_HTTP1_1; // default fallback
   }
-  ctx.alpnCache.set(url.origin, protocol);
+  ctx.alpnCache.set(origin, protocol);
   return { protocol, socket };
 };
 
@@ -177,7 +179,7 @@ const sanitizeHeaders = (headers) => {
 };
 
 const request = async (ctx, uri, options) => {
-  const url = typeof uri === 'string' ? new URL(uri) : uri;
+  const url = new URL(uri);
 
   const opts = { ...DEFAULT_OPTIONS, ...(options || {}) };
 
@@ -232,8 +234,12 @@ const request = async (ctx, uri, options) => {
       return h2.request(ctx, url, socket ? { ...opts, socket } : opts);
     case ALPN_HTTP2C:
       // plain-text HTTP/2 (h2c)
-      url.protocol = 'http:';
-      return h2.request(ctx, url, socket ? { ...opts, socket } : opts);
+      // url.protocol = 'http:'; => doesn't work ?!
+      return h2.request(
+        ctx,
+        new URL(`http://${url.host}${url.pathname}${url.hash}${url.search}`),
+        socket ? { ...opts, socket } : opts,
+      );
     case ALPN_HTTP1_0:
     case ALPN_HTTP1_1:
       return h1.request(ctx, url, socket ? { ...opts, socket } : opts);
