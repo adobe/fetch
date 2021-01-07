@@ -64,6 +64,20 @@ describe('Core Tests', () => {
     assert.strictEqual(resp.httpVersionMajor, 2);
   });
 
+  it('throws on unsupported protocol', async () => {
+    await assert.rejects(defaultCtx.request('ftp://httpbin.org/'), 'TypeError');
+  });
+
+  it('unsupported method', async () => {
+    const resp = await defaultCtx.request('https://httpbin.org/status/200', { method: 'BOMB' });
+    assert.strictEqual(resp.statusCode, 405);
+  });
+
+  it('accecpts URL object', async () => {
+    const resp = await defaultCtx.request(new URL('https://httpbin.org/status/200'));
+    assert.strictEqual(resp.statusCode, 200);
+  });
+
   it('supports binary response body (Stream)', async () => {
     const dataLen = 64 * 1024; // httpbin.org/stream-bytes/{n} has a limit of 100kb ...
     const contentType = 'application/octet-stream';

@@ -8,7 +8,6 @@
     "test-ci": "nyc --reporter=text --reporter=lcov --check-coverage --branches 90 --statements 90 --lines 90 mocha --recursive --reporter xunit --reporter-options output=./junit/test-results.xml && codecov",
     "lint": "./node_modules/.bin/eslint .",
     "semantic-release": "semantic-release",
-    "docs": "npx jsdoc2md -c .jsdoc.json --files 'src/*.js'  > docs/API.md",
     "commit": "git-cz"
   },
   "engines": {
@@ -52,7 +51,6 @@
     "eslint-plugin-import": "2.22.1",
     "is-stream": "2.0.0",
     "istanbul": "1.1.0-alpha.1",
-    "jsdoc-to-markdown": "6.0.1",
     "junit-report-builder": "2.1.0",
     "lint-staged": "10.5.3",
     "mocha": "8.2.1",

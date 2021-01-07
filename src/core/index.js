@@ -39,6 +39,9 @@ class RequestContext {
        * Requests a resource from the network. Returns a Promise which resolves once
        * the response is available.
        *
+       * @param {string} url
+       * @param {Object} options
+       *
        * @throws RequestAbortedError if the request is aborted via an AbortSignal
        */
       request: async (url, options) => this.request(url, options),
