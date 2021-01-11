@@ -247,7 +247,7 @@ const request = async (ctx, uri, options) => {
       return h1.request(ctx, url, socket ? { ...opts, socket } : opts);
     /* istanbul ignore next */
     default:
-      // dead branch since; only here to make eslint stop complaining
+      // dead branch: only here to make eslint stop complaining
       throw new TypeError(`unsupported protocol: ${protocol}`);
   }
 };

@@ -26,10 +26,10 @@ const { AbortController } = require('../../src/fetch/abort');
 const { context, ALPN_HTTP1_1 } = require('../../src/core');
 const { RequestAbortedError } = require('../../src/core/errors');
 
-const streamFinished = promisify(finished);
-
 const WOKEUP = 'woke up!';
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms, WOKEUP));
+
+const streamFinished = promisify(finished);
 
 const readStream = async (stream) => {
   const out = new WritableStreamBuffer();

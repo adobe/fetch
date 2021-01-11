@@ -135,12 +135,14 @@ const h1Request = async (ctx, url, options) => {
     const onAbortSignal = () => {
       // deregister from signal
       signal.removeEventListener('abort', onAbortSignal);
+      /* istanbul ignore next */
       if (socket && !socket.inUse) {
         // we have no use for the passed socket
         debug(`discarding redundant socket used for ALPN: #${socket.id} ${socket.servername}`);
         socket.destroy();
       }
       reject(new RequestAbortedError());
+      /* istanbul ignore else */
       if (req) {
         req.abort();
       }
@@ -158,6 +160,7 @@ const h1Request = async (ctx, url, options) => {
       if (signal) {
         signal.removeEventListener('abort', onAbortSignal);
       }
+      /* istanbul ignore next */
       if (socket && !socket.inUse) {
         // we have no use for the passed socket
         debug(`discarding redundant socket used for ALPN: #${socket.id} ${socket.servername}`);
@@ -167,9 +170,11 @@ const h1Request = async (ctx, url, options) => {
     });
     req.once('error', (err) => {
       // error occured during the request
+      /* istanbul ignore else */
       if (signal) {
         signal.removeEventListener('abort', onAbortSignal);
       }
+      /* istanbul ignore next */
       if (socket && !socket.inUse) {
         // we have no use for the passed socket
         debug(`discarding redundant socket used for ALPN: #${socket.id} ${socket.servername}`);
