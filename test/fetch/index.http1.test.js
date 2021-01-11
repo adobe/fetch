@@ -23,87 +23,111 @@ const {
   ALPN_HTTP1_1,
 } = require('../../src/fetch');
 
-describe('HTTP/1.x-specific Fetch Tests', () => {
-  it('defaults to \'no keep-alive\'', async () => {
-    const { fetch, reset } = context({ alpnProtocols: [ALPN_HTTP1_1] });
-    try {
-      const resp = await fetch('https://httpbin.org/status/200');
-      assert.strictEqual(resp.status, 200);
-      assert.strictEqual(resp.httpVersion, '1.1');
-      assert.strictEqual(resp.headers.get('connection'), 'close');
-    } finally {
-      await reset();
-    }
-  });
+const testParams = [
+  {
+    name: 'plain HTTP',
+    protocol: 'http',
+  },
+  {
+    name: 'secure HTTP',
+    protocol: 'https',
+  },
+];
 
-  it('supports keep-alive', async () => {
-    const { fetch, reset } = context({ alpnProtocols: [ALPN_HTTP1_1], h1: { keepAlive: true } });
-    try {
-      const resp = await fetch('https://httpbin.org/status/200');
-      assert.strictEqual(resp.status, 200);
-      assert.strictEqual(resp.httpVersion, '1.1');
-    } finally {
-      await reset();
-    }
-  });
+testParams.forEach((params) => {
+  const {
+    name,
+    protocol,
+  } = params;
 
-  it('supports HTTP/1.0', async () => {
-    const { fetch, reset } = context({ alpnProtocols: [ALPN_HTTP1_0] });
-    try {
-      const resp = await fetch('https://httpbin.org/status/200');
-      assert.strictEqual(resp.status, 200);
-      assert(['1.0', '1.1'].includes(resp.httpVersion));
-    } finally {
-      await reset();
-    }
-  });
+  describe(`HTTP/1.x-specific Fetch Tests (${name})`, () => {
+    it(`defaults to 'no keep-alive' (${name})`, async () => {
+      const { fetch, reset } = context({ alpnProtocols: [ALPN_HTTP1_1] });
+      try {
+        const resp = await fetch(`${protocol}://httpbin.org/status/200`);
+        assert.strictEqual(resp.status, 200);
+        assert.strictEqual(resp.httpVersion, '1.1');
+        assert.strictEqual(resp.headers.get('connection'), 'close');
+      } finally {
+        await reset();
+      }
+    });
 
-  it('concurrent HTTP/1.1 requests to same origin', async function test() {
-    this.timeout(5000);
+    it(`supports keep-alive (${name})`, async () => {
+      const { fetch, reset } = context({ alpnProtocols: [ALPN_HTTP1_1], h1: { keepAlive: true } });
+      try {
+        let resp = await fetch(`${protocol}://httpbin.org/status/200`, { cache: 'no-store' });
+        assert.strictEqual(resp.status, 200);
+        assert.strictEqual(resp.httpVersion, '1.1');
+        assert.strictEqual(resp.headers.get('connection'), 'keep-alive');
+        // re-fetch (force reuse of custom agent => coverage)
+        resp = await fetch(`${protocol}://httpbin.org/status/200`, { cache: 'no-store' });
+        assert.strictEqual(resp.status, 200);
+        assert.strictEqual(resp.httpVersion, '1.1');
+        assert.strictEqual(resp.headers.get('connection'), 'keep-alive');
+      } finally {
+        await reset();
+      }
+    });
 
-    const { fetch, reset } = context({ alpnProtocols: [ALPN_HTTP1_1] });
-    const N = 500; // # of parallel requests
-    const TEST_URL = 'https://httpbin.org/bytes/';
-    // generete array of 'randomized' urls
-    const urls = Array.from({ length: N }, () => Math.floor(Math.random() * N)).map((num) => `${TEST_URL}${num}`);
+    it(`supports HTTP/1.0 (${name})`, async () => {
+      const { fetch, reset } = context({ alpnProtocols: [ALPN_HTTP1_0] });
+      try {
+        const resp = await fetch(`${protocol}://httpbin.org/status/200`);
+        assert.strictEqual(resp.status, 200);
+        assert(['1.0', '1.1'].includes(resp.httpVersion));
+      } finally {
+        await reset();
+      }
+    });
 
-    let responses;
-    try {
-      // send requests
-      responses = await Promise.all(urls.map((url) => fetch(url)));
-      // read bodies
-      await Promise.all(responses.map((resp) => resp.text()));
-    } finally {
-      await reset();
-    }
-    const ok = responses.filter((res) => res.ok && res.httpVersion === '1.1');
-    assert.strictEqual(ok.length, N);
-  });
+    it(`concurrent HTTP/1.1 requests to same origin (${name})`, async function test() {
+      this.timeout(5000);
 
-  it('handles concurrent HTTP/1.1 requests to subdomains sharing the same IP address (using wildcard SAN cert)', async () => {
-    const { fetch, reset } = context({ alpnProtocols: [ALPN_HTTP1_1] });
+      const { fetch, reset } = context({ alpnProtocols: [ALPN_HTTP1_1] });
+      const N = 500; // # of parallel requests
+      const TEST_URL = `${protocol}://httpbin.org/bytes/`;
+      // generete array of 'randomized' urls
+      const urls = Array.from({ length: N }, () => Math.floor(Math.random() * N)).map((num) => `${TEST_URL}${num}`);
 
-    const doFetch = async (url) => {
-      const res = await fetch(url);
-      assert.strictEqual(res.httpVersion, '1.1');
-      const data = await res.text();
-      return crypto.createHash('md5').update(data).digest().toString('hex');
-    };
+      let responses;
+      try {
+        // send requests
+        responses = await Promise.all(urls.map((url) => fetch(url)));
+        // read bodies
+        await Promise.all(responses.map((resp) => resp.text()));
+      } finally {
+        await reset();
+      }
+      const ok = responses.filter((res) => res.ok && res.httpVersion === '1.1');
+      assert.strictEqual(ok.length, N);
+    });
 
-    let results;
-    try {
-      results = await Promise.all([
-        doFetch('https://en.wikipedia.org/wiki/42'),
-        doFetch('https://fr.wikipedia.org/wiki/42'),
-        doFetch('https://it.wikipedia.org/wiki/42'),
-      ]);
-    } finally {
-      await reset();
-    }
+    it(`handles concurrent HTTP/1.1 requests to subdomains sharing the same IP address (${name})`, async () => {
+      const { fetch, reset } = context({ alpnProtocols: [ALPN_HTTP1_1] });
 
-    assert.strictEqual(results.length, 3);
-    assert.notStrictEqual(results[0], results[1]);
-    assert.notStrictEqual(results[0], results[2]);
-    assert.notStrictEqual(results[1], results[2]);
+      const doFetch = async (url) => {
+        const res = await fetch(url);
+        assert.strictEqual(res.httpVersion, '1.1');
+        const data = await res.text();
+        return crypto.createHash('md5').update(data).digest().toString('hex');
+      };
+
+      let results;
+      try {
+        results = await Promise.all([
+          doFetch(`${protocol}://en.wikipedia.org/wiki/42`),
+          doFetch(`${protocol}://fr.wikipedia.org/wiki/42`),
+          doFetch(`${protocol}://it.wikipedia.org/wiki/42`),
+        ]);
+      } finally {
+        await reset();
+      }
+
+      assert.strictEqual(results.length, 3);
+      assert.notStrictEqual(results[0], results[1]);
+      assert.notStrictEqual(results[0], results[2]);
+      assert.notStrictEqual(results[1], results[2]);
+    });
   });
 });
