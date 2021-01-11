@@ -184,6 +184,7 @@ const request = async (ctx, uri, options) => {
   const opts = { ...DEFAULT_OPTIONS, ...(options || {}) };
 
   // sanitze method name
+  /* istanbul ignore else */
   if (typeof opts.method === 'string') {
     opts.method = opts.method.toUpperCase();
   }
@@ -194,6 +195,7 @@ const request = async (ctx, uri, options) => {
     opts.headers.host = url.host;
   }
   // User-Agent header
+  /* istanbul ignore else */
   if (ctx.userAgent) {
     if (!opts.headers['user-agent']) {
       opts.headers['user-agent'] = ctx.userAgent;
@@ -201,11 +203,11 @@ const request = async (ctx, uri, options) => {
   }
   // some header magic
   if (opts.body instanceof URLSearchParams) {
-    opts.headers['content-type'] = 'application/x-www-form-urlencoded;charset=UTF-8';
+    opts.headers['content-type'] = 'application/x-www-form-urlencoded; charset=utf-8';
     opts.body = opts.body.toString();
   } else if (typeof opts.body === 'string' || opts.body instanceof String) {
     if (!opts.headers['content-type']) {
-      opts.headers['content-type'] = 'text/plain;charset=UTF-8';
+      opts.headers['content-type'] = 'text/plain; charset=utf-8';
     }
   } else if (isPlainObject(opts.body)) {
     opts.body = JSON.stringify(opts.body);
@@ -238,9 +240,9 @@ const request = async (ctx, uri, options) => {
       return h2.request(
         ctx,
         new URL(`http://${url.host}${url.pathname}${url.hash}${url.search}`),
-        socket ? { ...opts, socket } : opts,
+        socket ? /* istanbul ignore next */ { ...opts, socket } : opts,
       );
-    case ALPN_HTTP1_0:
+    /* istanbul ignore next */ case ALPN_HTTP1_0:
     case ALPN_HTTP1_1:
       return h1.request(ctx, url, socket ? { ...opts, socket } : opts);
     /* istanbul ignore next */

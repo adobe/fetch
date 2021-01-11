@@ -38,11 +38,11 @@ const guessContentType = (body) => {
   }
 
   if (typeof body === 'string') {
-    return 'text/plain;charset=UTF-8';
+    return 'text/plain; charset=utf-8';
   }
 
   if (body instanceof URLSearchParams) {
-    return 'application/x-www-form-urlencoded;charset=UTF-8';
+    return 'application/x-www-form-urlencoded; charset=utf-8';
   }
 
   if (body instanceof FormData) {
@@ -59,7 +59,7 @@ const guessContentType = (body) => {
   }
 
   // fallback: body is coerced to string
-  return 'text/plain;charset=UTF-8';
+  return 'text/plain; charset=utf-8';
 };
 
 /**

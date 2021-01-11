@@ -87,6 +87,30 @@ describe('Core Tests', () => {
     assert.strictEqual(buf.length, dataLen);
   });
 
+  it('supports gzip/deflate/br content encoding (default)', async () => {
+    const resp = await defaultCtx.request('https://example.com/');
+    assert.strictEqual(resp.statusCode, 200);
+    assert.strictEqual(resp.headers['content-encoding'], 'gzip');
+  });
+
+  it('supports disabling gzip/deflate/br content encoding', async () => {
+    const resp = await defaultCtx.request('https://example.com/', { compress: false });
+    assert.strictEqual(resp.statusCode, 200);
+    assert.strictEqual(resp.headers['content-encoding'], undefined);
+  });
+
+  it('does not overwrite accept-encoding header', async () => {
+    const acceptEncoding = 'deflate';
+    const headers = { 'accept-encoding': acceptEncoding };
+    const resp = await defaultCtx.request('https://httpbin.org/headers', { headers });
+    assert.strictEqual(resp.statusCode, 200);
+    assert.strictEqual(resp.headers['content-type'], 'application/json');
+
+    const buf = await readStream(resp.readable);
+    const json = JSON.parse(buf);
+    assert.strictEqual(json.headers['Accept-Encoding'], acceptEncoding);
+  });
+
   it('creating custom context works', async () => {
     const customCtx = context();
     try {
@@ -177,7 +201,7 @@ describe('Core Tests', () => {
     assert((ts1 - ts0) < 1000 * 1.1);
   });
 
-  it('overriding user-agent works', async () => {
+  it('overriding user-agent works (context)', async () => {
     const customUserAgent = 'custom-agent';
     const customCtx = context({
       userAgent: customUserAgent,
@@ -193,6 +217,20 @@ describe('Core Tests', () => {
     } finally {
       customCtx.reset();
     }
+  });
+
+  it('overriding user-agent works (header)', async () => {
+    const customUserAgent = 'custom-agent';
+    const opts = {
+      headers: { 'user-agent': customUserAgent },
+    };
+    const resp = await defaultCtx.request('https://httpbin.org/user-agent', opts);
+    assert.strictEqual(resp.statusCode, 200);
+    assert.strictEqual(resp.headers['content-type'], 'application/json');
+
+    const buf = await readStream(resp.readable);
+    const json = JSON.parse(buf);
+    assert.strictEqual(json['user-agent'], customUserAgent);
   });
 
   it('forcing HTTP/1.1 works', async () => {
@@ -249,6 +287,21 @@ describe('Core Tests', () => {
     assert.deepStrictEqual(jsonResponseBody.json, body);
   });
 
+  it('supports json POST (override content-type)', async () => {
+    const method = 'POST';
+    const body = { foo: 'bar' };
+    const contentType = 'application/x-javascript';
+    const headers = { 'content-type': contentType };
+    const resp = await defaultCtx.request('https://httpbin.org/post', { method, body, headers });
+    assert.strictEqual(resp.statusCode, 200);
+    assert.strictEqual(resp.headers['content-type'], 'application/json');
+    const buf = await readStream(resp.readable);
+    const jsonResponseBody = JSON.parse(buf);
+    assert(typeof jsonResponseBody === 'object');
+    assert.strictEqual(jsonResponseBody.headers['Content-Type'], contentType);
+    assert.deepStrictEqual(jsonResponseBody.json, body);
+  });
+
   it('supports text body', async () => {
     const method = 'POST';
     const body = 'hello, world!';
@@ -258,7 +311,22 @@ describe('Core Tests', () => {
     const buf = await readStream(resp.readable);
     const jsonResponseBody = JSON.parse(buf);
     assert(typeof jsonResponseBody === 'object');
-    assert.strictEqual(jsonResponseBody.headers['Content-Type'], 'text/plain;charset=UTF-8');
+    assert.strictEqual(jsonResponseBody.headers['Content-Type'], 'text/plain; charset=utf-8');
+    assert.deepStrictEqual(jsonResponseBody.data, body);
+  });
+
+  it('supports text body (html)', async () => {
+    const method = 'POST';
+    const body = '<h1>hello, world!</h1>';
+    const contentType = 'text/html; charset=utf-8';
+    const headers = { 'content-type': contentType };
+    const resp = await defaultCtx.request('https://httpbin.org/post', { method, body, headers });
+    assert.strictEqual(resp.statusCode, 200);
+    assert.strictEqual(resp.headers['content-type'], 'application/json');
+    const buf = await readStream(resp.readable);
+    const jsonResponseBody = JSON.parse(buf);
+    assert(typeof jsonResponseBody === 'object');
+    assert.strictEqual(jsonResponseBody.headers['Content-Type'], contentType);
     assert.deepStrictEqual(jsonResponseBody.data, body);
   });
 
@@ -287,7 +355,7 @@ describe('Core Tests', () => {
     const buf = await readStream(resp.readable);
     const jsonResponseBody = JSON.parse(buf);
     assert(typeof jsonResponseBody === 'object');
-    assert.strictEqual(jsonResponseBody.headers['Content-Type'], 'application/x-www-form-urlencoded;charset=UTF-8');
+    assert.strictEqual(jsonResponseBody.headers['Content-Type'], 'application/x-www-form-urlencoded; charset=utf-8');
     assert.deepStrictEqual(jsonResponseBody.form, params);
   });
 

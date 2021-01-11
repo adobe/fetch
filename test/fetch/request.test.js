@@ -261,7 +261,7 @@ describe('Request Tests', () => {
     const method = 'PUT';
     const body = true;
     const req = new Request(BASE_URL, { method, body });
-    expect(req.headers.get('content-type')).to.equal('text/plain;charset=UTF-8');
+    expect(req.headers.get('content-type')).to.equal('text/plain; charset=utf-8');
     return req.text().then((result) => {
       expect(result).to.equal('true');
     });

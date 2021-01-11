@@ -19,15 +19,17 @@ const crypto = require('crypto');
 
 const {
   context,
+  ALPN_HTTP1_0,
   ALPN_HTTP1_1,
 } = require('../../src/fetch');
 
-describe('HTTP/1.1-specific Fetch Tests', () => {
+describe('HTTP/1.x-specific Fetch Tests', () => {
   it('defaults to \'no keep-alive\'', async () => {
     const { fetch, reset } = context({ alpnProtocols: [ALPN_HTTP1_1] });
     try {
       const resp = await fetch('https://httpbin.org/status/200');
       assert.strictEqual(resp.status, 200);
+      assert.strictEqual(resp.httpVersion, '1.1');
       assert.strictEqual(resp.headers.get('connection'), 'close');
     } finally {
       await reset();
@@ -39,7 +41,18 @@ describe('HTTP/1.1-specific Fetch Tests', () => {
     try {
       const resp = await fetch('https://httpbin.org/status/200');
       assert.strictEqual(resp.status, 200);
-      assert.strictEqual(resp.headers.get('connection'), 'keep-alive');
+      assert.strictEqual(resp.httpVersion, '1.1');
+    } finally {
+      await reset();
+    }
+  });
+
+  it('supports HTTP/1.0', async () => {
+    const { fetch, reset } = context({ alpnProtocols: [ALPN_HTTP1_0] });
+    try {
+      const resp = await fetch('https://httpbin.org/status/200');
+      assert.strictEqual(resp.status, 200);
+      assert(['1.0', '1.1'].includes(resp.httpVersion));
     } finally {
       await reset();
     }
