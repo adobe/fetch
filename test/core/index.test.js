@@ -470,8 +470,6 @@ describe('Core Tests', () => {
         resolve({ url, headers, response });
       };
       // automatically close idle pushed streams after 100ms
-      // without this setting the test will timeout after 2000ms while
-      // waiting on customCtx.reset()
       customCtx = context({ h2: { pushHandler, pushedStreamIdleTimeout: 100 } });
     });
 
@@ -484,11 +482,34 @@ describe('Core Tests', () => {
       const buf = await readStream(resp.readable);
       assert.strictEqual(+resp.headers['content-length'], buf.length);
       // pushed resource
-      const { url, response } = await pushedResource;
+      const { url, response: pushedResp } = await pushedResource;
       assert.strictEqual(url, 'https://nghttp2.org/stylesheets/screen.css');
-      assert.strictEqual(response.statusCode, 200);
-      assert.strictEqual(response.headers['content-type'], 'text/css');
-      // don't consume pushed stream in order to trigger the timeout for idle pushed streams
+      assert.strictEqual(pushedResp.statusCode, 200);
+      assert.strictEqual(pushedResp.headers['content-type'], 'text/css');
+      // verify pushed response stream is ready to be consumed
+      assert.strictEqual(pushedResp.readable.closed, false);
+      // wait some time in order to trigger the timeout for idle pushed streams
+      await sleep(250);
+      // verify pushed response stream has been discarded (due to idle session timeout)
+      assert.strictEqual(pushedResp.readable.closed, true);
+    } finally {
+      await customCtx.reset();
+    }
+  });
+
+  it('supports timeout for idle HTTP/2 session', async () => {
+    // automatically close idle session after 100ms
+    const customCtx = context({ h2: { idleSessionTimeout: 100 } });
+    try {
+      const resp = await customCtx.request('https://www.nghttp2.org/httpbin/status/200');
+      assert.strictEqual(resp.statusCode, 200);
+      assert.strictEqual(resp.httpVersionMajor, 2);
+      // verify response stream is ready to be consumed
+      assert.strictEqual(resp.readable.readable, true);
+      // wait some time in order to trigger the timeout for idle session
+      await sleep(150);
+      // verify response stream has been discarded (due to idle session timeout)
+      assert.strictEqual(resp.readable.readable, false);
     } finally {
       await customCtx.reset();
     }

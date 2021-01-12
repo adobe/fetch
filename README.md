@@ -89,7 +89,7 @@ $ npm install @adobe/helix-fetch
 
 ### Specify a timeout for a `fetch` operation
 
-Using `signalTimeout(ms)` extension:
+Using `timeoutSignal(ms)` extension:
 
 ```javascript
   const { fetch, timeoutSignal, AbortError } = require('@adobe/helix-fetch');

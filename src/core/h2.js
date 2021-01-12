@@ -46,7 +46,9 @@ const resetContext = async ({ h2 }) => {
   ));
 };
 
-const createResponse = (headers, clientHttp2Stream, onError = () => {}) => {
+const createResponse = (
+  headers, clientHttp2Stream, /* istanbul ignore next */ onError = () => {},
+) => {
   const hdrs = { ...headers };
   const statusCode = hdrs[':status'];
   delete hdrs[':status'];
@@ -116,7 +118,7 @@ const request = async (ctx, url, options) => {
   const {
     origin, pathname, search, hash,
   } = url;
-  const path = `${pathname || '/'}${search}${hash}`;
+  const path = `${pathname}${search}${hash}`;
 
   const {
     options: {
@@ -135,7 +137,7 @@ const request = async (ctx, url, options) => {
   const opts = { ...options };
   const {
     method,
-    headers = {},
+    headers,
     socket,
     body,
   } = opts;
@@ -190,7 +192,7 @@ const request = async (ctx, url, options) => {
           delete sessionCache[origin];
         }
       });
-      session.once('error', (err) => {
+      session.once('error', /* istanbul ignore next */ (err) => {
         debug(`session ${origin} encountered error: ${err}`);
         if (sessionCache[origin] === session) {
           // FIXME: redundant because 'close' event will follow?
@@ -210,6 +212,7 @@ const request = async (ctx, url, options) => {
       });
     } else {
       // we have a cached session
+      /* istanbul ignore if */
       // eslint-disable-next-line no-lonely-if
       if (socket && socket.id !== session.socket.id) {
         // we have no use for the passed socket
@@ -239,7 +242,7 @@ const request = async (ctx, url, options) => {
       signal.addEventListener('abort', onAbortSignal);
     }
 
-    const onSessionError = (err) => {
+    const onSessionError = /* istanbul ignore next */ (err) => {
       debug(`session ${origin} encountered error during ${opts.method} ${url.href}: ${err}`);
       reject(err);
     };
@@ -269,11 +272,11 @@ const request = async (ctx, url, options) => {
         reject(err);
       }
     });
-    req.once('frameError', (type, code, id) => {
+    req.once('frameError', /* istanbul ignore next */ (type, code, id) => {
       session.off('error', onSessionError);
       debug(`encountered frameError during ${opts.method} ${url.href}: type: ${type}, code: ${code}, id: ${id}`);
     });
-    req.on('push', (hdrs, flags) => {
+    req.on('push', /* istanbul ignore next */ (hdrs, flags) => {
       debug(`received 'push' event: headers: ${JSON.stringify(hdrs)}, flags: ${flags}`);
     });
     // send request body?
