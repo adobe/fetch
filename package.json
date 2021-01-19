@@ -37,9 +37,9 @@
     "@semantic-release/commit-analyzer": "8.0.1",
     "@semantic-release/git": "9.0.0",
     "@semantic-release/github": "7.2.0",
-    "@semantic-release/npm": "7.0.9",
+    "@semantic-release/npm": "7.0.10",
     "@semantic-release/release-notes-generator": "9.0.1",
-    "@types/node": "14.14.2",
+    "@types/node": "14.14.21",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
     "chai-iterator": "3.0.2",
@@ -57,9 +57,9 @@
     "nock": "13.0.5",
     "nyc": "15.1.0",
     "parse-cache-control": "1.0.1",
-    "pem": "^1.14.4",
+    "pem": "1.14.4",
     "semantic-release": "17.3.3",
-    "sinon": "^9.2.1",
+    "sinon": "9.2.1",
     "stream-buffers": "3.0.2"
   },
   "lint-staged": {
