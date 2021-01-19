@@ -7,7 +7,8 @@
 * `Response.body` returns a Node.js [Readable stream](https://nodejs.org/api/stream.html#stream_readable_streams).
 * `Response.blob()` is not implemented. Use `Response.buffer()` instead.
 * `Response.formData()` is not implemented.
-* The following `fetch()` options are ignored due to the nature of Node.js and since `helix-fetch` doesn't have the concept of web pages: `mode`, `referrer`, `referrerPolicy` `integrity`, `credentials` and `keepalive`.
+* The following `fetch()` options are ignored due to the nature of Node.js and since `helix-fetch` doesn't have the concept of web pages: `mode`, `referrer`, `referrerPolicy` `integrity` and `credentials`.
+* The `fetch()` option `keepalive` is not supported. But you can use the `h1.keepAlive` context option, as demonstrated [here](#http11-keep-alive).
 
 `helix-fetch` also supports the following extensions:
 
@@ -45,6 +46,20 @@ $ npm install @adobe/helix-fetch
 ```
 
 ## Usage Examples
+
+[Access Response Headers and other Meta data](#access-response-headers-and-other-meta-data)
+[Fetch JSON](#fetch-json)
+[Fetch text data](#fetch-text-data)
+[Fetch binary data](#fetch-binary-data)
+[Specify a timeout for a fetch operation](#specify-a-timeout-for-a-fetch-operation)
+[Stream an image](#stream-an-image)
+[Post JSON](#post-json)
+[Post JPEG image](#post-jpeg-image)
+[Post form data](#post-form-data)
+[GET with query parameters object](#get-with-query-parameters-object)
+[HTTP/2 Server Push](#http2-server-push)
+[HTTP/1.1 Keep-Alive](#http11-keep-alive)
+[Self-signed Certificates](#self-signed-certificates)
 
 ### Access Response Headers and other Meta data
 
@@ -209,6 +224,28 @@ You can however add a listener which will be notified on every pushed (and cache
 
   const resp = await fetch('https://nghttp2.org');
   console.log(`Http version: ${resp.httpVersion}`);
+```
+
+### HTTP/1.1 Keep-Alive
+
+```javascript
+const { fetch } = require('@adobe/helix-fetch').context({
+  alpnProtocols: ['http/1.1'], // make sure we're talking HTTP/1.1 with the server
+  h1: { // http[s].Agent options
+    keepAlive: true
+  }
+});
+
+const resp = await fetch('https://httpbin.org/status/200');
+console.log(`Connection: ${resp.headers.get('connection')}`); // -> keep-alive
+```
+
+### Self-signed Certificates
+
+```javascript
+const { fetch } = require('@adobe/helix-fetch').context({ rejectUnauthorized: false });
+
+const resp = await fetch('https://localhost:8080/');  // a server using a self-signed certificate
 ```
 
 ### Customization
