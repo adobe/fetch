@@ -17,6 +17,35 @@
 * The `Response` object has an extra property `httpVersion` which is one of `'1.0'`, `'1.1'` or `'2.0'` (numbers), depending on what was negotiated with the server.
 * The `Response` object has an extra property `fromCache` which determines whether the response was retrieved from cache.
 * `Response.headers.plain()` returns the headers as a plain object.
+  
+## TOC
+
+- [Helix Fetch Library](#helix-fetch-library)
+  - [TOC](#toc)
+  - [Features](#features)
+  - [Status](#status)
+  - [Installation](#installation)
+  - [Usage Examples](#usage-examples)
+    - [Access Response Headers and other Meta data](#access-response-headers-and-other-meta-data)
+    - [Fetch JSON](#fetch-json)
+    - [Fetch text data](#fetch-text-data)
+    - [Fetch binary data](#fetch-binary-data)
+    - [Specify a timeout for a `fetch` operation](#specify-a-timeout-for-a-fetch-operation)
+    - [Stream an image](#stream-an-image)
+    - [Post JSON](#post-json)
+    - [Post JPEG image](#post-jpeg-image)
+    - [Post form data](#post-form-data)
+    - [GET with query parameters object](#get-with-query-parameters-object)
+    - [HTTP/2 Server Push](#http2-server-push)
+    - [Force HTTP/1(.1) protocol](#force-http11-protocol)
+    - [HTTP/1.1 Keep-Alive](#http11-keep-alive)
+    - [Self-signed Certificates](#self-signed-certificates)
+    - [Customization](#customization)
+    - [Misc](#misc)
+  - [Development](#development)
+    - [Build](#build)
+    - [Test](#test)
+    - [Lint](#lint)
 
 ## Features
 
@@ -46,20 +75,6 @@ $ npm install @adobe/helix-fetch
 ```
 
 ## Usage Examples
-
-[Access Response Headers and other Meta data](#access-response-headers-and-other-meta-data)
-[Fetch JSON](#fetch-json)
-[Fetch text data](#fetch-text-data)
-[Fetch binary data](#fetch-binary-data)
-[Specify a timeout for a fetch operation](#specify-a-timeout-for-a-fetch-operation)
-[Stream an image](#stream-an-image)
-[Post JSON](#post-json)
-[Post JPEG image](#post-jpeg-image)
-[Post form data](#post-form-data)
-[GET with query parameters object](#get-with-query-parameters-object)
-[HTTP/2 Server Push](#http2-server-push)
-[HTTP/1.1 Keep-Alive](#http11-keep-alive)
-[Self-signed Certificates](#self-signed-certificates)
 
 ### Access Response Headers and other Meta data
 
@@ -226,11 +241,22 @@ You can however add a listener which will be notified on every pushed (and cache
   console.log(`Http version: ${resp.httpVersion}`);
 ```
 
+### Force HTTP/1(.1) protocol
+
+```javascript
+  const { fetch, ALPN_HTTP1_1 } = require('@adobe/helix-fetch').context({
+    alpnProtocols: [ALPN_HTTP1_1],
+  });
+
+  const resp = await fetch('https://nghttp2.org');
+  console.log(`Http version: ${resp.httpVersion}`);
+```
+
 ### HTTP/1.1 Keep-Alive
 
 ```javascript
-const { fetch } = require('@adobe/helix-fetch').context({
-  alpnProtocols: ['http/1.1'], // make sure we're talking HTTP/1.1 with the server
+const { fetch, ALPN_HTTP1_1 } = require('@adobe/helix-fetch').context({
+  alpnProtocols: [ALPN_HTTP1_1], // make sure we're talking HTTP/1.1 to the server
   h1: { // http[s].Agent options
     keepAlive: true
   }
@@ -260,17 +286,6 @@ Set cache size limit (Default: 100 \* 1024 \* 1024 bytes, i.e. 100mb):
   let resp = await fetch('http://httpbin.org/bytes/60000'); // ~60kb response
   resp = await fetch('http://httpbin.org/bytes/50000'); // ~50kb response
   console.log(cacheStats());
-```
-
-Force HTTP/1(.1) protocol:
-
-```javascript
-  const { fetch, ALPN_HTTP1_1 } = require('@adobe/helix-fetch').context({
-    alpnProtocols: [ALPN_HTTP1_1],
-  });
-
-  const resp = await fetch('https://nghttp2.org');
-  console.log(`Http version: ${resp.httpVersion}`);
 ```
 
 ### Misc
