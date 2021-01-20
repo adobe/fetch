@@ -1,6 +1,50 @@
-# Helix Fetch Library
+<div align="center">
+  <img src="banner.jpeg" alt="Helix Fetch"/>
+  <br>
+  <p>Light-weight <a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API">Fetch API</a> implementation transparently supporting both <b>HTTP/1(.1)</b> and <b>HTTP/2</b></p>
+  <a href="https://codecov.io/gh/adobe/helix-fetch"><img src="https://img.shields.io/codecov/c/github/adobe/helix-fetch.svg" alt="codecov"></a>
+  <a href="https://circleci.com/gh/adobe/helix-fetch"><img src="https://img.shields.io/circleci/project/github/adobe/helix-fetch.svg" alt="CircleCI"></a>
+  <a href="https://github.com/adobe/helix-fetch/blob/main/LICENSE.txt"><img src="https://img.shields.io/github/license/adobe/helix-fetch.svg" alt="GitHub license"></a>
+  <a href="https://github.com/adobe/helix-fetch/issues"><img src="https://img.shields.io/github/issues/adobe/helix-fetch.svg" alt="GitHub issues"></a>
+  <a href="https://lgtm.com/projects/g/adobe/helix-fetch"><img src="https://img.shields.io/lgtm/grade/javascript/g/adobe/helix-fetch.svg?logo=lgtm&logoWidth=18" alt="LGTM Code Quality Grade: JavaScript"></a>
+  <a href="https://renovatebot.com/"><img src="https://img.shields.io/badge/renovate-enabled-brightgreen.svg" alt="Renovate enabled"></a>
+  <a href="https://github.com/semantic-release/semantic-release"><img src="https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg" alt="semantic-release"></a>
+	<a href="https://packagephobia.now.sh/result?p=@adobe/helix-fetch"><img src="https://badgen.net/packagephobia/install/@adobe/helix-fetch" alt="Install size"></a>
+  <a href="https://www.npmjs.com/package/@adobe/helix-fetch"><img src="https://img.shields.io/npm/v/@adobe/helix-fetch" alt="Current version"></a>
+</div>
 
-> Lightweight Fetch implementation transparently supporting both HTTP/1(.1) and HTTP/2.
+---
+
+<!-- TOC -->
+- [About](#about)
+- [Features](#features)
+- [Installation](#installation)
+- [Usage Examples](#usage-examples)
+  - [Access Response Headers and other Meta data](#access-response-headers-and-other-meta-data)
+  - [Fetch JSON](#fetch-json)
+  - [Fetch text data](#fetch-text-data)
+  - [Fetch binary data](#fetch-binary-data)
+  - [Specify a timeout for a `fetch` operation](#specify-a-timeout-for-a-fetch-operation)
+  - [Stream an image](#stream-an-image)
+  - [Post JSON](#post-json)
+  - [Post JPEG image](#post-jpeg-image)
+  - [Post form data](#post-form-data)
+  - [GET with query parameters object](#get-with-query-parameters-object)
+  - [HTTP/2 Server Push](#http2-server-push)
+  - [Force HTTP/1(.1) protocol](#force-http11-protocol)
+  - [HTTP/1.1 Keep-Alive](#http11-keep-alive)
+  - [Self-signed Certificates](#self-signed-certificates)
+  - [Customization](#customization)
+  - [Misc](#misc)
+- [Development](#development)
+  - [Build](#build)
+  - [Test](#test)
+  - [Lint](#lint)
+<!-- /TOC -->
+
+---
+
+## About
 
 `helix-fetch` in general adheres to the [Fetch API Specification](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API), implementing a subset of the API. However, there are some notable deviations:
 
@@ -18,35 +62,6 @@
 * The `Response` object has an extra property `fromCache` which determines whether the response was retrieved from cache.
 * `Response.headers.plain()` returns the headers as a plain object.
   
-## TOC
-
-- [Helix Fetch Library](#helix-fetch-library)
-  - [TOC](#toc)
-  - [Features](#features)
-  - [Status](#status)
-  - [Installation](#installation)
-  - [Usage Examples](#usage-examples)
-    - [Access Response Headers and other Meta data](#access-response-headers-and-other-meta-data)
-    - [Fetch JSON](#fetch-json)
-    - [Fetch text data](#fetch-text-data)
-    - [Fetch binary data](#fetch-binary-data)
-    - [Specify a timeout for a `fetch` operation](#specify-a-timeout-for-a-fetch-operation)
-    - [Stream an image](#stream-an-image)
-    - [Post JSON](#post-json)
-    - [Post JPEG image](#post-jpeg-image)
-    - [Post form data](#post-form-data)
-    - [GET with query parameters object](#get-with-query-parameters-object)
-    - [HTTP/2 Server Push](#http2-server-push)
-    - [Force HTTP/1(.1) protocol](#force-http11-protocol)
-    - [HTTP/1.1 Keep-Alive](#http11-keep-alive)
-    - [Self-signed Certificates](#self-signed-certificates)
-    - [Customization](#customization)
-    - [Misc](#misc)
-  - [Development](#development)
-    - [Build](#build)
-    - [Test](#test)
-    - [Lint](#lint)
-
 ## Features
 
 * [x] supports reasonable subset of the standard [Fetch specification](https://fetch.spec.whatwg.org/)
@@ -58,15 +73,7 @@
 * [x] overridable User-Agent
 * [x] low-level HTTP/1.* agent/connect options support (e.g. `keepAlive`, `rejectUnauthorized`)
 
-## Status
 
-[![codecov](https://img.shields.io/codecov/c/github/adobe/helix-fetch.svg)](https://codecov.io/gh/adobe/helix-fetch)
-[![CircleCI](https://img.shields.io/circleci/project/github/adobe/helix-fetch.svg)](https://circleci.com/gh/adobe/helix-fetch)
-[![GitHub license](https://img.shields.io/github/license/adobe/helix-fetch.svg)](https://github.com/adobe/helix-fetch/blob/main/LICENSE.txt)
-[![GitHub issues](https://img.shields.io/github/issues/adobe/helix-fetch.svg)](https://github.com/adobe/helix-fetch/issues)
-[![LGTM Code Quality Grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/adobe/helix-fetch.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/adobe/helix-fetch)
-[![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com/)
-[![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
 
 ## Installation
 
@@ -271,7 +278,7 @@ console.log(`Connection: ${resp.headers.get('connection')}`); // -> keep-alive
 ```javascript
 const { fetch } = require('@adobe/helix-fetch').context({ rejectUnauthorized: false });
 
-const resp = await fetch('https://localhost:8080/');  // a server using a self-signed certificate
+const resp = await fetch('https://localhost:8443/');  // a server using a self-signed certificate
 ```
 
 ### Customization

@@ -1,4 +1,6 @@
 coverage
+.github
+.circleci
 .nyc_output/
 node_modules/
 .vscode/
@@ -8,8 +10,12 @@ junit
 *.tgz
 build
 logs
+test
+banner.jpeg
 test-results.xml
 snykmocha.js
+.tidelift.yml
+.renovaterc.json 
 .releaserc.js
 .eslintignore
 .eslintrc.js
