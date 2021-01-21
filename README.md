@@ -111,9 +111,9 @@ Apart from the standard Fetch API
 `helix-fetch` exposes the following extensions:
 
 * `context()` - creates a new customized API context
-* `reset()` - resets the current API context, i.e. closes pending sessions/sockets, clears internal caches etc ...
-* `onPush()` - registers a HTTP/2 Server Push listener
-* `offPush()`- deregisters a listener previously registered with `onPush()` 
+* `reset()` - resets the current API context, i.e. closes pending sessions/sockets, clears internal caches, etc ...
+* `onPush()` - registers an HTTP/2 Server Push listener
+* `offPush()`- deregisters a listener previously registered with `onPush()`
 * `clearCache()` - clears the HTTP cache (cached responses)
 * `cacheStats()` - returns cache statistics
 * `createUrl()` - creates a URL with query parameters (convenience)
