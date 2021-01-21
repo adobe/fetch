@@ -1,11 +1,11 @@
 <h1>Upgrade to helix-fetch v2.x</h1>
 
 While helix-fetch v1.x was based on [fetch-h2](https://github.com/grantila/fetch-h2)
- v2.x is a complete re-implementation from scratch.
-
-The exposed (non-Fetch Standard) API has changed significantly which means that apps
-written for helix-fetch v1.x will most likely need to be updated to work with
-helix-fetch v2.x. This document helps you make this transition.
+ v2.x is a complete re-implementation from scratch. The exposed API, options etc. have
+ been aligned with [node-fetch](https://github.com/node-fetch/node-fetch) where possible.
+ Due to the major changes there are numerous breaking changes both in the API and the options,
+ which means that apps written for helix-fetch v1.x will most likely need to be updated to
+ work with helix-fetch v2.x. This document helps you make this transition.
 
 Note that this document is not an exhaustive list of all changes made in v2.x,
 but rather that of the most important breaking changes. See our [ChangeLog](CHANGELOG.md)

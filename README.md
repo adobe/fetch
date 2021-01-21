@@ -73,6 +73,8 @@
 * `Response.headers.plain()` returns the headers as a plain object.
 * The Fetch option `follow` allows to limit the number of redirects to follow (default: `20`).
 * The Fetch option `compress` enables transparent gzip/deflate/br content decoding (default: `true`)
+
+Note that non-standard Fetch options have been aligned with [node-fetch](https://github.com/node-fetch/node-fetch) where possible.
   
 ## Features
 
