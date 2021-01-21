@@ -19,7 +19,10 @@
 - [About](#about)
 - [Features](#features)
 - [Installation](#installation)
-- [Usage Examples](#usage-examples)
+- [Upgrading](#upgrading)
+- [API](#api)
+  - [Context](#context)
+- [Common Usage Examples](#common-usage-examples)
   - [Access Response Headers and other Meta data](#access-response-headers-and-other-meta-data)
   - [Fetch JSON](#fetch-json)
   - [Fetch text data](#fetch-text-data)
@@ -30,16 +33,20 @@
   - [Post JPEG image](#post-jpeg-image)
   - [Post form data](#post-form-data)
   - [GET with query parameters object](#get-with-query-parameters-object)
+- [Advanced Usage Examples](#advanced-usage-examples)
   - [HTTP/2 Server Push](#http2-server-push)
   - [Force HTTP/1(.1) protocol](#force-http11-protocol)
   - [HTTP/1.1 Keep-Alive](#http11-keep-alive)
   - [Self-signed Certificates](#self-signed-certificates)
-  - [Customization](#customization)
-  - [Misc](#misc)
+  - [Set cache size limit](#set-cache-size-limit)
+  - [Set a custom user agent](#set-a-custom-user-agent)
+- [More examples](#more-examples)
 - [Development](#development)
   - [Build](#build)
   - [Test](#test)
   - [Lint](#lint)
+- [Acknowledgement](#acknowledgement)
+- [License](#license)
 <!-- /TOC -->
 
 ---
@@ -51,16 +58,21 @@
 * `Response.body` returns a Node.js [Readable stream](https://nodejs.org/api/stream.html#stream_readable_streams).
 * `Response.blob()` is not implemented. Use `Response.buffer()` instead.
 * `Response.formData()` is not implemented.
+* Cookies are not stored by default. However, cookies can be extracted and passed by manipulating request and response headers.
 * The following `fetch()` options are ignored due to the nature of Node.js and since `helix-fetch` doesn't have the concept of web pages: `mode`, `referrer`, `referrerPolicy` `integrity` and `credentials`.
 * The `fetch()` option `keepalive` is not supported. But you can use the `h1.keepAlive` context option, as demonstrated [here](#http11-keep-alive).
 
 `helix-fetch` also supports the following extensions:
 
 * `Response.buffer()` returns a Node.js `Buffer`.
+* `Response.url` contains the final url when following redirects.
 * The `body` that can be sent in a `Request` can also be a `Readable` Node.js stream, a `Buffer`, a string or a plain object.
-* The `Response` object has an extra property `httpVersion` which is one of `'1.0'`, `'1.1'` or `'2.0'` (numbers), depending on what was negotiated with the server.
+* There are no forbidden header names.
+* The `Response` object has an extra property `httpVersion` which is one of `'1.0'`, `'1.1'` or `'2.0'`, depending on what was negotiated with the server.
 * The `Response` object has an extra property `fromCache` which determines whether the response was retrieved from cache.
 * `Response.headers.plain()` returns the headers as a plain object.
+* The Fetch option `follow` allows to limit the number of redirects to follow (default: `20`).
+* The Fetch option `compress` enables transparent gzip/deflate/br content decoding (default: `true`)
   
 ## Features
 
@@ -73,15 +85,123 @@
 * [x] overridable User-Agent
 * [x] low-level HTTP/1.* agent/connect options support (e.g. `keepAlive`, `rejectUnauthorized`)
 
-
-
 ## Installation
 
 ```bash
 $ npm install @adobe/helix-fetch
 ```
 
-## Usage Examples
+## Upgrading
+
+Upgrading from an old version of `helix-fetch`? Check out the following files:
+
+- [1.x to 2.x upgrade guide](v2-UPGRADE-GUIDE.md)
+- [Changelog](CHANGELOG.md)
+
+## API
+
+Apart from the standard Fetch API
+
+* `fetch()`
+* `Request`
+* `Response`
+* `Headers`
+* `Body`
+
+`helix-fetch` exposes the following extensions:
+
+* `context()` - creates a new customized API context
+* `reset()` - resets the current API context, i.e. frees resources, clears caches etc ...
+* `onPush()` - registers a HTTP/2 Server Push listener
+* `offPush()`- deregisters a listener previously registered with `onPush()` 
+* `clearCache()` - clears the HTTP cache (cached responses)
+* `cacheStats()` - returns cache statistics
+* `createUrl()` - creates a URL with query parameters (convenience)
+* `timeoutSignal()` - ceates a timeout signal (convenience)
+
+### Context
+
+An API context allows to customize certain aspects of the implementation and provides isolation of internal structures (session caches, HTTP cache, etc.) per API context.
+
+The following options are supported:
+
+```ts
+interface ContextOptions {
+  /**
+   * Value of `user-agent` request header
+   * @default 'helix-fetch/<version>'
+   */
+  userAgent?: string;
+  /**
+   * The maximum total size of the cached entries (in bytes)
+   * @default 100 * 1024 * 1024
+   */
+  maxCacheSize?: number;
+  /**
+   * The protocols to be negotiated, in order of preference
+   * @default [ALPN_HTTP2, ALPN_HTTP1_1, ALPN_HTTP1_0]
+   */
+  alpnProtocols?: ReadonlyArray< ALPNProtocol >;
+  /**
+   * How long (in milliseconds) should ALPN information be cached for a given host?
+   * @default 60 * 60 * 1000
+   */
+  alpnCacheTTL?: number;
+  /**
+   * Maximum number of ALPN cache entries
+   * @default 100
+   */
+  alpnCacheSize?: number;
+  h1?: Http1Options;
+  h2?: Http2Options;
+};
+
+interface Http1Options {
+  /**
+   * Keep sockets around in a pool to be used by other requests in the future.
+   * @default false
+   */
+  keepAlive?: boolean;
+  /**
+   * When using HTTP KeepAlive, how often to send TCP KeepAlive packets over sockets being kept alive.
+   * Only relevant if keepAlive is set to true.
+   * @default 1000
+   */
+  keepAliveMsecs?: number;
+  /**
+   * (HTTPS only)
+   * If not false, the server certificate is verified against the list of supplied CAs. An 'error' event is emitted if verification fails; err.code contains the OpenSSL error code.
+   * @default true
+   */
+  rejectUnauthorized?: boolean;
+  /**
+   * (HTTPS only)
+   * Maximum number of TLS cached sessions. Use 0 to disable TLS session caching.
+   * @default 100
+   */
+  maxCachedSessions?: number;
+}
+
+interface Http2Options {
+  /**
+   * Max idle time in milliseconds after which a session will be automatically closed. 
+   * @default 5 * 60 * 1000
+   */
+  idleSessionTimeout?: number;
+  /**
+   * Enable HTTP/2 Server Push?
+   * @default true
+   */
+  enablePush?: boolean;
+  /**
+   * Max idle time in milliseconds after which a pushed stream will be automatically closed. 
+   * @default 5000
+   */
+  pushedStreamIdleTimeout?: number;
+};
+```
+
+## Common Usage Examples
 
 ### Access Response Headers and other Meta data
 
@@ -234,6 +354,8 @@ const body = new URLSearchParams({
 const resp = await fetch('https://httpbin.org/json', { body });
 ```
 
+## Advanced Usage Examples
+
 ### HTTP/2 Server Push
 
 Note that pushed resources will be automatically and transparently added to the cache.
@@ -281,23 +403,33 @@ const { fetch } = require('@adobe/helix-fetch').context({ rejectUnauthorized: fa
 const resp = await fetch('https://localhost:8443/');  // a server using a self-signed certificate
 ```
 
-### Customization
-
-Set cache size limit (Default: 100 \* 1024 \* 1024 bytes, i.e. 100mb):
+### Set cache size limit
 
 ```javascript
   const { fetch, cacheStats } = require('@adobe/helix-fetch').context({
-    maxCacheSize: 100 * 1024, // 100kb
+    maxCacheSize: 100 * 1024, // 100kb (Default: 100mb)
   });
 
-  let resp = await fetch('http://httpbin.org/bytes/60000'); // ~60kb response
-  resp = await fetch('http://httpbin.org/bytes/50000'); // ~50kb response
+  let resp = await fetch('https://httpbin.org/bytes/60000'); // ~60kb response
+  resp = await fetch('https://httpbin.org/bytes/50000'); // ~50kb response
   console.log(cacheStats());
 ```
 
-### Misc
+### Set a custom user agent
 
-More example code can be found [here](/test/index.test.js).
+```javascript
+  const { fetch } = require('@adobe/helix-fetch').context({
+    userAgent: 'custom-fetch'
+  });
+
+  const resp = await fetch('https://httpbin.org//user-agent');
+  const json = await resp.json();
+  console.log(json['user-agent']);
+```
+
+## More examples
+
+More example code can be found in the [test source files](/test/).
 
 ## Development
 
@@ -318,3 +450,11 @@ $ npm test
 ```bash
 $ npm run lint
 ```
+
+## Acknowledgement
+
+Thanks to [node-fetch](https://github.com/node-fetch/node-fetch) and [github/fetch](https://github.com/github/fetch) for providing a solid implementation reference.
+
+## License
+
+[Apache 2.0](LICENSE.txt)
