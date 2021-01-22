@@ -12,6 +12,7 @@ but rather that of the most important breaking changes. See our [ChangeLog](CHAN
 for more information.
 
 <!-- TOC --> 
+- [Node version](#node-version)
 - [API](#api)
 - [Context options](#context-options)
 - [Fetch options](#fetch-options)
@@ -21,6 +22,10 @@ for more information.
 <!-- /TOC -->
 
 ---
+
+## Node version
+
+As of v2 Node version >= 12 is required.
 
 ## API
 
