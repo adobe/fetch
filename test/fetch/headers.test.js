@@ -167,4 +167,10 @@ describe('Headers Tests', () => {
     expect(headers.get(true)).to.be.equal('ok');
     expect(headers.get('true')).to.be.equal('ok');
   });
+
+  it('plain() should return plain object representation', () => {
+    const hdrObj = { foo: 'bar' };
+    const headers = new Headers(hdrObj);
+    expect(headers.plain()).to.be.deep.equal(hdrObj);
+  });
 });

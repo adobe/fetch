@@ -70,7 +70,7 @@ class Headers {
    */
   constructor(init = {}) {
     this[INTERNALS] = {
-      map: {},
+      map: new Map(),
     };
 
     if (init instanceof Headers) {
@@ -89,27 +89,27 @@ class Headers {
   }
 
   set(name, value) {
-    this[INTERNALS].map[normalizeName(name)] = normalizeValue(value);
+    this[INTERNALS].map.set(normalizeName(name), normalizeValue(value));
   }
 
   has(name) {
-    return Object.prototype.hasOwnProperty.call(this[INTERNALS].map, normalizeName(name));
+    return this[INTERNALS].map.has(normalizeName(name));
   }
 
   get(name) {
-    const nm = normalizeName(name);
-    return this.has(nm) ? this[INTERNALS].map[nm] : null;
+    const val = this[INTERNALS].map.get(normalizeName(name));
+    return val === undefined ? null : val;
   }
 
   append(name, value) {
     const nm = normalizeName(name);
     const val = normalizeValue(value);
-    const oldVal = this[INTERNALS].map[nm];
-    this[INTERNALS].map[nm] = oldVal ? `${oldVal}, ${val}` : val;
+    const oldVal = this[INTERNALS].map.get(nm);
+    this[INTERNALS].map.set(nm, oldVal ? `${oldVal}, ${val}` : val);
   }
 
   delete(name) {
-    delete this[INTERNALS].map[normalizeName(name)];
+    this[INTERNALS].map.delete(normalizeName(name));
   }
 
   forEach(callback, thisArg) {
@@ -118,11 +118,9 @@ class Headers {
     }
   }
 
-  * keys() {
-    // return Object.keys(this[INTERNALS].map).sort();
-    for (const name of Object.keys(this[INTERNALS].map).sort()) {
-      yield name;
-    }
+  keys() {
+    return Array.from(this[INTERNALS].map.keys())
+      .sort();
   }
 
   * values() {
@@ -158,7 +156,15 @@ class Headers {
    * @return {object}
    */
   plain() {
-    return { ...this[INTERNALS].map };
+    if (typeof Object.fromEntries === 'function') {
+      // since node 12
+      return Object.fromEntries(this[INTERNALS].map);
+    }
+    const obj = {};
+    for (const key of this[INTERNALS].keys()) {
+      obj[key] = this[INTERNALS].map.get(key);
+    }
+    return obj;
   }
 }
 
