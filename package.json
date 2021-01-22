@@ -4,8 +4,8 @@
   "description": "Light-weight Fetch implementation transparently supporting both HTTP/1(.1) and HTTP/2",
   "main": "src/index.js",
   "scripts": {
-    "test": " nyc --reporter=text --reporter=lcov --check-coverage --branches 100 --statements 100 --lines 100 mocha --recursive",
-    "test-ci": "nyc --reporter=text --reporter=lcov --check-coverage --branches 100 --statements 100 --lines 100 mocha --recursive --reporter xunit --reporter-options output=./junit/test-results.xml && codecov",
+    "test": " nyc --reporter=text --reporter=lcov --check-coverage --branches 100 --statements 100 --lines 100 mocha --recursive --timeout 5000",
+    "test-ci": "nyc --reporter=text --reporter=lcov --check-coverage --branches 100 --statements 100 --lines 100 mocha --recursive --timeout 5000 --reporter xunit --reporter-options output=./junit/test-results.xml && codecov",
     "lint": "./node_modules/.bin/eslint .",
     "semantic-release": "semantic-release",
     "commit": "git-cz"
