@@ -156,17 +156,7 @@ class Headers {
    * @return {object}
    */
   plain() {
-    /* istanbul ignore else */
-    if (typeof Object.fromEntries === 'function') {
-      // since node 12
-      return Object.fromEntries(this[INTERNALS].map);
-    } else {
-      const obj = {};
-      for (const key of this[INTERNALS].keys()) {
-        obj[key] = this[INTERNALS].map.get(key);
-      }
-      return obj;
-    }
+    return Object.fromEntries(this[INTERNALS].map);
   }
 }
 

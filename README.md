@@ -89,6 +89,10 @@ Note that non-standard Fetch options have been aligned with [node-fetch](https:/
 
 ## Installation
 
+> **Note**:
+>
+> As of v2 Node version >= 12 is required.
+
 ```bash
 $ npm install @adobe/helix-fetch
 ```
@@ -97,7 +101,7 @@ $ npm install @adobe/helix-fetch
 
 Upgrading from an old version of `helix-fetch`? Check out the following files:
 
-- [1.x to 2.x upgrade guide](v2-UPGRADE-GUIDE.md)
+- [1.x to 2.x Upgrade Guide](v2-UPGRADE-GUIDE.md)
 - [Changelog](CHANGELOG.md)
 
 ## API
