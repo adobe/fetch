@@ -180,6 +180,7 @@ const h1Request = async (ctx, url, options) => {
         debug(`discarding redundant socket used for ALPN: #${socket.id} ${socket.servername}`);
         socket.destroy();
       }
+      /* istanbul ignore next */
       if (!req.aborted) {
         debug(`${opts.method} ${url.href} failed with: ${err.message}`);
         // TODO: better call req.destroy(err) instead of req.abort() ?
