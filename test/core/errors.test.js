@@ -10,6 +10,20 @@
  * governing permissions and limitations under the License.
  */
 
+/* eslint-env mocha */
+
 'use strict';
 
-module.exports = require('./fetch');
+const assert = require('assert');
+
+const { RequestAbortedError } = require('../../src/core/errors');
+
+describe('core errors Tests', () => {
+  it('RequestAbortedError', () => {
+    const err = new RequestAbortedError('test');
+    assert(err instanceof Error);
+    assert.strictEqual(err.message, 'test');
+    assert.strictEqual(err.name, 'RequestAbortedError');
+    assert.strictEqual(Object.prototype.toString.call(err), '[object RequestAbortedError]');
+  });
+});

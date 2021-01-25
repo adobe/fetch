@@ -12,29 +12,17 @@
 
 'use strict';
 
-const { Headers } = require('fetch-h2');
-
 /**
- * Return the headers as a plain object/
- *
- * @param {Headers} headers
- * @returns {Object}
+ * Error thrown if a request is aborted via an AbortSignal.
  */
-const headersAsObject = (headers) => {
-  const obj = {};
-  for (const [key, value] of headers.entries()) {
-    obj[key] = value;
+class RequestAbortedError extends Error {
+  get name() {
+    return this.constructor.name;
   }
-  return obj;
-};
 
-/**
- * Decorate the headers with extensions
- */
-const decorateHeaders = (headers) => {
-  const hdrs = new Headers(headers);
-  hdrs.raw = () => headersAsObject(hdrs);
-  return hdrs;
-};
+  get [Symbol.toStringTag]() {
+    return this.constructor.name;
+  }
+}
 
-module.exports = { headersAsObject, decorateHeaders };
+module.exports = { RequestAbortedError };

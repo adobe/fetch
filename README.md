@@ -1,52 +1,213 @@
-# Helix Fetch Library
+<div align="center">
+  <img src="banner.jpeg" alt="Helix Fetch"/>
+  <br>
+  <p>Light-weight <a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API">Fetch API</a> implementation transparently supporting both <b>HTTP/1(.1)</b> and <b>HTTP/2</b></p>
+  <a href="https://codecov.io/gh/adobe/helix-fetch"><img src="https://img.shields.io/codecov/c/github/adobe/helix-fetch.svg" alt="codecov"></a>
+  <a href="https://circleci.com/gh/adobe/helix-fetch"><img src="https://img.shields.io/circleci/project/github/adobe/helix-fetch.svg" alt="CircleCI"></a>
+  <a href="https://github.com/adobe/helix-fetch/blob/main/LICENSE.txt"><img src="https://img.shields.io/github/license/adobe/helix-fetch.svg" alt="GitHub license"></a>
+  <a href="https://github.com/adobe/helix-fetch/issues"><img src="https://img.shields.io/github/issues/adobe/helix-fetch.svg" alt="GitHub issues"></a>
+  <a href="https://lgtm.com/projects/g/adobe/helix-fetch"><img src="https://img.shields.io/lgtm/grade/javascript/g/adobe/helix-fetch.svg?logo=lgtm&logoWidth=18" alt="LGTM Code Quality Grade: JavaScript"></a>
+  <a href="https://renovatebot.com/"><img src="https://img.shields.io/badge/renovate-enabled-brightgreen.svg" alt="Renovate enabled"></a>
+  <a href="https://github.com/semantic-release/semantic-release"><img src="https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg" alt="semantic-release"></a>
+	<a href="https://packagephobia.now.sh/result?p=@adobe/helix-fetch"><img src="https://badgen.net/packagephobia/install/@adobe/helix-fetch" alt="Install size"></a>
+  <a href="https://www.npmjs.com/package/@adobe/helix-fetch"><img src="https://img.shields.io/npm/v/@adobe/helix-fetch" alt="Current version"></a>
+</div>
 
-> Library for making transparent HTTP/1(.1) and HTTP/2 requests.
+---
 
-`helix-fetch` is based on [fetch-h2](https://github.com/grantila/fetch-h2). `helix-fetch` in general adheres to the [Fetch API Specification](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API), implementing a subset of the API. However, there are some notable deviations:
+<!-- TOC -->
+- [About](#about)
+- [Features](#features)
+- [Installation](#installation)
+- [Upgrading](#upgrading)
+- [API](#api)
+  - [Context](#context)
+- [Common Usage Examples](#common-usage-examples)
+  - [Access Response Headers and other Meta data](#access-response-headers-and-other-meta-data)
+  - [Fetch JSON](#fetch-json)
+  - [Fetch text data](#fetch-text-data)
+  - [Fetch binary data](#fetch-binary-data)
+  - [Specify a timeout for a `fetch` operation](#specify-a-timeout-for-a-fetch-operation)
+  - [Stream an image](#stream-an-image)
+  - [Post JSON](#post-json)
+  - [Post JPEG image](#post-jpeg-image)
+  - [Post form data](#post-form-data)
+  - [GET with query parameters object](#get-with-query-parameters-object)
+- [Advanced Usage Examples](#advanced-usage-examples)
+  - [HTTP/2 Server Push](#http2-server-push)
+  - [Force HTTP/1(.1) protocol](#force-http11-protocol)
+  - [HTTP/1.1 Keep-Alive](#http11-keep-alive)
+  - [Self-signed Certificates](#self-signed-certificates)
+  - [Set cache size limit](#set-cache-size-limit)
+  - [Set a custom user agent](#set-a-custom-user-agent)
+- [More examples](#more-examples)
+- [Development](#development)
+  - [Build](#build)
+  - [Test](#test)
+  - [Lint](#lint)
+- [Acknowledgement](#acknowledgement)
+- [License](#license)
+<!-- /TOC -->
 
-* `Response.body` is not implemented. Use `Response.readable()` instead.
+---
+
+## About
+
+`helix-fetch` in general adheres to the [Fetch API Specification](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API), implementing a subset of the API. However, there are some notable deviations:
+
+* `Response.body` returns a Node.js [Readable stream](https://nodejs.org/api/stream.html#stream_readable_streams).
 * `Response.blob()` is not implemented. Use `Response.buffer()` instead.
 * `Response.formData()` is not implemented.
-* The following `fetch()` options are ignored since `helix-fetch` doesn't have the concept of web pages: `mode`, `referrer` and `referrerPolicy`.
+* Cookies are not stored by default. However, cookies can be extracted and passed by manipulating request and response headers.
+* The following `fetch()` options are ignored due to the nature of Node.js and since `helix-fetch` doesn't have the concept of web pages: `mode`, `referrer`, `referrerPolicy` `integrity` and `credentials`.
+* The `fetch()` option `keepalive` is not supported. But you can use the `h1.keepAlive` context option, as demonstrated [here](#http11-keep-alive).
 
 `helix-fetch` also supports the following extensions:
 
 * `Response.buffer()` returns a Node.js `Buffer`.
-* The `body` that can be sent in a `Request` can also be a `Readable` Node.js stream, a `Buffer` or a string.
-* `fetch()` has an extra option `json` that can be used instead of `body` to send an object that will be JSON stringified. The appropriate content-type will be set if it isn't already.
-* ~~`fetch()` has an extra option `timeout` which is a timeout in milliseconds before the request should be aborted and the returned promise thereby rejected (with a `TimeoutError`).~~
-  
-  **Deprecated:** Use `AbortController` or `timeoutSignal(ms)` instead, see examples below.
-* The `Response` object has an extra property `httpVersion` which is either `1` or `2` (numbers), depending on what was negotiated with the server.
-* `Response.headers.raw()` returns the headers as a plain object.
+* `Response.url` contains the final url when following redirects.
+* The `body` that can be sent in a `Request` can also be a `Readable` Node.js stream, a `Buffer`, a string or a plain object.
+* There are no forbidden header names.
+* The `Response` object has an extra property `httpVersion` which is one of `'1.0'`, `'1.1'` or `'2.0'`, depending on what was negotiated with the server.
+* The `Response` object has an extra property `fromCache` which determines whether the response was retrieved from cache.
+* `Response.headers.plain()` returns the headers as a plain object.
+* The Fetch option `follow` allows to limit the number of redirects to follow (default: `20`).
+* The Fetch option `compress` enables transparent gzip/deflate/br content decoding (default: `true`)
 
+Note that non-standard Fetch options have been aligned with [node-fetch](https://github.com/node-fetch/node-fetch) where possible.
+  
 ## Features
 
-* [x] [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) implementation
+* [x] supports reasonable subset of the standard [Fetch specification](https://fetch.spec.whatwg.org/)
 * [x] Transparent handling of HTTP/1(.1) and HTTP/2 connections
-* [x] Promise API/`async & await`
-* [x] Streaming support
 * [x] [RFC 7234](https://httpwg.org/specs/rfc7234.html) compliant cache
+* [x] Support `gzip/deflate/br` content encoding
 * [x] HTTP/2 request and response multiplexing support
-* [x] HTTP/2 Server Push support
-
-## Status
-
-[![codecov](https://img.shields.io/codecov/c/github/adobe/helix-fetch.svg)](https://codecov.io/gh/adobe/helix-fetch)
-[![CircleCI](https://img.shields.io/circleci/project/github/adobe/helix-fetch.svg)](https://circleci.com/gh/adobe/helix-fetch)
-[![GitHub license](https://img.shields.io/github/license/adobe/helix-fetch.svg)](https://github.com/adobe/helix-fetch/blob/main/LICENSE.txt)
-[![GitHub issues](https://img.shields.io/github/issues/adobe/helix-fetch.svg)](https://github.com/adobe/helix-fetch/issues)
-[![LGTM Code Quality Grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/adobe/helix-fetch.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/adobe/helix-fetch)
-[![Renovate enabled](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com/)
-[![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
+* [x] HTTP/2 Server Push support (transparent caching and explicit listener support)
+* [x] overridable User-Agent
+* [x] low-level HTTP/1.* agent/connect options support (e.g. `keepAlive`, `rejectUnauthorized`)
 
 ## Installation
+
+> **Note**:
+>
+> As of v2 Node version >= 12 is required.
 
 ```bash
 $ npm install @adobe/helix-fetch
 ```
 
-## Usage Examples
+## Upgrading
+
+Upgrading from an old version of `helix-fetch`? Check out the following files:
+
+- [1.x to 2.x Upgrade Guide](v2-UPGRADE-GUIDE.md)
+- [Changelog](CHANGELOG.md)
+
+## API
+
+Apart from the standard Fetch API
+
+* `fetch()`
+* `Request`
+* `Response`
+* `Headers`
+* `Body`
+
+`helix-fetch` exposes the following extensions:
+
+* `context()` - creates a new customized API context
+* `reset()` - resets the current API context, i.e. closes pending sessions/sockets, clears internal caches, etc ...
+* `onPush()` - registers an HTTP/2 Server Push listener
+* `offPush()`- deregisters a listener previously registered with `onPush()`
+* `clearCache()` - clears the HTTP cache (cached responses)
+* `cacheStats()` - returns cache statistics
+* `createUrl()` - creates a URL with query parameters (convenience)
+* `timeoutSignal()` - ceates a timeout signal (convenience)
+
+### Context
+
+An API context allows to customize certain aspects of the implementation and provides isolation of internal structures (session caches, HTTP cache, etc.) per API context.
+
+The following options are supported:
+
+```ts
+interface ContextOptions {
+  /**
+   * Value of `user-agent` request header
+   * @default 'helix-fetch/<version>'
+   */
+  userAgent?: string;
+  /**
+   * The maximum total size of the cached entries (in bytes)
+   * @default 100 * 1024 * 1024
+   */
+  maxCacheSize?: number;
+  /**
+   * The protocols to be negotiated, in order of preference
+   * @default [ALPN_HTTP2, ALPN_HTTP1_1, ALPN_HTTP1_0]
+   */
+  alpnProtocols?: ReadonlyArray< ALPNProtocol >;
+  /**
+   * How long (in milliseconds) should ALPN information be cached for a given host?
+   * @default 60 * 60 * 1000
+   */
+  alpnCacheTTL?: number;
+  /**
+   * Maximum number of ALPN cache entries
+   * @default 100
+   */
+  alpnCacheSize?: number;
+  h1?: Http1Options;
+  h2?: Http2Options;
+};
+
+interface Http1Options {
+  /**
+   * Keep sockets around in a pool to be used by other requests in the future.
+   * @default false
+   */
+  keepAlive?: boolean;
+  /**
+   * When using HTTP KeepAlive, how often to send TCP KeepAlive packets over sockets being kept alive.
+   * Only relevant if keepAlive is set to true.
+   * @default 1000
+   */
+  keepAliveMsecs?: number;
+  /**
+   * (HTTPS only)
+   * If not false, the server certificate is verified against the list of supplied CAs. An 'error' event is emitted if verification fails; err.code contains the OpenSSL error code.
+   * @default true
+   */
+  rejectUnauthorized?: boolean;
+  /**
+   * (HTTPS only)
+   * Maximum number of TLS cached sessions. Use 0 to disable TLS session caching.
+   * @default 100
+   */
+  maxCachedSessions?: number;
+}
+
+interface Http2Options {
+  /**
+   * Max idle time in milliseconds after which a session will be automatically closed. 
+   * @default 5 * 60 * 1000
+   */
+  idleSessionTimeout?: number;
+  /**
+   * Enable HTTP/2 Server Push?
+   * @default true
+   */
+  enablePush?: boolean;
+  /**
+   * Max idle time in milliseconds after which a pushed stream will be automatically closed. 
+   * @default 5000
+   */
+  pushedStreamIdleTimeout?: number;
+};
+```
+
+## Common Usage Examples
 
 ### Access Response Headers and other Meta data
 
@@ -58,7 +219,7 @@ $ npm install @adobe/helix-fetch
   console.log(resp.status);
   console.log(resp.statusText);
   console.log(resp.method);
-  console.log(resp.headers.raw());
+  console.log(resp.headers.plain());
   console.log(resp.headers.get('content-type'));
 ```
 
@@ -91,7 +252,7 @@ $ npm install @adobe/helix-fetch
 
 ### Specify a timeout for a `fetch` operation
 
-Using `signalTimeout(ms)` extension:
+Using `timeoutSignal(ms)` extension:
 
 ```javascript
   const { fetch, timeoutSignal, AbortError } = require('@adobe/helix-fetch');
@@ -113,9 +274,10 @@ Using `AbortController`:
 
   const controller = new AbortController();
   setTimeout(() => controller.abort(), 1000);
+  const { signal } = controller;
 
   try {
-    const resp = await fetch('https://httpbin.org/json', { signal: controller.signal });
+    const resp = await fetch('https://httpbin.org/json', { signal });
     const jsonData = await resp.json();
   } catch (err) {
     if (err instanceof AbortError) {
@@ -131,7 +293,7 @@ Using `AbortController`:
   const { fetch } = require('@adobe/helix-fetch');
 
   const resp = await fetch('https://httpbin.org/image/jpeg');
-  (await resp.readable()).pipe(fs.createWriteStream('saved-image.jpg'));
+  resp.body.pipe(fs.createWriteStream('saved-image.jpg'));
 ```
 
 ### Post JSON
@@ -140,8 +302,8 @@ Using `AbortController`:
   const { fetch } = require('@adobe/helix-fetch');
 
   const method = 'POST';
-  const json = { foo: 'bar' };
-  const resp = await fetch('https://httpbin.org/post', { method, json });
+  const body = { foo: 'bar' };
+  const resp = await fetch('https://httpbin.org/post', { method, body });
 ```
 
 ### Post JPEG image
@@ -163,11 +325,11 @@ Using `AbortController`:
   const { FormData, fetch } = require('@adobe/helix-fetch');
 
   const method = 'POST';
-  const form = new FormData();
-  form.append('foo', 'bar');
-  form.append('data', [ 0x68, 0x65, 0x6c, 0x69, 0x78, 0x2d, 0x66, 0x65, 0x74, 0x63, 0x68 ]);
-  form.append('some_file', fs.createReadStream('/foo/bar.jpg'), 'bar.jpg');
-  const resp = await fetch('https://httpbin.org/post', { method, body: form });
+  const body = new FormData();
+  body.append('foo', 'bar');
+  body.append('data', [ 0x68, 0x65, 0x6c, 0x69, 0x78, 0x2d, 0x66, 0x65, 0x74, 0x63, 0x68 ]);
+  body.append('some_file', fs.createReadStream('/foo/bar.jpg'), 'bar.jpg');
+  const resp = await fetch('https://httpbin.org/post', { method, body });
 ```
 
 ### GET with query parameters object
@@ -198,47 +360,82 @@ const body = new URLSearchParams({
 const resp = await fetch('https://httpbin.org/json', { body });
 ```
 
+## Advanced Usage Examples
+
 ### HTTP/2 Server Push
+
+Note that pushed resources will be automatically and transparently added to the cache.
+You can however add a listener which will be notified on every pushed (and cached) resource.
 
 ```javascript
   const { fetch, onPush } = require('@adobe/helix-fetch');
 
-  onPush((url) => console.log(`received server push: ${url}`));
+  onPush((url, response) => console.log(`received server push: ${url} status ${response.status}`));
 
   const resp = await fetch('https://nghttp2.org');
   console.log(`Http version: ${resp.httpVersion}`);
 ```
 
-### Customization
+### Force HTTP/1(.1) protocol
 
-Set cache size limit (Default: 100 \* 1024 \* 1024 bytes, i.e. 100mb):
+```javascript
+  const { fetch, ALPN_HTTP1_1 } = require('@adobe/helix-fetch').context({
+    alpnProtocols: [ALPN_HTTP1_1],
+  });
+
+  const resp = await fetch('https://nghttp2.org');
+  console.log(`Http version: ${resp.httpVersion}`);
+```
+
+### HTTP/1.1 Keep-Alive
+
+```javascript
+const { fetch, ALPN_HTTP1_1 } = require('@adobe/helix-fetch').context({
+  alpnProtocols: [ALPN_HTTP1_1], // make sure we're talking HTTP/1.1 to the server
+  h1: { // http[s].Agent options
+    keepAlive: true
+  }
+});
+
+const resp = await fetch('https://httpbin.org/status/200');
+console.log(`Connection: ${resp.headers.get('connection')}`); // -> keep-alive
+```
+
+### Self-signed Certificates
+
+```javascript
+const { fetch } = require('@adobe/helix-fetch').context({ rejectUnauthorized: false });
+
+const resp = await fetch('https://localhost:8443/');  // a server using a self-signed certificate
+```
+
+### Set cache size limit
 
 ```javascript
   const { fetch, cacheStats } = require('@adobe/helix-fetch').context({
-    maxCacheSize: 100 * 1024, // 100kb
+    maxCacheSize: 100 * 1024, // 100kb (Default: 100mb)
   });
 
-  let resp = await fetch('http://httpbin.org/bytes/60000'); // ~60kb response
-  resp = await fetch('http://httpbin.org/bytes/50000'); // ~50kb response
+  let resp = await fetch('https://httpbin.org/bytes/60000'); // ~60kb response
+  resp = await fetch('https://httpbin.org/bytes/50000'); // ~50kb response
   console.log(cacheStats());
 ```
 
-Force HTTP/1(.1) protocol:
+### Set a custom user agent
 
 ```javascript
   const { fetch } = require('@adobe/helix-fetch').context({
-    httpsProtocols: ['http1'],
+    userAgent: 'custom-fetch'
   });
 
-  const resp = await fetch('https://nghttp2.org');
-  console.log(`Http version: ${resp.httpVersion}`);
+  const resp = await fetch('https://httpbin.org//user-agent');
+  const json = await resp.json();
+  console.log(json['user-agent']);
 ```
 
-See [Contexts](https://github.com/grantila/fetch-h2#contexts) for more options.
+## More examples
 
-### Misc
-
-More example code can be found [here](/test/index.test.js).
+More example code can be found in the [test source files](/test/).
 
 ## Development
 
@@ -259,3 +456,11 @@ $ npm test
 ```bash
 $ npm run lint
 ```
+
+## Acknowledgement
+
+Thanks to [node-fetch](https://github.com/node-fetch/node-fetch) and [github/fetch](https://github.com/github/fetch) for providing a solid implementation reference.
+
+## License
+
+[Apache 2.0](LICENSE.txt)
