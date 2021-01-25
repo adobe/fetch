@@ -1,3 +1,16 @@
+# [2.0.0](https://github.com/adobe/helix-fetch/compare/v1.9.2...v2.0.0) (2021-01-25)
+
+
+### Features
+
+* rewrite from scratch [BREAKING CHANGES] ([#116](https://github.com/adobe/helix-fetch/issues/116)) ([75cbcbe](https://github.com/adobe/helix-fetch/commit/75cbcbe7b43af5a16531db2691994a8f25a740a3)), closes [#20](https://github.com/adobe/helix-fetch/issues/20) [#27](https://github.com/adobe/helix-fetch/issues/27) [#32](https://github.com/adobe/helix-fetch/issues/32) [#81](https://github.com/adobe/helix-fetch/issues/81)
+
+
+### BREAKING CHANGES
+
+* ** The exposed API, options etc have been aligned with node-fetch. Due to the major
+changes there are numerous breaking changes both in the API and the options. See the [1.x to 2.x Upgrade Guide](v2-UPGRADE-GUIDE.md) for details.
+
 ## [1.9.2](https://github.com/adobe/helix-fetch/compare/v1.9.1...v1.9.2) (2020-12-09)
 
 
