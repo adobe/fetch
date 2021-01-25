@@ -379,7 +379,8 @@ You can however add a listener which will be notified on every pushed (and cache
 ### Force HTTP/1(.1) protocol
 
 ```javascript
-  const { fetch, ALPN_HTTP1_1 } = require('@adobe/helix-fetch').context({
+  const { context, ALPN_HTTP1_1 } = require('@adobe/helix-fetch');
+  const { fetch } = context({
     alpnProtocols: [ALPN_HTTP1_1],
   });
 
@@ -390,7 +391,8 @@ You can however add a listener which will be notified on every pushed (and cache
 ### HTTP/1.1 Keep-Alive
 
 ```javascript
-const { fetch, ALPN_HTTP1_1 } = require('@adobe/helix-fetch').context({
+const { context, ALPN_HTTP1_1 } = require('@adobe/helix-fetch');
+const { fetch } = context({
   alpnProtocols: [ALPN_HTTP1_1], // make sure we're talking HTTP/1.1 to the server
   h1: { // http[s].Agent options
     keepAlive: true
