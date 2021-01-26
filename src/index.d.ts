@@ -10,6 +10,8 @@
  * governing permissions and limitations under the License.
  */
 
+import { Readable } from "stream";
+
 export enum ALPNProtocol {
   ALPN_HTTP2 = 'h2',
   ALPN_HTTP2C = 'h2c',
@@ -66,14 +68,68 @@ export interface Http1Options {
   maxCachedSessions?: number;
 }
 
-export interface Response {
+declare interface RequestInit {
+  /**
+   * A BodyInit object or null to set request's body.
+   */
+  body?: BodyInit | null;
+  /**
+   * A Headers object, an object literal, or an array of two-item arrays to set request's headers.
+   */
+  headers?: HeadersInit;
+  /**
+   * A string to set request's method.
+   */
+  method?: string;
+}
+
+interface ResponseInit {
+  headers?: HeadersInit;
+  status?: number;
+  statusText?: string;
+}
+
+type BodyInit =
+  | Blob
+  | Buffer
+  | URLSearchParams
+  | NodeJS.ReadableStream
+  | string;
+type BodyType = { [K in keyof Body]: Body[K] };
+
+declare class Body {
+  constructor(body?: BodyInit, opts?: { size?: number });
+
+  readonly body: NodeJS.ReadableStream | null;
+  readonly bodyUsed: boolean;
+  readonly size: number;
+
+  buffer(): Promise<Buffer>;
+  arrayBuffer(): Promise<ArrayBuffer>;
+  blob(): Promise<Blob>;
+  json(): Promise<unknown>;
+  text(): Promise<string>;
+}
+
+type RequestInfo = string | Body;
+
+declare class Request extends Body {
+  constructor(input: RequestInfo, init?: RequestInit);
+  readonly headers: Headers;
+  readonly method: string;
+  readonly url: string;
+}
+
+export class Response extends Body {
+  constructor(body?: BodyInit | null, init?: ResponseInit);
+
   statusCode: number;
   httpVersion: string;
   httpVersionMajor: number;
   httpVersionMinor: number;
   headers: NodeJS.Dict<string | string[]>;
   readable: NodeJS.ReadableStream;
-};
+}
 
 export type PushPromiseHandler = (
   url: string,
@@ -89,7 +145,7 @@ export type PushHandler = (
 
 export interface Http2Options {
   /**
-   * Max idle time in milliseconds after which a session will be automatically closed. 
+   * Max idle time in milliseconds after which a session will be automatically closed.
    * @default 5 * 60 * 1000
    */
   idleSessionTimeout?: number;
@@ -101,11 +157,11 @@ export interface Http2Options {
   // pushPromiseHandler?: PushPromiseHandler;
   // pushHandler?: PushHandler;
   /**
-   * Max idle time in milliseconds after which a pushed stream will be automatically closed. 
+   * Max idle time in milliseconds after which a pushed stream will be automatically closed.
    * @default 5000
    */
   pushedStreamIdleTimeout?: number;
-};
+}
 
 export interface ContextOptions {
   /**
@@ -135,7 +191,7 @@ export interface ContextOptions {
   alpnCacheSize?: number;
   h1?: Http1Options;
   h2?: Http2Options;
-};
+}
 
 type AbortSignal = {
 	readonly aborted: boolean;
@@ -189,4 +245,4 @@ export interface RequestOptions {
    * @default 20
    */
   follow?: number;
-};
+}

@@ -332,14 +332,14 @@ describe('Core Tests', () => {
 
   it('supports stream body', async () => {
     const method = 'POST';
-    const body = fs.createReadStream('README.md');
-    const resp = await defaultCtx.request('https://httpbin.org/post', { method, body });
+    const body = fs.createReadStream(__filename);
+    const resp = await defaultCtx.request('https://httpbingo.org/post', { method, body });
     assert.strictEqual(resp.statusCode, 200);
-    assert.strictEqual(resp.headers['content-type'], 'application/json');
+    assert.strictEqual(resp.headers['content-type'], 'application/json; encoding=utf-8');
     const buf = await readStream(resp.readable);
     const jsonResponseBody = JSON.parse(buf);
     assert(typeof jsonResponseBody === 'object');
-    assert.deepStrictEqual(jsonResponseBody.data, fs.readFileSync('README.md').toString());
+    assert.deepStrictEqual(jsonResponseBody.data, fs.readFileSync(__filename).toString());
   });
 
   it('supports URLSearchParams body', async () => {
