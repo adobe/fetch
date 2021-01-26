@@ -330,22 +330,16 @@ describe('Core Tests', () => {
     assert.deepStrictEqual(jsonResponseBody.data, body);
   });
 
-  it('supports stream body', async function test() {
-    if (process.env.GITHUB_ACTIONS) {
-      // this test consistenly times out on github actions (ubuntu 18.04 or 20.04, node 12);
-      // it succeeds when run in a plain ubuntu 20.04 docker image with node 12.
-      // TODO: investigate why it fails on github actions
-      this.skip();
-    }
+  it('supports stream body', async () => {
     const method = 'POST';
-    const body = fs.createReadStream(__filename);
+    const body = fs.createReadStream('README.md');
     const resp = await defaultCtx.request('https://httpbin.org/post', { method, body });
     assert.strictEqual(resp.statusCode, 200);
     assert.strictEqual(resp.headers['content-type'], 'application/json');
     const buf = await readStream(resp.readable);
     const jsonResponseBody = JSON.parse(buf);
     assert(typeof jsonResponseBody === 'object');
-    assert.deepStrictEqual(jsonResponseBody.data, fs.readFileSync(__filename).toString());
+    assert.deepStrictEqual(jsonResponseBody.data, fs.readFileSync('README.md').toString());
   });
 
   it('supports URLSearchParams body', async () => {

@@ -355,9 +355,17 @@ testParams.forEach((params) => {
     });
 
     it('supports redirect: manual', async () => {
-      const resp = await fetch(`${protocol}://httpstat.us/307`, { redirect: 'manual', cache: 'no-store' });
+      const resp = await fetch(
+        // `${protocol}://httpstat.us/307`, // unreliable server (frequent 503s)
+        `${protocol}://httpbin.org/status/307`,
+        { redirect: 'manual', cache: 'no-store' }
+      );
       assert.strictEqual(resp.status, 307);
-      assert.strictEqual(resp.headers.get('location'), 'https://httpstat.us/');
+      assert.strictEqual(
+        resp.headers.get('location'),
+        // 'https://httpstat.us/',
+        `${protocol}://httpbin.org/redirect/1`,
+      );
       assert.strictEqual(resp.redirected, false);
     });
 
