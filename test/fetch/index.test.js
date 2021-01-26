@@ -358,7 +358,7 @@ testParams.forEach((params) => {
       const resp = await fetch(
         // `${protocol}://httpstat.us/307`, // unreliable server (frequent 503s)
         `${protocol}://httpbin.org/status/307`,
-        { redirect: 'manual', cache: 'no-store' }
+        { redirect: 'manual', cache: 'no-store' },
       );
       assert.strictEqual(resp.status, 307);
       assert.strictEqual(
