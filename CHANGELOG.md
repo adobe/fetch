@@ -1,3 +1,10 @@
+## [2.0.1](https://github.com/adobe/helix-fetch/compare/v2.0.0...v2.0.1) (2021-01-26)
+
+
+### Bug Fixes
+
+* **types:** add missing exported types ([#121](https://github.com/adobe/helix-fetch/issues/121)) ([0e72a4d](https://github.com/adobe/helix-fetch/commit/0e72a4d751fc91528af592b16b0e337bdd19e8f1))
+
 # [2.0.0](https://github.com/adobe/helix-fetch/compare/v1.9.2...v2.0.0) (2021-01-25)
 
 
