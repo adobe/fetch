@@ -151,7 +151,7 @@ testParams.forEach((params) => {
       assert.deepStrictEqual(jsonResponseBody.json, body);
     });
 
-    it.only('supports json PATCH', async () => {
+    it('supports json PATCH', async () => {
       const method = 'PATCH';
       const body = { foo: 'bar' };
       const resp = await fetch(`${baseUrl}/patch`, { method, body });
