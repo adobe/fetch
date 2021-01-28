@@ -10,8 +10,6 @@
  * governing permissions and limitations under the License.
  */
 
-import { Readable } from "stream";
-
 export enum ALPNProtocol {
   ALPN_HTTP2 = 'h2',
   ALPN_HTTP2C = 'h2c',
@@ -72,7 +70,7 @@ declare interface RequestInit {
   /**
    * A BodyInit object or null to set request's body.
    */
-  body?: BodyInit | null;
+  body?: BodyInit | Object |null;
   /**
    * A Headers object, an object literal, or an array of two-item arrays to set request's headers.
    */
@@ -90,23 +88,19 @@ interface ResponseInit {
 }
 
 type BodyInit =
-  | Blob
   | Buffer
   | URLSearchParams
   | NodeJS.ReadableStream
   | string;
-type BodyType = { [K in keyof Body]: Body[K] };
 
 declare class Body {
-  constructor(body?: BodyInit, opts?: { size?: number });
+  constructor(body?: BodyInit);
 
   readonly body: NodeJS.ReadableStream | null;
   readonly bodyUsed: boolean;
-  readonly size: number;
 
   buffer(): Promise<Buffer>;
   arrayBuffer(): Promise<ArrayBuffer>;
-  blob(): Promise<Blob>;
   json(): Promise<unknown>;
   text(): Promise<string>;
 }
@@ -121,14 +115,15 @@ declare class Request extends Body {
 }
 
 export class Response extends Body {
-  constructor(body?: BodyInit | null, init?: ResponseInit);
+  constructor(body?: BodyInit | Object | null, init?: ResponseInit);
 
-  statusCode: number;
-  httpVersion: string;
-  httpVersionMajor: number;
-  httpVersionMinor: number;
-  headers: NodeJS.Dict<string | string[]>;
-  readable: NodeJS.ReadableStream;
+  readonly url: string;
+  readonly status: number;
+  readonly statusText: string;
+  readonly ok: boolean;
+  readonly redirected: boolean;
+  readonly httpVersion: string;
+  headers: Headers;
 }
 
 export type PushPromiseHandler = (
@@ -200,7 +195,7 @@ type AbortSignal = {
 	removeEventListener(type: 'abort', listener: (this: AbortSignal) => void): void;
 };
 
-type HeadersInit = Headers | Record<string, string> | Iterable<readonly [string, string]> | Iterable<Iterable<string>>;
+type HeadersInit = Headers | Object | Iterable<readonly [string, string]> | Iterable<Iterable<string>>;
 
 export interface RequestOptions {
   /**
@@ -212,12 +207,12 @@ export interface RequestOptions {
 	 * A Headers object, an object literal, or an array of two-item arrays to set request's headers.
    * @default {}
 	 */
-  headers?: Headers | Record<string, string> | Iterable<readonly [string, string]> | Iterable<Iterable<string>>;
+  headers?: Headers | Object | Iterable<readonly [string, string]> | Iterable<Iterable<string>>;
 	/**
 	 * The request's body.
    * @default null
 	 */
-	body?: Readable | Buffer | String | Record<string, string> | URLSearchParams | FormData;
+	body?: BodyInit | Object | FormData;
 	/**
 	 * A string indicating whether request follows redirects, results in an error upon encountering a redirect, or returns the redirect (in an opaque fashion). Sets request's redirect.
    * @default 'follow'

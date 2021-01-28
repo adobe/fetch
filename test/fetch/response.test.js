@@ -181,6 +181,23 @@ describe('Response Tests', () => {
     });
   });
 
+  it('should guess content-type header', () => {
+    // string body
+    let res = new Response('Hello, World!');
+    expect(res.headers.get('content-type')).to.equal('text/plain; charset=utf-8');
+    // plain js object body
+    res = new Response({ foo: 42 });
+    expect(res.headers.get('content-type')).to.equal('application/json');
+  });
+
+  it('should not override content-type header', () => {
+    const res = new Response(
+      '<p>Hello, World!</p>',
+      { headers: { 'Content-Type': 'text/html' } },
+    );
+    expect(res.headers.get('content-type')).to.equal('text/html');
+  });
+
   it('should default to null as body', () => {
     const res = new Response();
     expect(res.body).to.equal(null);

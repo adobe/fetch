@@ -12,8 +12,10 @@
 
 'use strict';
 
-const { Body, cloneStream } = require('./body');
+const { Body, cloneStream, guessContentType } = require('./body');
 const { Headers } = require('./headers');
+
+const { isPlainObject } = require('../common/utils');
 
 const INTERNALS = Symbol('Response internals');
 
@@ -31,9 +33,24 @@ class Response extends Body {
    * @param {Object} [init={}]
    */
   constructor(body = null, init = {}) {
-    super(body);
-
     const headers = new Headers(init.headers);
+
+    let respBody = body;
+    if (!headers.has('content-type')) {
+      if (isPlainObject(respBody)) {
+        // extension: support plain js object body (JSON serialization)
+        respBody = JSON.stringify(respBody);
+        headers.set('content-type', 'application/json');
+      } else {
+        const contentType = guessContentType(respBody);
+        if (contentType) {
+          headers.set('content-type', contentType);
+        }
+      }
+    }
+
+    // call Body constructor
+    super(respBody);
 
     this[INTERNALS] = {
       url: init.url,

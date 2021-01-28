@@ -197,7 +197,44 @@ const cloneStream = (body) => {
   return result;
 };
 
+/**
+ * Guesses the `Content-Type` based on the type of body.
+ *
+ * @param {Readable|Buffer|String|URLSearchParams|FormData} body Any options.body input
+ * @returns {string|null}
+ */
+const guessContentType = (body) => {
+  if (body === null) {
+    return null;
+  }
+
+  if (typeof body === 'string') {
+    return 'text/plain; charset=utf-8';
+  }
+
+  if (body instanceof URLSearchParams) {
+    return 'application/x-www-form-urlencoded; charset=utf-8';
+  }
+
+  if (body instanceof FormData) {
+    return `multipart/form-data;boundary=${body.getBoundary()}`;
+  }
+
+  if (Buffer.isBuffer(body)) {
+    return null;
+  }
+
+  /* istanbul ignore else */
+  if (body instanceof Readable) {
+    return null;
+  }
+
+  // fallback: body is coerced to string
+  return 'text/plain; charset=utf-8';
+};
+
 module.exports = {
   Body,
   cloneStream,
+  guessContentType,
 };
