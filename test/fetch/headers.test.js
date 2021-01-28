@@ -168,6 +168,16 @@ describe('Headers Tests', () => {
     expect(headers.get('true')).to.be.equal('ok');
   });
 
+  it('should coerce value to string', () => {
+    const headers = new Headers();
+    const vals = [true, [1, 2, 3], 42, null, undefined];
+
+    for (const val of vals) {
+      expect(() => headers.set('a', val)).to.not.throw();
+      expect(headers.get('a')).to.be.equal(String(val));
+    }
+  });
+
   it('plain() should return plain object representation', () => {
     const hdrObj = { foo: 'bar' };
     const headers = new Headers(hdrObj);
