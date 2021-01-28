@@ -151,6 +151,18 @@ testParams.forEach((params) => {
       assert.deepStrictEqual(jsonResponseBody.json, body);
     });
 
+    it.only('supports json PATCH', async () => {
+      const method = 'PATCH';
+      const body = { foo: 'bar' };
+      const resp = await fetch(`${baseUrl}/patch`, { method, body });
+      assert.strictEqual(resp.status, 200);
+      assert.strictEqual(resp.httpVersion, httpVersion);
+      assert.strictEqual(resp.headers.get('content-type'), 'application/json');
+      const jsonResponseBody = await resp.json();
+      assert(jsonResponseBody !== null && typeof jsonResponseBody === 'object');
+      assert.deepStrictEqual(jsonResponseBody.json, body);
+    });
+
     it('sanitizes lowercase method names', async () => {
       const method = 'post';
       const body = { foo: 'bar' };
