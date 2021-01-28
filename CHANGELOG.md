@@ -1,3 +1,10 @@
+# [2.1.0](https://github.com/adobe/helix-fetch/compare/v2.0.1...v2.1.0) (2021-01-28)
+
+
+### Features
+
+* **response:** guess Response content-type ([#128](https://github.com/adobe/helix-fetch/issues/128)) ([0cff243](https://github.com/adobe/helix-fetch/commit/0cff2434cc90bc007bff078f2685a6cfc4bcae43)), closes [#122](https://github.com/adobe/helix-fetch/issues/122)
+
 ## [2.0.1](https://github.com/adobe/helix-fetch/compare/v2.0.0...v2.0.1) (2021-01-26)
 
 
