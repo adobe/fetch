@@ -45,6 +45,7 @@
   - [Build](#build)
   - [Test](#test)
   - [Lint](#lint)
+  - [Troubleshooting](#troubleshooting)
 - [Acknowledgement](#acknowledgement)
 - [License](#license)
 <!-- /TOC -->
@@ -457,6 +458,31 @@ $ npm test
 
 ```bash
 $ npm run lint
+```
+
+### Troubleshooting
+
+You can enable low-level debug console output by setting the `DEBUG` environment variable, e.g.:
+
+```bash
+$ DEBUG=helix-fetch* npm test
+```
+
+This will produce console outout similar to:
+
+```bash
+  ...
+  helix-fetch:core established TLS connection: #48 (www.nghttp2.org) +2s
+  helix-fetch:core www.nghttp2.org -> h2 +0ms
+  helix-fetch:h2 reusing socket #48 (www.nghttp2.org) +2s
+  helix-fetch:h2 GET www.nghttp2.org/httpbin/user-agent +0ms
+  helix-fetch:h2 session https://www.nghttp2.org established +1ms
+  helix-fetch:h2 caching session https://www.nghttp2.org +0ms
+  helix-fetch:h2 session https://www.nghttp2.org remoteSettings: {"headerTableSize":8192,"enablePush":true,"initialWindowSize":1048576,"maxFrameSize":16384,"maxConcurrentStreams":100,"maxHeaderListSize":4294967295,"maxHeaderSize":4294967295,"enableConnectProtocol":true} +263ms
+  helix-fetch:h2 session https://www.nghttp2.org localSettings: {"headerTableSize":4096,"enablePush":true,"initialWindowSize":65535,"maxFrameSize":16384,"maxConcurrentStreams":4294967295,"maxHeaderListSize":4294967295,"maxHeaderSize":4294967295,"enableConnectProtocol":false} +0ms
+  helix-fetch:h2 session https://www.nghttp2.org closed +6ms
+  helix-fetch:h2 discarding cached session https://www.nghttp2.org +0ms
+  ... 
 ```
 
 ## Acknowledgement

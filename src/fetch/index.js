@@ -69,7 +69,7 @@ const fetch = async (ctx, url, options) => {
 
   try {
     // call underlying protocol agnostic abstraction;
-    // signal is passed to lower layer which throws a TBD error
+    // signal is passed to lower layer which throws a RequestAbortedError
     // if the signal fires
     coreResp = await request(req.url, {
       ...options,
