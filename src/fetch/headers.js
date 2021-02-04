@@ -53,7 +53,7 @@ const normalizeValue = (value) => {
     }
   }
 
-  return value;
+  return val;
 };
 
 /**

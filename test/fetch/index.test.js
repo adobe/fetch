@@ -151,6 +151,18 @@ testParams.forEach((params) => {
       assert.deepStrictEqual(jsonResponseBody.json, body);
     });
 
+    it('supports json PATCH', async () => {
+      const method = 'PATCH';
+      const body = { foo: 'bar' };
+      const resp = await fetch(`${baseUrl}/patch`, { method, body });
+      assert.strictEqual(resp.status, 200);
+      assert.strictEqual(resp.httpVersion, httpVersion);
+      assert.strictEqual(resp.headers.get('content-type'), 'application/json');
+      const jsonResponseBody = await resp.json();
+      assert(jsonResponseBody !== null && typeof jsonResponseBody === 'object');
+      assert.deepStrictEqual(jsonResponseBody.json, body);
+    });
+
     it('sanitizes lowercase method names', async () => {
       const method = 'post';
       const body = { foo: 'bar' };
@@ -334,7 +346,7 @@ testParams.forEach((params) => {
 
     it('supports redirect (default)', async () => {
       const url = `${protocol}://httpbingo.org/redirect-to?url=${protocol}%3A%2F%2Fhttpbin.org%2Fstatus%2F200&status_code=307`;
-      // const url = `${protocol}://httpstat.us/307`; // sometimes very slooow
+      // const url = `${protocol}://httpstat.us/307`; // sometimes very slooow/unreliable
       let resp = await fetch(url, { cache: 'no-store' });
       assert.strictEqual(resp.status, 200);
       assert.strictEqual(resp.redirected, true);
@@ -348,16 +360,24 @@ testParams.forEach((params) => {
 
     it('supports redirect: follow', async () => {
       const url = `${protocol}://httpbingo.org/redirect-to?url=${protocol}%3A%2F%2Fhttpbin.org%2Fstatus%2F200&status_code=307`;
-      // const url = `${protocol}://httpstat.us/307`; // sometimes very slooow
+      // const url = `${protocol}://httpstat.us/307`; // sometimes very slooow/unreliable
       const resp = await fetch(url, { redirect: 'follow', cache: 'no-store' });
       assert.strictEqual(resp.status, 200);
       assert.strictEqual(resp.redirected, true);
     });
 
     it('supports redirect: manual', async () => {
-      const resp = await fetch(`${protocol}://httpstat.us/307`, { redirect: 'manual', cache: 'no-store' });
+      const resp = await fetch(
+        // `${protocol}://httpstat.us/307`, // unreliable server (frequent 503s)
+        `${protocol}://httpbin.org/status/307`,
+        { redirect: 'manual', cache: 'no-store' },
+      );
       assert.strictEqual(resp.status, 307);
-      assert.strictEqual(resp.headers.get('location'), 'https://httpstat.us/');
+      assert.strictEqual(
+        resp.headers.get('location'),
+        // 'https://httpstat.us/',
+        '/redirect/1',
+      );
       assert.strictEqual(resp.redirected, false);
     });
 
@@ -374,19 +394,35 @@ testParams.forEach((params) => {
     });
 
     it('supports follow: 0', async () => {
-      assert.rejects(() => fetch(`${protocol}://httpstat.us/307`, { follow: 0 }), FetchError);
+      assert.rejects(() => fetch(
+        // `${protocol}://httpstat.us/307`, // unreliable server (frequent 503s)
+        `${protocol}://httpbin.org/status/307`,
+        { follow: 0 },
+      ), FetchError);
       // same with a signal (code coverage)
       const controller = new AbortController();
       const { signal } = controller;
-      assert.rejects(() => fetch(`${protocol}://httpstat.us/307`, { follow: 0, signal }), FetchError);
+      assert.rejects(() => fetch(
+        // `${protocol}://httpstat.us/307`, // unreliable server (frequent 503s)
+        `${protocol}://httpbin.org/status/307`,
+        { follow: 0, signal },
+      ), FetchError);
     });
 
     it('supports redirect: error', async () => {
-      assert.rejects(() => fetch(`${protocol}://httpstat.us/307`, { redirect: 'error' }), FetchError);
+      assert.rejects(() => fetch(
+        // `${protocol}://httpstat.us/307`, // unreliable server (frequent 503s)
+        `${protocol}://httpbin.org/status/307`,
+        { redirect: 'error' },
+      ), FetchError);
       // same with a signal (code coverage)
       const controller = new AbortController();
       const { signal } = controller;
-      assert.rejects(() => fetch(`${protocol}://httpstat.us/307`, { redirect: 'error', signal }), FetchError);
+      assert.rejects(() => fetch(
+        // `${protocol}://httpstat.us/307`, // unreliable server (frequent 503s)
+        `${protocol}://httpbin.org/status/307`,
+        { redirect: 'error', signal },
+      ), FetchError);
     });
 
     it('supports multiple redirects', async () => {
@@ -429,12 +465,20 @@ testParams.forEach((params) => {
     it('fails non-GET redirect if body is a readable stream', async () => {
       const method = 'POST';
       const body = stream.Readable.from('foo bar');
-      assert.rejects(() => fetch(`${protocol}://httpstat.us/307`, { method, body }), FetchError);
+      assert.rejects(() => fetch(
+        // `${protocol}://httpstat.us/307`, // unreliable server (frequent 503s)
+        `${protocol}://httpbin.org/status/307`,
+        { method, body },
+      ), FetchError);
       assert(!body.destroyed);
       // same with a signal (code coverage)
       const controller = new AbortController();
       const { signal } = controller;
-      assert.rejects(() => fetch(`${protocol}://httpstat.us/307`, { method, body, signal }), FetchError);
+      assert.rejects(() => fetch(
+        // `${protocol}://httpstat.us/307`, // unreliable server (frequent 503s)
+        `${protocol}://httpbin.org/status/307`,
+        { method, body, signal },
+      ), FetchError);
     });
 
     it('supports text body', async () => {

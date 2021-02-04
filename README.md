@@ -33,6 +33,7 @@
   - [Post JPEG image](#post-jpeg-image)
   - [Post form data](#post-form-data)
   - [GET with query parameters object](#get-with-query-parameters-object)
+  - [Cache](#cache)
 - [Advanced Usage Examples](#advanced-usage-examples)
   - [HTTP/2 Server Push](#http2-server-push)
   - [Force HTTP/1(.1) protocol](#force-http11-protocol)
@@ -45,6 +46,7 @@
   - [Build](#build)
   - [Test](#test)
   - [Lint](#lint)
+  - [Troubleshooting](#troubleshooting)
 - [Acknowledgement](#acknowledgement)
 - [License](#license)
 <!-- /TOC -->
@@ -59,7 +61,8 @@
 * `Response.blob()` is not implemented. Use `Response.buffer()` instead.
 * `Response.formData()` is not implemented.
 * Cookies are not stored by default. However, cookies can be extracted and passed by manipulating request and response headers.
-* The following `fetch()` options are ignored due to the nature of Node.js and since `helix-fetch` doesn't have the concept of web pages: `mode`, `referrer`, `referrerPolicy` `integrity` and `credentials`.
+* The following values of the `fetch()` option `cache` are supported: `'default'` (the implicit default) and `'no-store'`. All other values are currently ignored.  
+* The following `fetch()` options are ignored due to the nature of Node.js and since `helix-fetch` doesn't have the concept of web pages: `mode`, `referrer`, `referrerPolicy`, `integrity` and `credentials`.
 * The `fetch()` option `keepalive` is not supported. But you can use the `h1.keepAlive` context option, as demonstrated [here](#http11-keep-alive).
 
 `helix-fetch` also supports the following extensions:
@@ -360,6 +363,35 @@ const body = new URLSearchParams({
 const resp = await fetch('https://httpbin.org/json', { body });
 ```
 
+### Cache
+
+Responses of `GET` and `HEAD` requests are by default cached, according to the rules of [RFC 7234](https://httpwg.org/specs/rfc7234.html):
+
+```javascript
+const { fetch } = require('@adobe/helix-fetch');
+
+const url = 'https://httpbin.org/cache/60'; // -> max-age=60 (seconds)
+// send initial request, priming cache
+let resp = await fetch(url);
+assert(resp.ok);
+assert(!resp.fromCache);
+
+// re-send request and verify it's served from cache
+resp = await fetch(url);
+assert(resp.ok);
+assert(resp.fromCache);
+```
+
+You can disable caching with the `cache: 'no-store'` option:
+
+```javascript
+const { fetch } = require('@adobe/helix-fetch');
+
+const resp = await fetch('https://httbin.org/', { cache: 'no-store' });
+assert(resp.ok);
+assert(!resp.fromCache);
+```
+
 ## Advanced Usage Examples
 
 ### HTTP/2 Server Push
@@ -457,6 +489,31 @@ $ npm test
 
 ```bash
 $ npm run lint
+```
+
+### Troubleshooting
+
+You can enable low-level debug console output by setting the `DEBUG` environment variable, e.g.:
+
+```bash
+$ DEBUG=helix-fetch* npm test
+```
+
+This will produce console outout similar to:
+
+```bash
+  ...
+  helix-fetch:core established TLS connection: #48 (www.nghttp2.org) +2s
+  helix-fetch:core www.nghttp2.org -> h2 +0ms
+  helix-fetch:h2 reusing socket #48 (www.nghttp2.org) +2s
+  helix-fetch:h2 GET www.nghttp2.org/httpbin/user-agent +0ms
+  helix-fetch:h2 session https://www.nghttp2.org established +1ms
+  helix-fetch:h2 caching session https://www.nghttp2.org +0ms
+  helix-fetch:h2 session https://www.nghttp2.org remoteSettings: {"headerTableSize":8192,"enablePush":true,"initialWindowSize":1048576,"maxFrameSize":16384,"maxConcurrentStreams":100,"maxHeaderListSize":4294967295,"maxHeaderSize":4294967295,"enableConnectProtocol":true} +263ms
+  helix-fetch:h2 session https://www.nghttp2.org localSettings: {"headerTableSize":4096,"enablePush":true,"initialWindowSize":65535,"maxFrameSize":16384,"maxConcurrentStreams":4294967295,"maxHeaderListSize":4294967295,"maxHeaderSize":4294967295,"enableConnectProtocol":false} +0ms
+  helix-fetch:h2 session https://www.nghttp2.org closed +6ms
+  helix-fetch:h2 discarding cached session https://www.nghttp2.org +0ms
+  ... 
 ```
 
 ## Acknowledgement

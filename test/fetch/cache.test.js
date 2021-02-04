@@ -67,7 +67,7 @@ describe('Cache Tests', () => {
   });
 
   it('fetch supports caching', async () => {
-    const url = 'https://httpbin.org/cache/60'; // -> max-age=2 (seconds)
+    const url = 'https://httpbin.org/cache/60'; // -> max-age=60 (seconds)
     // send initial request, priming cache
     let resp = await fetch(url);
     assert.strictEqual(resp.status, 200);
@@ -95,7 +95,7 @@ describe('Cache Tests', () => {
   });
 
   it('clearCache works', async () => {
-    const url = 'https://httpbin.org/cache/60'; // -> max-age=2 (seconds)
+    const url = 'https://httpbin.org/cache/60'; // -> max-age=60 (seconds)
     // send initial request, priming cache
     let resp = await fetch(url);
     assert.strictEqual(resp.status, 200);

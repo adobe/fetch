@@ -1,3 +1,31 @@
+## [2.1.2](https://github.com/adobe/helix-fetch/compare/v2.1.1...v2.1.2) (2021-02-04)
+
+
+### Bug Fixes
+
+* don't manipulate location header ([#133](https://github.com/adobe/helix-fetch/issues/133)) ([ae78c75](https://github.com/adobe/helix-fetch/commit/ae78c756ea3ff009fbcc6d1f8827781cb0608917))
+
+## [2.1.1](https://github.com/adobe/helix-fetch/compare/v2.1.0...v2.1.1) (2021-02-04)
+
+
+### Bug Fixes
+
+* **body:** TypeError on errored stream ([#132](https://github.com/adobe/helix-fetch/issues/132)) ([a801d79](https://github.com/adobe/helix-fetch/commit/a801d7948f2f070d94f8c9f1ba64e6bdd9239dd5))
+
+# [2.1.0](https://github.com/adobe/helix-fetch/compare/v2.0.1...v2.1.0) (2021-01-28)
+
+
+### Features
+
+* **response:** guess Response content-type ([#128](https://github.com/adobe/helix-fetch/issues/128)) ([0cff243](https://github.com/adobe/helix-fetch/commit/0cff2434cc90bc007bff078f2685a6cfc4bcae43)), closes [#122](https://github.com/adobe/helix-fetch/issues/122)
+
+## [2.0.1](https://github.com/adobe/helix-fetch/compare/v2.0.0...v2.0.1) (2021-01-26)
+
+
+### Bug Fixes
+
+* **types:** add missing exported types ([#121](https://github.com/adobe/helix-fetch/issues/121)) ([0e72a4d](https://github.com/adobe/helix-fetch/commit/0e72a4d751fc91528af592b16b0e337bdd19e8f1))
+
 # [2.0.0](https://github.com/adobe/helix-fetch/compare/v1.9.2...v2.0.0) (2021-01-25)
 
 

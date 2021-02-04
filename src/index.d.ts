@@ -66,14 +66,65 @@ export interface Http1Options {
   maxCachedSessions?: number;
 }
 
-export interface Response {
-  statusCode: number;
-  httpVersion: string;
-  httpVersionMajor: number;
-  httpVersionMinor: number;
-  headers: NodeJS.Dict<string | string[]>;
-  readable: NodeJS.ReadableStream;
-};
+declare interface RequestInit {
+  /**
+   * A BodyInit object or null to set request's body.
+   */
+  body?: BodyInit | Object |null;
+  /**
+   * A Headers object, an object literal, or an array of two-item arrays to set request's headers.
+   */
+  headers?: HeadersInit;
+  /**
+   * A string to set request's method.
+   */
+  method?: string;
+}
+
+interface ResponseInit {
+  headers?: HeadersInit;
+  status?: number;
+  statusText?: string;
+}
+
+type BodyInit =
+  | Buffer
+  | URLSearchParams
+  | NodeJS.ReadableStream
+  | string;
+
+declare class Body {
+  constructor(body?: BodyInit);
+
+  readonly body: NodeJS.ReadableStream | null;
+  readonly bodyUsed: boolean;
+
+  buffer(): Promise<Buffer>;
+  arrayBuffer(): Promise<ArrayBuffer>;
+  json(): Promise<unknown>;
+  text(): Promise<string>;
+}
+
+type RequestInfo = string | Body;
+
+declare class Request extends Body {
+  constructor(input: RequestInfo, init?: RequestInit);
+  readonly headers: Headers;
+  readonly method: string;
+  readonly url: string;
+}
+
+export class Response extends Body {
+  constructor(body?: BodyInit | Object | null, init?: ResponseInit);
+
+  readonly url: string;
+  readonly status: number;
+  readonly statusText: string;
+  readonly ok: boolean;
+  readonly redirected: boolean;
+  readonly httpVersion: string;
+  headers: Headers;
+}
 
 export type PushPromiseHandler = (
   url: string,
@@ -89,7 +140,7 @@ export type PushHandler = (
 
 export interface Http2Options {
   /**
-   * Max idle time in milliseconds after which a session will be automatically closed. 
+   * Max idle time in milliseconds after which a session will be automatically closed.
    * @default 5 * 60 * 1000
    */
   idleSessionTimeout?: number;
@@ -101,11 +152,11 @@ export interface Http2Options {
   // pushPromiseHandler?: PushPromiseHandler;
   // pushHandler?: PushHandler;
   /**
-   * Max idle time in milliseconds after which a pushed stream will be automatically closed. 
+   * Max idle time in milliseconds after which a pushed stream will be automatically closed.
    * @default 5000
    */
   pushedStreamIdleTimeout?: number;
-};
+}
 
 export interface ContextOptions {
   /**
@@ -135,7 +186,7 @@ export interface ContextOptions {
   alpnCacheSize?: number;
   h1?: Http1Options;
   h2?: Http2Options;
-};
+}
 
 type AbortSignal = {
 	readonly aborted: boolean;
@@ -144,7 +195,7 @@ type AbortSignal = {
 	removeEventListener(type: 'abort', listener: (this: AbortSignal) => void): void;
 };
 
-type HeadersInit = Headers | Record<string, string> | Iterable<readonly [string, string]> | Iterable<Iterable<string>>;
+type HeadersInit = Headers | Object | Iterable<readonly [string, string]> | Iterable<Iterable<string>>;
 
 export interface RequestOptions {
   /**
@@ -156,12 +207,12 @@ export interface RequestOptions {
 	 * A Headers object, an object literal, or an array of two-item arrays to set request's headers.
    * @default {}
 	 */
-  headers?: Headers | Record<string, string> | Iterable<readonly [string, string]> | Iterable<Iterable<string>>;
+  headers?: Headers | Object | Iterable<readonly [string, string]> | Iterable<Iterable<string>>;
 	/**
 	 * The request's body.
    * @default null
 	 */
-	body?: Readable | Buffer | String | Record<string, string> | URLSearchParams | FormData;
+	body?: BodyInit | Object | FormData;
 	/**
 	 * A string indicating whether request follows redirects, results in an error upon encountering a redirect, or returns the redirect (in an opaque fashion). Sets request's redirect.
    * @default 'follow'
@@ -189,4 +240,4 @@ export interface RequestOptions {
    * @default 20
    */
   follow?: number;
-};
+}

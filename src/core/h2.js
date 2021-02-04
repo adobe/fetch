@@ -92,7 +92,7 @@ const handlePush = (ctx, origin, pushedStream, requestHeaders, flags) => {
     debug(`received push headers for ${origin}${path}, stream #${pushedStream.id}, headers: ${JSON.stringify(responseHeaders)}, flags: ${flgs}`);
 
     // set timeout to automatically discard pushed streams that aren't consumed for some time
-    pushedStream.setTimeout(pushedStreamIdleTimeout, () => {
+    pushedStream.setTimeout(pushedStreamIdleTimeout, /* istanbul ignore next */ () => {
       debug(`closing pushed stream #${pushedStream.id} after ${pushedStreamIdleTimeout} ms of inactivity`);
       pushedStream.close(NGHTTP2_CANCEL);
     });
