@@ -1,3 +1,10 @@
+## [2.1.1](https://github.com/adobe/helix-fetch/compare/v2.1.0...v2.1.1) (2021-02-04)
+
+
+### Bug Fixes
+
+* **body:** TypeError on errored stream ([#132](https://github.com/adobe/helix-fetch/issues/132)) ([a801d79](https://github.com/adobe/helix-fetch/commit/a801d7948f2f070d94f8c9f1ba64e6bdd9239dd5))
+
 # [2.1.0](https://github.com/adobe/helix-fetch/compare/v2.0.1...v2.1.0) (2021-01-28)
 
 
