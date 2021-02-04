@@ -132,19 +132,14 @@ const fetch = async (ctx, url, options) => {
     const locationURL = location == null ? null : new URL(location, req.url);
     // https://fetch.spec.whatwg.org/#concept-http-fetch step 6.5
     switch (req.redirect) {
+      case 'manual':
+        break;
       case 'error':
         if (signal) {
           // deregister from signal
           signal.removeEventListener('abort', abortHandler);
         }
         throw new FetchError(`uri requested responds with a redirect, redirect mode is set to 'error': ${req.url}`, 'no-redirect');
-      case 'manual':
-        // extension: set location header to the resolved url
-        /* istanbul ignore else */
-        if (locationURL !== null) {
-          headers.location = locationURL.toString();
-        }
-        break;
       case 'follow': {
         // https://fetch.spec.whatwg.org/#http-redirect-fetch step 2
         if (locationURL === null) {

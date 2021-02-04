@@ -376,7 +376,7 @@ testParams.forEach((params) => {
       assert.strictEqual(
         resp.headers.get('location'),
         // 'https://httpstat.us/',
-        `${protocol}://httpbin.org/redirect/1`,
+        '/redirect/1',
       );
       assert.strictEqual(resp.redirected, false);
     });
