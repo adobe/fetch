@@ -1,3 +1,10 @@
+## [2.1.2](https://github.com/adobe/helix-fetch/compare/v2.1.1...v2.1.2) (2021-02-04)
+
+
+### Bug Fixes
+
+* don't manipulate location header ([#133](https://github.com/adobe/helix-fetch/issues/133)) ([ae78c75](https://github.com/adobe/helix-fetch/commit/ae78c756ea3ff009fbcc6d1f8827781cb0608917))
+
 ## [2.1.1](https://github.com/adobe/helix-fetch/compare/v2.1.0...v2.1.1) (2021-02-04)
 
 
