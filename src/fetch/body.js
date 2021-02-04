@@ -46,7 +46,7 @@ const consume = async (body) => {
   }
 
   if (body[INTERNALS].error) {
-    throw this[INTERNALS].error;
+    throw new TypeError(`Stream had error: ${body[INTERNALS].error.message}`);
   }
 
   // eslint-disable-next-line no-param-reassign
