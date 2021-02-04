@@ -381,6 +381,16 @@ testParams.forEach((params) => {
       assert.strictEqual(resp.redirected, false);
     });
 
+    it('supports redirect: manual with path location', async () => {
+      const resp = await fetch(
+        `${protocol}://httpbingo.org/redirect-to?url=/foo.html&status_code=307`,
+        { redirect: 'manual', cache: 'no-store' },
+      );
+      assert.strictEqual(resp.status, 307);
+      assert.strictEqual(resp.headers.get('location'), '/foo.html');
+      assert.strictEqual(resp.redirected, false);
+    });
+
     it('supports follow option (max-redirect limit)', async () => {
       // 5 relative redirects, follows: 4
       assert.rejects(() => fetch(`${protocol}://httpbingo.org/relative-redirect/5`, { follow: 4 }), FetchError);
