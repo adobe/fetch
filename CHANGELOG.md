@@ -1,3 +1,10 @@
+## [2.1.3](https://github.com/adobe/helix-fetch/compare/v2.1.2...v2.1.3) (2021-02-09)
+
+
+### Bug Fixes
+
+* **h2:** fixing ERR_HTTP2_SOCKET_BOUND errors ([55213b3](https://github.com/adobe/helix-fetch/commit/55213b3b62dd2e433671135a6eadd1b832795d90)), closes [#135](https://github.com/adobe/helix-fetch/issues/135)
+
 ## [2.1.2](https://github.com/adobe/helix-fetch/compare/v2.1.1...v2.1.2) (2021-02-04)
 
 
