@@ -156,7 +156,7 @@ const request = async (ctx, url, options) => {
     if (!session || session.closed || session.destroyed) {
       // connect and setup new session
       // (connect options: https://nodejs.org/api/http2.html#http2_http2_connect_authority_options_listener)
-      const connectOptions = ctxOpts;
+      const connectOptions = { ...ctxOpts };
       /* istanbul ignore else */
       if (socket) {
         // reuse socket
