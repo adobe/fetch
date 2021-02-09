@@ -493,10 +493,10 @@ $ npm run lint
 
 ### Troubleshooting
 
-You can enable low-level debug console output by setting the `DEBUG` environment variable, e.g.:
+You can enable `helix-fetch` low-level debug console output by setting the `DEBUG` environment variable to `helix-fetch*`, e.g.:
 
 ```bash
-$ DEBUG=helix-fetch* npm test
+$ DEBUG=helix-fetch* node test.js
 ```
 
 This will produce console outout similar to:
@@ -515,6 +515,17 @@ This will produce console outout similar to:
   helix-fetch:h2 discarding cached session https://www.nghttp2.org +0ms
   ... 
 ```
+
+Additionally, you can enable Node.js low-level debug console output by setting the `NODE_DEBUG` environment variable appropriately, e.g.
+
+```bash
+$ export NODE_DEBUG=http*,stream*
+$ export DEBUG=helix-fetch*
+
+$ node test.js
+```
+
+> Note: this will flood the console with highly verbose debug output.
 
 ## Acknowledgement
 
