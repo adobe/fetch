@@ -1,6 +1,6 @@
 {
   "name": "@adobe/helix-fetch",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "description": "Light-weight Fetch implementation transparently supporting both HTTP/1(.1) and HTTP/2",
   "main": "src/index.js",
   "scripts": {

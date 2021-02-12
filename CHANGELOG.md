@@ -1,3 +1,10 @@
+## [2.1.4](https://github.com/adobe/helix-fetch/compare/v2.1.3...v2.1.4) (2021-02-12)
+
+
+### Bug Fixes
+
+* **response:** don't set content-type for null body ([#137](https://github.com/adobe/helix-fetch/issues/137)) ([492e74d](https://github.com/adobe/helix-fetch/commit/492e74d1fd7f5b79f7f1253c3ea504d3389e3734))
+
 ## [2.1.3](https://github.com/adobe/helix-fetch/compare/v2.1.2...v2.1.3) (2021-02-09)
 
 
