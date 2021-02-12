@@ -198,6 +198,11 @@ describe('Response Tests', () => {
     expect(res.headers.get('content-type')).to.equal('text/html');
   });
 
+  it('should not auto-set content-type header if body is null', () => {
+    const res = new Response(null, { status: 301, headers: { location: 'https://example.com' } });
+    expect(res.headers.get('content-type')).to.be.null;
+  });
+
   it('should default to null as body', () => {
     const res = new Response();
     expect(res.body).to.equal(null);

@@ -36,7 +36,7 @@ class Response extends Body {
     const headers = new Headers(init.headers);
 
     let respBody = body;
-    if (!headers.has('content-type')) {
+    if (body !== null && !headers.has('content-type')) {
       if (isPlainObject(respBody)) {
         // extension: support plain js object body (JSON serialization)
         respBody = JSON.stringify(respBody);
