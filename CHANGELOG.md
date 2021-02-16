@@ -1,3 +1,10 @@
+## [2.1.5](https://github.com/adobe/helix-fetch/compare/v2.1.4...v2.1.5) (2021-02-16)
+
+
+### Bug Fixes
+
+* **deps:** update external major ([#139](https://github.com/adobe/helix-fetch/issues/139)) ([ae0bf92](https://github.com/adobe/helix-fetch/commit/ae0bf92ce3d4ac3c8061d56f60e3946f2bad3c7a))
+
 ## [2.1.4](https://github.com/adobe/helix-fetch/compare/v2.1.3...v2.1.4) (2021-02-12)
 
 
