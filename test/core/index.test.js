@@ -284,7 +284,10 @@ describe('Core Tests', () => {
     const buf = await readStream(resp.readable);
     const jsonResponseBody = JSON.parse(buf);
     assert(typeof jsonResponseBody === 'object');
-    assert.deepStrictEqual(jsonResponseBody.json, body);
+    const { json, headers } = jsonResponseBody;
+    assert.strictEqual(headers['Content-Type'], 'application/json');
+    assert.strictEqual(+headers['Content-Length'], JSON.stringify(body).length);
+    assert.deepStrictEqual(json, body);
   });
 
   it('supports json POST (override content-type)', async () => {
@@ -298,8 +301,10 @@ describe('Core Tests', () => {
     const buf = await readStream(resp.readable);
     const jsonResponseBody = JSON.parse(buf);
     assert(typeof jsonResponseBody === 'object');
-    assert.strictEqual(jsonResponseBody.headers['Content-Type'], contentType);
-    assert.deepStrictEqual(jsonResponseBody.json, body);
+    const { json, headers: reqHeaders } = jsonResponseBody;
+    assert.strictEqual(reqHeaders['Content-Type'], contentType);
+    assert.strictEqual(+reqHeaders['Content-Length'], JSON.stringify(body).length);
+    assert.deepStrictEqual(json, body);
   });
 
   it('supports text body', async () => {
@@ -311,8 +316,10 @@ describe('Core Tests', () => {
     const buf = await readStream(resp.readable);
     const jsonResponseBody = JSON.parse(buf);
     assert(typeof jsonResponseBody === 'object');
-    assert.strictEqual(jsonResponseBody.headers['Content-Type'], 'text/plain; charset=utf-8');
-    assert.deepStrictEqual(jsonResponseBody.data, body);
+    const { data, headers } = jsonResponseBody;
+    assert.strictEqual(headers['Content-Type'], 'text/plain; charset=utf-8');
+    assert.strictEqual(+headers['Content-Length'], body.length);
+    assert.strictEqual(data, body);
   });
 
   it('supports text body (html)', async () => {
@@ -326,8 +333,10 @@ describe('Core Tests', () => {
     const buf = await readStream(resp.readable);
     const jsonResponseBody = JSON.parse(buf);
     assert(typeof jsonResponseBody === 'object');
-    assert.strictEqual(jsonResponseBody.headers['Content-Type'], contentType);
-    assert.deepStrictEqual(jsonResponseBody.data, body);
+    const { data, headers: reqHeaders } = jsonResponseBody;
+    assert.strictEqual(reqHeaders['Content-Type'], contentType);
+    assert.strictEqual(+reqHeaders['Content-Length'], body.length);
+    assert.strictEqual(data, body);
   });
 
   it('supports stream body', async () => {
@@ -339,7 +348,23 @@ describe('Core Tests', () => {
     const buf = await readStream(resp.readable);
     const jsonResponseBody = JSON.parse(buf);
     assert(typeof jsonResponseBody === 'object');
-    assert.deepStrictEqual(jsonResponseBody.data, fs.readFileSync(__filename).toString());
+    const { data, headers } = jsonResponseBody;
+    assert.strictEqual(data, fs.readFileSync(__filename).toString());
+    assert.strictEqual(headers['Content-Length'], undefined);
+  });
+
+  it('coerces arbitrary body to string', async () => {
+    const method = 'POST';
+    const body = Number(313);
+    const resp = await defaultCtx.request('https://httpbingo.org/post', { method, body });
+    assert.strictEqual(resp.statusCode, 200);
+    assert.strictEqual(resp.headers['content-type'], 'application/json; encoding=utf-8');
+    const buf = await readStream(resp.readable);
+    const jsonResponseBody = JSON.parse(buf);
+    assert(typeof jsonResponseBody === 'object');
+    const { data, headers } = jsonResponseBody;
+    assert.strictEqual(data, String(body));
+    assert.strictEqual(+headers['Content-Length'], String(body).length);
   });
 
   it('supports URLSearchParams body', async () => {
@@ -355,8 +380,10 @@ describe('Core Tests', () => {
     const buf = await readStream(resp.readable);
     const jsonResponseBody = JSON.parse(buf);
     assert(typeof jsonResponseBody === 'object');
-    assert.strictEqual(jsonResponseBody.headers['Content-Type'], 'application/x-www-form-urlencoded; charset=utf-8');
-    assert.deepStrictEqual(jsonResponseBody.form, params);
+    const { form, headers } = jsonResponseBody;
+    assert.strictEqual(headers['Content-Type'], 'application/x-www-form-urlencoded; charset=utf-8');
+    assert.strictEqual(+headers['Content-Length'], body.toString().length);
+    assert.deepStrictEqual(form, params);
   });
 
   it('supports POST without body', async () => {

@@ -116,7 +116,7 @@ testParams.forEach((params) => {
       assert.strictEqual(resp.httpVersion, httpVersion);
       assert.strictEqual(resp.headers.get('content-type'), contentType);
       const buffer = await resp.arrayBuffer();
-      assert(buffer !== null && buffer instanceof ArrayBuffer);
+      assert(buffer instanceof ArrayBuffer);
       assert.strictEqual(buffer.byteLength, dataLen);
     });
 
@@ -148,7 +148,10 @@ testParams.forEach((params) => {
       assert.strictEqual(resp.headers.get('content-type'), 'application/json');
       const jsonResponseBody = await resp.json();
       assert(jsonResponseBody !== null && typeof jsonResponseBody === 'object');
-      assert.deepStrictEqual(jsonResponseBody.json, body);
+      const { json, headers } = jsonResponseBody;
+      assert.strictEqual(headers['Content-Type'], 'application/json');
+      assert.strictEqual(+headers['Content-Length'], JSON.stringify(body).length);
+      assert.deepStrictEqual(json, body);
     });
 
     it('supports json PATCH', async () => {
@@ -160,7 +163,10 @@ testParams.forEach((params) => {
       assert.strictEqual(resp.headers.get('content-type'), 'application/json');
       const jsonResponseBody = await resp.json();
       assert(jsonResponseBody !== null && typeof jsonResponseBody === 'object');
-      assert.deepStrictEqual(jsonResponseBody.json, body);
+      const { json, headers } = jsonResponseBody;
+      assert.strictEqual(headers['Content-Type'], 'application/json');
+      assert.strictEqual(+headers['Content-Length'], JSON.stringify(body).length);
+      assert.deepStrictEqual(json, body);
     });
 
     it('sanitizes lowercase method names', async () => {
@@ -172,7 +178,10 @@ testParams.forEach((params) => {
       assert.strictEqual(resp.headers.get('content-type'), 'application/json');
       const jsonResponseBody = await resp.json();
       assert(jsonResponseBody !== null && typeof jsonResponseBody === 'object');
-      assert.deepStrictEqual(jsonResponseBody.json, body);
+      const { json, headers } = jsonResponseBody;
+      assert.strictEqual(headers['Content-Type'], 'application/json');
+      assert.strictEqual(+headers['Content-Length'], JSON.stringify(body).length);
+      assert.deepStrictEqual(json, body);
     });
 
     it('AbortController works (premature abort)', async () => {
@@ -493,8 +502,10 @@ testParams.forEach((params) => {
       assert.strictEqual(resp.headers.get('content-type'), 'application/json');
       const jsonResponseBody = await resp.json();
       assert(jsonResponseBody !== null && typeof jsonResponseBody === 'object');
-      assert.strictEqual(jsonResponseBody.headers['Content-Type'], 'text/plain; charset=utf-8');
-      assert.deepStrictEqual(jsonResponseBody.data, body);
+      const { data, headers } = jsonResponseBody;
+      assert.strictEqual(+headers['Content-Length'], body.length);
+      assert.strictEqual(headers['Content-Type'], 'text/plain; charset=utf-8');
+      assert.strictEqual(data, body);
     });
 
     it('supports stream body', async () => {
@@ -506,7 +517,9 @@ testParams.forEach((params) => {
       assert.strictEqual(resp.headers.get('content-type'), 'application/json');
       const jsonResponseBody = await resp.json();
       assert(jsonResponseBody !== null && typeof jsonResponseBody === 'object');
-      assert.deepStrictEqual(jsonResponseBody.data, fs.readFileSync(__filename).toString());
+      const { data, headers } = jsonResponseBody;
+      assert.strictEqual(data, fs.readFileSync(__filename).toString());
+      assert.strictEqual(headers['Content-Length'], undefined);
     });
 
     it('supports URLSearchParams body', async () => {
@@ -522,8 +535,10 @@ testParams.forEach((params) => {
       assert.strictEqual(resp.headers.get('content-type'), 'application/json');
       const jsonResponseBody = await resp.json();
       assert(jsonResponseBody !== null && typeof jsonResponseBody === 'object');
-      assert.strictEqual(jsonResponseBody.headers['Content-Type'], 'application/x-www-form-urlencoded; charset=utf-8');
-      assert.deepStrictEqual(jsonResponseBody.form, searchParams);
+      const { form, headers } = jsonResponseBody;
+      assert.strictEqual(headers['Content-Type'], 'application/x-www-form-urlencoded; charset=utf-8');
+      assert.strictEqual(+headers['Content-Length'], body.toString().length);
+      assert.deepStrictEqual(form, searchParams);
     });
 
     it('supports FormData body', async () => {
@@ -541,8 +556,10 @@ testParams.forEach((params) => {
       assert.strictEqual(resp.headers.get('content-type'), 'application/json');
       const jsonResponseBody = await resp.json();
       assert(jsonResponseBody !== null && typeof jsonResponseBody === 'object');
-      assert(jsonResponseBody.headers['Content-Type'].startsWith('multipart/form-data;boundary='));
-      assert.deepStrictEqual(jsonResponseBody.form, searchParams);
+      const { form: reqForm, headers } = jsonResponseBody;
+      assert(headers['Content-Type'].startsWith('multipart/form-data;boundary='));
+      assert.strictEqual(+headers['Content-Length'], form.getBuffer().length);
+      assert.deepStrictEqual(reqForm, searchParams);
     });
   });
 });

@@ -246,7 +246,7 @@ describe('Cache Tests', () => {
 
     // arrayBuffer()
     const arrBuf = await resp.arrayBuffer();
-    assert(arrBuf !== null && arrBuf instanceof ArrayBuffer);
+    assert(arrBuf instanceof ArrayBuffer);
     assert.strictEqual(arrBuf.byteLength, contentLength);
   });
 
@@ -284,7 +284,7 @@ describe('Cache Tests', () => {
     assert.strictEqual(buf.length, contentLength);
 
     const arrBuf = await resp.arrayBuffer();
-    assert(arrBuf !== null && arrBuf instanceof ArrayBuffer);
+    assert(arrBuf instanceof ArrayBuffer);
     assert.strictEqual(arrBuf.byteLength, contentLength);
 
     assert(isStream.readable(resp.body));
