@@ -52,7 +52,7 @@ const fetch = async (ctx, url, options) => {
 
   // extract options
   const {
-    method, body, signal, compress, follow, redirect,
+    method, body, signal, compress, follow, redirect, init: { body: initBody },
   } = req;
 
   let coreResp;
@@ -61,7 +61,7 @@ const fetch = async (ctx, url, options) => {
     const err = new AbortError('The operation was aborted.');
     // cleanup request
     /* istanbul ignore else */
-    if (req.body && req.body instanceof Readable) {
+    if (req.body instanceof Readable) {
       req.body.destroy(err);
     }
     throw err;
@@ -75,7 +75,7 @@ const fetch = async (ctx, url, options) => {
       ...options,
       method,
       headers: req.headers.plain(),
-      body,
+      body: initBody && !(initBody instanceof Readable) ? initBody : body,
       compress,
       follow,
       redirect,
@@ -83,7 +83,7 @@ const fetch = async (ctx, url, options) => {
     });
   } catch (err) {
     // cleanup request
-    if (body && body instanceof Readable) {
+    if (body instanceof Readable) {
       body.destroy(err);
     }
     /* istanbul ignore next */
@@ -104,7 +104,7 @@ const fetch = async (ctx, url, options) => {
     const err = new AbortError('The operation was aborted.');
     // cleanup request
     /* istanbul ignore else */
-    if (req.body && req.body instanceof Readable) {
+    if (req.body instanceof Readable) {
       req.body.destroy(err);
     }
     // propagate error on response stream

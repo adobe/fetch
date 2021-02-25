@@ -12,8 +12,10 @@
 
 'use strict';
 
+const { Readable } = require('stream');
 const tls = require('tls');
 
+const FormData = require('form-data');
 const LRU = require('lru-cache');
 const debug = require('debug')('helix-fetch:core');
 
@@ -191,37 +193,57 @@ const request = async (ctx, uri, options) => {
   // sanitize headers (lowercase names)
   opts.headers = sanitizeHeaders(opts.headers || {});
   // set Host header if none is provided
-  if (!opts.headers.host) {
+  if (opts.headers.host === undefined) {
     opts.headers.host = url.host;
   }
   // User-Agent header
   /* istanbul ignore else */
   if (ctx.userAgent) {
-    if (!opts.headers['user-agent']) {
+    if (opts.headers['user-agent'] === undefined) {
       opts.headers['user-agent'] = ctx.userAgent;
     }
   }
   // some header magic
+  let contentType;
   if (opts.body instanceof URLSearchParams) {
-    opts.headers['content-type'] = 'application/x-www-form-urlencoded; charset=utf-8';
+    contentType = 'application/x-www-form-urlencoded; charset=utf-8';
     opts.body = opts.body.toString();
+  } else if (opts.body instanceof FormData) {
+    contentType = `multipart/form-data;boundary=${opts.body.getBoundary()}`;
+    opts.body = opts.body.getBuffer();
   } else if (typeof opts.body === 'string' || opts.body instanceof String) {
-    if (!opts.headers['content-type']) {
-      opts.headers['content-type'] = 'text/plain; charset=utf-8';
-    }
+    contentType = 'text/plain; charset=utf-8';
   } else if (isPlainObject(opts.body)) {
     opts.body = JSON.stringify(opts.body);
-    if (!opts.headers['content-type']) {
-      opts.headers['content-type'] = 'application/json';
+    contentType = 'application/json';
+  }
+  if (opts.headers['content-type'] === undefined && contentType !== undefined) {
+    opts.headers['content-type'] = contentType;
+  }
+  // by now all supported custom body types are converted to string or buffer
+  if (opts.body != null) {
+    if (!(opts.body instanceof Readable)) {
+      // non-stream body
+      if (!(typeof opts.body === 'string' || opts.body instanceof String)
+        && !Buffer.isBuffer(opts.body)) {
+        // neither a string or buffer: coerce to string
+        opts.body = String(opts.body);
+      }
+      // string or buffer body
+      /* istanbul ignore else */
+      if (opts.headers['transfer-encoding'] === undefined
+        && opts.headers['content-length'] === undefined) {
+        opts.headers['content-length'] = String(opts.body.length);
+      }
     }
   }
-  if (!opts.headers.accept) {
+  if (opts.headers.accept === undefined) {
     opts.headers.accept = '*/*';
   }
   if (opts.body == null && ['POST', 'PUT'].includes(opts.method)) {
     opts.headers['content-length'] = '0';
   }
-  if (opts.compress && !opts.headers['accept-encoding']) {
+  if (opts.compress && opts.headers['accept-encoding'] === undefined) {
     opts.headers['accept-encoding'] = 'gzip,deflate,br';
   }
 
