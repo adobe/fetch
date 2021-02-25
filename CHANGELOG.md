@@ -1,3 +1,10 @@
+## [2.1.6](https://github.com/adobe/helix-fetch/compare/v2.1.5...v2.1.6) (2021-02-25)
+
+
+### Bug Fixes
+
+* preserve original req body and calculate content-length for non-stream body ([#144](https://github.com/adobe/helix-fetch/issues/144)) ([d4f04e5](https://github.com/adobe/helix-fetch/commit/d4f04e52cc53e9ddf5e0bf1df40ec3937c934cae))
+
 ## [2.1.5](https://github.com/adobe/helix-fetch/compare/v2.1.4...v2.1.5) (2021-02-16)
 
 
