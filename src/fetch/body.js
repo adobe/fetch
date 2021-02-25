@@ -112,7 +112,7 @@ class Body {
    * Return a Node.js Readable stream.
    * (deviation from spec)
    *
-   * @return {Promise<Readable>}
+   * @return {Readable}
    */
   get body() {
     return this[INTERNALS].stream;
