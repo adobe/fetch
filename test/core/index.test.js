@@ -215,7 +215,7 @@ describe('Core Tests', () => {
       const json = JSON.parse(buf);
       assert.strictEqual(json['user-agent'], customUserAgent);
     } finally {
-      customCtx.reset();
+      await customCtx.reset();
     }
   });
 
@@ -251,7 +251,7 @@ describe('Core Tests', () => {
       assert.strictEqual(resp.httpVersionMajor, 1);
       assert.strictEqual(resp.httpVersionMinor, 1);
     } finally {
-      h1Ctx.reset();
+      await h1Ctx.reset();
     }
   });
 
@@ -271,7 +271,7 @@ describe('Core Tests', () => {
       const ok = responses.filter((res) => res.statusCode === 200);
       assert.strictEqual(ok.length, N);
     } finally {
-      ctx.reset();
+      await ctx.reset();
     }
   });
 
