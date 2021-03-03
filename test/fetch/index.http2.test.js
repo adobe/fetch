@@ -152,7 +152,7 @@ describe('HTTP/2-specific Fetch Tests', () => {
       const body = await resp.text();
       assert.strictEqual(body, HELLO_WORLD);
     } finally {
-      ctx.reset();
+      await ctx.reset();
     }
   });
 
@@ -201,7 +201,7 @@ describe('HTTP/2-specific Fetch Tests', () => {
       await sleep(1000);
       assert(handler.notCalled);
     } finally {
-      ctx.reset();
+      await ctx.reset();
     }
   });
 
