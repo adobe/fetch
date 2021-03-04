@@ -12,6 +12,8 @@
 
 'use strict';
 
+const debug = require('debug')('helix-fetch:core');
+
 const {
   request,
   setupContext,
@@ -77,6 +79,7 @@ class RequestContext {
   }
 
   async reset() {
+    debug('resetting context');
     return resetContext(this);
   }
 }

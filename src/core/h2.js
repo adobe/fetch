@@ -41,6 +41,7 @@ const resetContext = async ({ h2 }) => {
   return Promise.all(Object.values(h2.sessionCache).map(
     (session) => new Promise((resolve) => {
       session.on('close', resolve);
+      debug(`resetContext: destroying session (socket #${session.socket.id}, ${session.socket.servername})`);
       session.destroy();
     }),
   ));
@@ -157,11 +158,12 @@ const request = async (ctx, url, options) => {
       // connect and setup new session
       // (connect options: https://nodejs.org/api/http2.html#http2_http2_connect_authority_options_listener)
       const connectOptions = { ...ctxOpts };
-      /* istanbul ignore else */
-      if (socket) {
-        // reuse socket
+      if (socket && !socket.inUse) {
+        // we've got a socket from initial protocol negotiation via ALPN
+        // reuse socket for new session
         connectOptions.createConnection = (/* url, options */) => {
           debug(`reusing socket #${socket.id} (${socket.servername})`);
+          socket.inUse = true;
           return socket;
         };
       }
@@ -212,9 +214,9 @@ const request = async (ctx, url, options) => {
       });
     } else {
       // we have a cached session
-      /* istanbul ignore if */
+      /* istanbul ignore next */
       // eslint-disable-next-line no-lonely-if
-      if (socket && socket.id !== session.socket.id) {
+      if (socket && socket.id !== session.socket.id && !socket.inUse) {
         // we have no use for the passed socket
         debug(`discarding redundant socket used for ALPN: #${socket.id} ${socket.servername}`);
         socket.destroy();

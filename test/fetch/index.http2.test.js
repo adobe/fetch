@@ -240,4 +240,24 @@ describe('HTTP/2-specific Fetch Tests', () => {
     assert.notStrictEqual(results[0], results[2]);
     assert.notStrictEqual(results[1], results[2]);
   });
+
+  it('concurrent HTTP/2 requests to same origin using different contexts', async function test() {
+    this.timeout(5000);
+
+    const doFetch = async (ctx, url) => ctx.fetch(url);
+
+    const N = 50; // # of parallel requests
+    const contexts = Array.from({ length: N }, () => context());
+    const TEST_URL = 'https://httpbin.org/bytes/'; // HTTP2
+    // generete array of 'randomized' urls
+    const args = contexts
+      .map((ctx) => ({ ctx, num: Math.floor(Math.random() * N) }))
+      .map(({ ctx, num }) => ({ ctx, url: `${TEST_URL}${num}` }));
+    // send requests
+    const responses = await Promise.all(args.map(({ ctx, url }) => doFetch(ctx, url)));
+    // cleanup
+    await Promise.all(contexts.map((ctx) => ctx.reset()));
+    const ok = responses.filter((res) => res.ok && res.httpVersion === '2.0');
+    assert.strictEqual(ok.length, N);
+  });
 });

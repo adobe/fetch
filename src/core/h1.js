@@ -58,11 +58,13 @@ const setupContext = (ctx) => {
 
 const resetContext = async ({ h1 }) => {
   if (h1.httpAgent) {
+    debug('resetContext: destroying httpAgent');
     h1.httpAgent.destroy();
     // eslint-disable-next-line no-param-reassign
     delete h1.httpAgent;
   }
   if (h1.httpsAgent) {
+    debug('resetContext: destroying httpsAgent');
     h1.httpsAgent.destroy();
     // eslint-disable-next-line no-param-reassign
     delete h1.httpsAgent;
