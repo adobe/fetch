@@ -221,7 +221,7 @@ interface Http2Options {
   console.log(resp.ok);
   console.log(resp.status);
   console.log(resp.statusText);
-  console.log(resp.method);
+  console.log(resp.httpVersion);
   console.log(resp.headers.plain());
   console.log(resp.headers.get('content-type'));
 ```
