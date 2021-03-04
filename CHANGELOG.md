@@ -1,3 +1,10 @@
+## [2.1.7](https://github.com/adobe/helix-fetch/compare/v2.1.6...v2.1.7) (2021-03-04)
+
+
+### Bug Fixes
+
+* concurrent h2 requests to same origin using separate contexts ([#148](https://github.com/adobe/helix-fetch/issues/148)) ([ac85163](https://github.com/adobe/helix-fetch/commit/ac851632fc5723dfa4bec59d7e11bec827fe02e5))
+
 ## [2.1.6](https://github.com/adobe/helix-fetch/compare/v2.1.5...v2.1.6) (2021-02-25)
 
 
