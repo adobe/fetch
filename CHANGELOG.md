@@ -1,3 +1,10 @@
+## [2.1.8](https://github.com/adobe/helix-fetch/compare/v2.1.7...v2.1.8) (2021-03-22)
+
+
+### Bug Fixes
+
+* guard against race condition on reset ([72fb3a4](https://github.com/adobe/helix-fetch/commit/72fb3a47210f0e40246acdc41425f9cd9011ceed))
+
 ## [2.1.7](https://github.com/adobe/helix-fetch/compare/v2.1.6...v2.1.7) (2021-03-04)
 
 
