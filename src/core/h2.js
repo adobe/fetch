@@ -41,7 +41,7 @@ const resetContext = async ({ h2 }) => {
   return Promise.all(Object.values(h2.sessionCache).map(
     (session) => new Promise((resolve) => {
       session.on('close', resolve);
-      debug(`resetContext: destroying session (socket #${session.socket.id}, ${session.socket.servername})`);
+      debug(`resetContext: destroying session (socket #${session.socket && session.socket.id}, ${session.socket && session.socket.servername})`);
       session.destroy();
     }),
   ));
