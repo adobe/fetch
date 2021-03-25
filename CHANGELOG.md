@@ -1,3 +1,10 @@
+## [2.1.9](https://github.com/adobe/helix-fetch/compare/v2.1.8...v2.1.9) (2021-03-25)
+
+
+### Bug Fixes
+
+* use byte length in content-length ([#154](https://github.com/adobe/helix-fetch/issues/154)) ([cc46f65](https://github.com/adobe/helix-fetch/commit/cc46f6582da4377fd5148d3f72e4a77376f4e825))
+
 ## [2.1.8](https://github.com/adobe/helix-fetch/compare/v2.1.7...v2.1.8) (2021-03-22)
 
 
