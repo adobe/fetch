@@ -233,7 +233,7 @@ const request = async (ctx, uri, options) => {
       /* istanbul ignore else */
       if (opts.headers['transfer-encoding'] === undefined
         && opts.headers['content-length'] === undefined) {
-        opts.headers['content-length'] = String(opts.body.length);
+        opts.headers['content-length'] = Buffer.byteLength(opts.body, 'utf-8');
       }
     }
   }
