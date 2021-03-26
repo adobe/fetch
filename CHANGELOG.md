@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/adobe/helix-fetch/compare/v2.1.9...v2.2.0) (2021-03-26)
+
+
+### Features
+
+* **core:** use buffer.length for content-length if possible ([#155](https://github.com/adobe/helix-fetch/issues/155)) ([e614297](https://github.com/adobe/helix-fetch/commit/e614297cfd4f7351d2cc0119485de9dcc1838d8b))
+
 ## [2.1.9](https://github.com/adobe/helix-fetch/compare/v2.1.8...v2.1.9) (2021-03-25)
 
 
