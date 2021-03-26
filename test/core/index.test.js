@@ -322,6 +322,45 @@ describe('Core Tests', () => {
     assert.strictEqual(data, body);
   });
 
+  it('supports text multibyte body', async () => {
+    const method = 'POST';
+    const body = 'こんにちは';
+    const resp = await defaultCtx.request('https://httpbin.org/post', { method, body });
+    assert.strictEqual(resp.statusCode, 200);
+    assert.strictEqual(resp.headers['content-type'], 'application/json');
+    const buf = await readStream(resp.readable);
+    const jsonResponseBody = JSON.parse(buf);
+    assert(typeof jsonResponseBody === 'object');
+    const { data, headers } = jsonResponseBody;
+    assert.strictEqual(headers['Content-Type'], 'text/plain; charset=utf-8');
+    assert.strictEqual(+headers['Content-Length'], Buffer.from(body, 'utf-8').length);
+    assert.strictEqual(data, body);
+  });
+
+  it('supports buffer body', async () => {
+    const method = 'POST';
+    const body = Buffer.from(new Uint8Array([0xfe, 0xff, 0x41]));
+    const resp = await defaultCtx.request('https://httpbin.org/post', {
+      method,
+      body,
+      headers: {
+        'content-type': 'application/octet-stream',
+      },
+    });
+    assert.strictEqual(resp.statusCode, 200);
+    assert.strictEqual(resp.headers['content-type'], 'application/json');
+    const buf = await readStream(resp.readable);
+    const jsonResponseBody = JSON.parse(buf);
+    assert(typeof jsonResponseBody === 'object');
+    const { data, headers } = jsonResponseBody;
+    assert.strictEqual(headers['Content-Type'], 'application/octet-stream');
+    assert.strictEqual(+headers['Content-Length'], body.length);
+    assert.deepStrictEqual(
+      Buffer.from(data.substring('data:application/octet-stream;base64,'.length), 'base64'),
+      body,
+    );
+  });
+
   it('supports text body (html)', async () => {
     const method = 'POST';
     const body = '<h1>hello, world!</h1>';
