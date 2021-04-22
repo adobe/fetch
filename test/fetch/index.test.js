@@ -15,6 +15,7 @@
 'use strict';
 
 const assert = require('assert');
+const https = require('https');
 const fs = require('fs');
 const stream = require('stream');
 const { promisify } = require('util');
@@ -365,6 +366,32 @@ testParams.forEach((params) => {
       resp = await fetch(url, { cache: 'no-store', signal });
       assert.strictEqual(resp.status, 200);
       assert.strictEqual(resp.redirected, true);
+    });
+
+    it('connection error in redirected location is handled correctly', async () => {
+      let server;
+      await new Promise((resolve, reject) => {
+        server = https.createServer({ }, (req, res) => {
+          console.log('request received');
+          res.writeHead(200);
+          res.end('hello');
+        }).listen(8444)
+          .on('error', reject)
+          .on('listening', resolve);
+      });
+
+      try {
+        const location = `${protocol}://localhost:${server.address().port}/`;
+        const url = `${protocol}://httpbingo.org/redirect-to?url=${encodeURIComponent(location)}&status_code=302`;
+        await fetch(url, { cache: 'no-store' });
+        assert.fail('redirect should fail');
+      } catch (e) {
+        if (e.message === 'redirect should fail') {
+          throw e;
+        }
+      } finally {
+        server.close();
+      }
     });
 
     it('supports redirect: follow', async () => {
