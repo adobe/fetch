@@ -372,10 +372,9 @@ testParams.forEach((params) => {
       let server;
       await new Promise((resolve, reject) => {
         server = https.createServer({ }, (req, res) => {
-          console.log('request received');
           res.writeHead(200);
           res.end('hello');
-        }).listen(8444)
+        }).listen()
           .on('error', reject)
           .on('listening', resolve);
       });
