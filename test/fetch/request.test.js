@@ -277,4 +277,15 @@ describe('Request Tests', () => {
       expect(result).to.equal('hello, world!');
     });
   });
+
+  it('wrapping requests preserves init options', () => {
+    const method = 'POST';
+    const body = { foo: 'bar', baz: { count: 313 } };
+    const req = new Request(BASE_URL, { method, body });
+    expect(req.init.body).to.deep.equal(body);
+    const req1 = new Request(req.url, req.init);
+    expect(req1.init.body).to.deep.equal(body);
+    const req2 = new Request(req1.url, req1.init);
+    expect(req2.init.body).to.deep.equal(body);
+  });
 });
