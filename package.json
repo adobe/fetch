@@ -51,7 +51,7 @@
     "eslint-plugin-import": "2.22.1",
     "is-stream": "2.0.0",
     "junit-report-builder": "3.0.0",
-    "lint-staged": "10.5.4",
+    "lint-staged": "11.0.0",
     "mocha": "8.4.0",
     "nock": "13.0.11",
     "nyc": "15.1.0",
