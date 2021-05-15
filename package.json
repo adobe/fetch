@@ -48,7 +48,7 @@
     "cz-conventional-changelog": "3.3.0",
     "eslint": "7.26.0",
     "eslint-plugin-header": "3.1.1",
-    "eslint-plugin-import": "2.23.1",
+    "eslint-plugin-import": "2.23.2",
     "is-stream": "2.0.0",
     "junit-report-builder": "3.0.0",
     "lint-staged": "11.0.0",
