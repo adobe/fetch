@@ -27,7 +27,7 @@ describe('Fetch Resiliance Tests', () => {
     const server = new Server(2, true, HELLO_MSG);
     await server.start();
 
-    const ctx = context({ h2: { rejectUnauthorized: false } });
+    const ctx = context({ rejectUnauthorized: false });
     try {
       let resp = await ctx.fetch(`${server.origin}/hello`);
       assert.strictEqual(resp.status, 200);
@@ -54,7 +54,7 @@ describe('Fetch Resiliance Tests', () => {
     const server = new Server(2, true, HELLO_MSG);
     await server.start();
 
-    const ctx = context({ h2: { rejectUnauthorized: false } });
+    const ctx = context({ rejectUnauthorized: false });
     try {
       let resp = await ctx.fetch(`${server.origin}/hello`);
       assert.strictEqual(resp.status, 200);
