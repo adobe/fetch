@@ -158,17 +158,6 @@ const h1Request = async (ctx, url, options) => {
       signal.addEventListener('abort', onAbortSignal);
     }
 
-    const {
-      options: {
-        rejectUnauthorized: _rejectUnauthorized,
-        h1: h1Opts = {},
-        h2: h2Opts = {},
-      },
-    } = ctx;
-    const rejectUnauthorized = !((_rejectUnauthorized === false
-      || h1Opts.rejectUnauthorized === false
-      || h2Opts.rejectUnauthorized === false));
-  
     req = request(url, opts);
     req.once('response', (res) => {
       if (signal) {
