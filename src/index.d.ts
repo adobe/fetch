@@ -156,6 +156,12 @@ export interface Http2Options {
    * @default 5000
    */
   pushedStreamIdleTimeout?: number;
+  /**
+   * (HTTPS only)
+   * If not false, the server certificate is verified against the list of supplied CAs. An 'error' event is emitted if verification fails; err.code contains the OpenSSL error code.
+   * @default true
+   */
+  rejectUnauthorized?: boolean;
 }
 
 export interface ContextOptions {
@@ -184,6 +190,13 @@ export interface ContextOptions {
    * @default 100
    */
   alpnCacheSize?: number;
+  /**
+   * (HTTPS only)
+   * If not false, the server certificate is verified against the list of supplied CAs. An 'error' event is emitted if verification fails; err.code contains the OpenSSL error code.
+   * @default true
+   */
+  rejectUnauthorized?: boolean;
+
   h1?: Http1Options;
   h2?: Http2Options;
 }
