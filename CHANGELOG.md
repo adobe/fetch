@@ -1,3 +1,10 @@
+## [2.2.1](https://github.com/adobe/helix-fetch/compare/v2.2.0...v2.2.1) (2021-05-17)
+
+
+### Bug Fixes
+
+* properly propagate global rejectUnauthorized context option ([#173](https://github.com/adobe/helix-fetch/issues/173)) ([e61c326](https://github.com/adobe/helix-fetch/commit/e61c326266e99e2af44d26a875539595af336d1a))
+
 # [2.2.0](https://github.com/adobe/helix-fetch/compare/v2.1.9...v2.2.0) (2021-03-26)
 
 
