@@ -23,15 +23,16 @@ const { decodeStream } = require('../common/utils');
 
 const getAgent = (ctx, protocol) => {
   // getAgent is synchronous, no need for lock/mutex
-  const { h1, options: { h1: opts } } = ctx;
+  const { h1, options: { h1: opts, rejectUnauthorized } } = ctx;
 
   if (protocol === 'https:') {
     // secure http
     if (h1.httpsAgent) {
       return h1.httpsAgent;
     }
-    if (opts) {
-      h1.httpsAgent = new https.Agent(opts);
+    // use agent if either h1 options or rejectUnauthorized context option was specified
+    if (opts || typeof rejectUnauthorized === 'boolean') {
+      h1.httpsAgent = new https.Agent({ ...(opts || {}), rejectUnauthorized });
       return h1.httpsAgent;
     }
     // use default (global) agent
@@ -157,6 +158,17 @@ const h1Request = async (ctx, url, options) => {
       signal.addEventListener('abort', onAbortSignal);
     }
 
+    const {
+      options: {
+        rejectUnauthorized: _rejectUnauthorized,
+        h1: h1Opts = {},
+        h2: h2Opts = {},
+      },
+    } = ctx;
+    const rejectUnauthorized = !((_rejectUnauthorized === false
+      || h1Opts.rejectUnauthorized === false
+      || h2Opts.rejectUnauthorized === false));
+  
     req = request(url, opts);
     req.once('response', (res) => {
       if (signal) {
