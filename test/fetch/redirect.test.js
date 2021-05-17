@@ -21,7 +21,7 @@ const { context } = require('../../src/fetch');
 
 describe('Redirect-specific Fetch Tests', () => {
   it('connection error in redirected http/1.1 location is handled correctly', async () => {
-    // start unfriendly http/1.1 server
+    // start http/1.1 server
     const server = new Server(1);
     await server.start();
 
@@ -36,7 +36,7 @@ describe('Redirect-specific Fetch Tests', () => {
       assert.strictEqual(resp.httpVersion, '1.1');
       assert.strictEqual(resp.redirected, true);
 
-      // redirected request will be aborted
+      // redirected request is aborted
       location = `${server.origin}/abort`;
       url = `https://httpbingo.org/redirect-to?url=${encodeURIComponent(location)}&status_code=302`;
       await assert.rejects(async () => ctx.fetch(url, { cache: 'no-store' }), { name: 'FetchError', code: 'ECONNRESET' });
@@ -47,8 +47,8 @@ describe('Redirect-specific Fetch Tests', () => {
     }
   });
 
-  it('connection error in redirected http/1.1 location is handled correctly', async () => {
-    // start unfriendly http/2 server
+  it('connection error in redirected http/2 location is handled correctly', async () => {
+    // start http/2 server
     const server = new Server(2);
     await server.start();
 
@@ -63,7 +63,7 @@ describe('Redirect-specific Fetch Tests', () => {
       assert.strictEqual(resp.httpVersion, '2.0');
       assert.strictEqual(resp.redirected, true);
 
-      // redirected request will be aborted
+      // redirected request is aborted
       location = `${server.origin}/abort`;
       url = `https://httpbingo.org/redirect-to?url=${encodeURIComponent(location)}&status_code=302`;
       await assert.rejects(async () => ctx.fetch(url, { cache: 'no-store' }), { name: 'FetchError', code: 'ERR_HTTP2_SESSION_ERROR' });
