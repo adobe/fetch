@@ -22,7 +22,10 @@ const { promisify } = require('util');
 const isStream = require('is-stream');
 const { WritableStreamBuffer } = require('stream-buffers');
 
+const { Server } = require('../server');
 const defaultFetchContext = require('../../src/fetch');
+
+const HELLO_WORLD = 'Hello, World!';
 
 const {
   context,
@@ -46,7 +49,7 @@ const testParams = [
     name: 'https: (default: ALPN)',
     protocol: 'https',
     httpVersion: '2.0',
-    context: defaultFetchContext,
+    context: context({ rejectUnauthorized: false }),
   },
   {
     name: 'https: (forced: HTTP 1.1)',
@@ -561,5 +564,34 @@ testParams.forEach((params) => {
       assert.strictEqual(+headers['Content-Length'], form.getBuffer().length);
       assert.deepStrictEqual(reqForm, searchParams);
     });
+
+    if (protocol === 'https') {
+      it('supports self signed certificate', async () => {
+        const server = new Server(httpVersion === '2.0' ? 2 : 1, true, HELLO_WORLD);
+        await server.start();
+
+        // self signed certificates are rejected by default
+        assert.rejects(() => defaultFetchContext.fetch(`${server.origin}/hello`, { cache: 'no-store' }));
+
+        const ctx = context({ rejectUnauthorized: false });
+        try {
+          let resp = await ctx.fetch(`${server.origin}/hello`, { cache: 'no-store' });
+          assert.strictEqual(resp.status, 200);
+          assert.strictEqual(resp.httpVersion, httpVersion);
+          let body = await resp.text();
+          assert.strictEqual(body, HELLO_WORLD);
+
+          // try again
+          resp = await ctx.fetch(`${server.origin}/hello`, { cache: 'no-store' });
+          assert.strictEqual(resp.status, 200);
+          assert.strictEqual(resp.httpVersion, httpVersion);
+          body = await resp.text();
+          assert.strictEqual(body, HELLO_WORLD);
+        } finally {
+          await ctx.reset();
+          await server.close();
+        }
+      });
+    }
   });
 });

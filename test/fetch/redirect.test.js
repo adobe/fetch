@@ -15,46 +15,62 @@
 'use strict';
 
 const assert = require('assert');
-const https = require('https');
-const util = require('util');
 
-const pem = require('pem');
-
+const { Server } = require('../server');
 const { context } = require('../../src/fetch');
 
-const createCertificate = util.promisify(pem.createCertificate);
-
 describe('Redirect-specific Fetch Tests', () => {
-  it('connection error in redirected location is handled correctly', async () => {
-    // setup & start unfriendly server
-    const keys = await createCertificate({ selfSigned: true });
-    const options = {
-      key: keys.serviceKey,
-      cert: keys.certificate,
-    };
-    let server;
-    await new Promise((resolve, reject) => {
-      server = https.createServer(options, (req) => {
-        // abort every request
-        req.socket.destroy();
-      }).listen(0)
-        .on('error', reject)
-        .on('listening', resolve);
-    });
+  it('connection error in redirected http/1.1 location is handled correctly', async () => {
+    // start unfriendly http/1.1 server
+    const server = new Server(1);
+    await server.start();
 
     const ctx = context({ rejectUnauthorized: false });
 
-    const location = `https://localhost:${server.address().port}/`;
     try {
-      const url = `https://httpbingo.org/redirect-to?url=${encodeURIComponent(location)}&status_code=302`;
-      await ctx.fetch(url, { cache: 'no-store' });
-      assert.fail('redirect should fail');
-    } catch (e) {
-      assert(e.code === 'ECONNRESET');
+      // redirected request works
+      let location = `${server.origin}/hello`;
+      let url = `https://httpbingo.org/redirect-to?url=${encodeURIComponent(location)}&status_code=302`;
+      const resp = await ctx.fetch(url, { cache: 'no-store' });
+      assert.strictEqual(resp.status, 200);
+      assert.strictEqual(resp.httpVersion, '1.1');
+      assert.strictEqual(resp.redirected, true);
+
+      // redirected request will be aborted
+      location = `${server.origin}/abort`;
+      url = `https://httpbingo.org/redirect-to?url=${encodeURIComponent(location)}&status_code=302`;
+      await assert.rejects(async () => ctx.fetch(url, { cache: 'no-store' }), { name: 'FetchError', code: 'ECONNRESET' });
     } finally {
+      await ctx.reset();
       // shutdown server
-      server.close();
-      ctx.reset();
+      await server.close();
+    }
+  });
+
+  it('connection error in redirected http/1.1 location is handled correctly', async () => {
+    // start unfriendly http/2 server
+    const server = new Server(2);
+    await server.start();
+
+    const ctx = context({ rejectUnauthorized: false });
+
+    try {
+      // redirected request works
+      let location = `${server.origin}/hello`;
+      let url = `https://httpbingo.org/redirect-to?url=${encodeURIComponent(location)}&status_code=302`;
+      const resp = await ctx.fetch(url, { cache: 'no-store' });
+      assert.strictEqual(resp.status, 200);
+      assert.strictEqual(resp.httpVersion, '2.0');
+      assert.strictEqual(resp.redirected, true);
+
+      // redirected request will be aborted
+      location = `${server.origin}/abort`;
+      url = `https://httpbingo.org/redirect-to?url=${encodeURIComponent(location)}&status_code=302`;
+      await assert.rejects(async () => ctx.fetch(url, { cache: 'no-store' }), { name: 'FetchError', code: 'ERR_HTTP2_SESSION_ERROR' });
+    } finally {
+      await ctx.reset();
+      // shutdown server
+      await server.close();
     }
   });
 });
