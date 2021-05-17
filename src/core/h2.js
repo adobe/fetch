@@ -157,7 +157,9 @@ const request = async (ctx, url, options) => {
     if (!session || session.closed || session.destroyed) {
       // connect and setup new session
       // (connect options: https://nodejs.org/api/http2.html#http2_http2_connect_authority_options_listener)
-      const connectOptions = { ...ctxOpts };
+      const rejectUnauthorized = !((ctx.options.rejectUnauthorized === false
+        || ctxOpts.rejectUnauthorized === false));
+      const connectOptions = { ...ctxOpts, rejectUnauthorized };
       if (socket && !socket.inUse) {
         // we've got a socket from initial protocol negotiation via ALPN
         // reuse socket for new session

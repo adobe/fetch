@@ -15,7 +15,6 @@
 'use strict';
 
 const assert = require('assert');
-const http2 = require('http2');
 const { finished } = require('stream');
 const { promisify } = require('util');
 
@@ -24,6 +23,7 @@ const { WritableStreamBuffer } = require('stream-buffers');
 
 const streamFinished = promisify(finished);
 
+const { Server } = require('../server');
 const { request, reset } = require('../../src/core');
 
 const readStream = async (stream) => {
@@ -34,76 +34,13 @@ const readStream = async (stream) => {
 
 const HELLO_WORLD = 'Hello, World!';
 
-// unencrypted HTTP/2 (h2c) server
-class H2Server {
-  constructor() {
-    this.server = null;
-    this.sessions = new Set();
-  }
-
-  async start(port = 0) {
-    if (this.server) {
-      throw Error('server already started');
-    }
-    const server = http2.createServer();
-    server.once('error', (err) => {
-      throw err;
-    });
-    server.once('close', () => {
-      this.server = null;
-      this.sessions.clear();
-    });
-    server.on('session', (session) => this.sessions.add(session));
-    server.on('stream', (stream, headers) => {
-      const { pathname } = new URL(`${headers[':scheme']}://${headers[':authority']}${headers[':path']}`);
-      switch (pathname) {
-        case '/hello':
-          stream.respond({ ':status': 200 });
-          stream.end(HELLO_WORLD);
-          break;
-
-        default:
-          stream.respond({ ':status': 404 });
-          stream.end('Not found!');
-      }
-    });
-    return new Promise((resolve) => {
-      server.listen(port, () => {
-        this.server = server;
-        resolve();
-      });
-    });
-  }
-
-  get port() {
-    if (!this.server) {
-      throw Error('server not started');
-    }
-    return this.server.address().port;
-  }
-
-  get origin() {
-    const { port } = this;
-    return `http2://localhost:${port}`;
-  }
-
-  async close() {
-    if (!this.server) {
-      throw Error('server not started');
-    }
-    return new Promise((resolve) => this.server.close(resolve));
-  }
-}
-
 describe('unencrypted HTTP/2 (h2c)-specific Core Tests', () => {
   let server;
-  let origin;
 
   before(async () => {
-    // start test server
-    server = new H2Server();
+    // start unencrypted HTTP/2 (h2c) server
+    server = new Server(2, false, HELLO_WORLD);
     await server.start();
-    origin = server.origin;
   });
 
   after(async () => {
@@ -112,7 +49,7 @@ describe('unencrypted HTTP/2 (h2c)-specific Core Tests', () => {
   });
 
   it('supports unencrypted HTTP/2 (h2c)', async () => {
-    const resp = await request(`${origin}/hello`);
+    const resp = await request(`${server.origin}/hello`);
     assert.strictEqual(resp.statusCode, 200);
     assert.strictEqual(resp.httpVersionMajor, 2);
     assert(isStream.readable(resp.readable));
