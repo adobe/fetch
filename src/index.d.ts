@@ -191,7 +191,7 @@ export interface ContextOptions {
    */
   alpnCacheSize?: number;
   /**
-   * (HTTPS only)
+   * (HTTPS only, applies to HTTP/1.x and HTTP/2)
    * If not false, the server certificate is verified against the list of supplied CAs. An 'error' event is emitted if verification fails; err.code contains the OpenSSL error code.
    * @default true
    */
