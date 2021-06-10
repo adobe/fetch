@@ -303,9 +303,11 @@ const createUrl = (url, qs = {}) => {
  */
 const timeoutSignal = (ms) => {
   const controller = new AbortController();
-  setTimeout(() => {
+  const timer = setTimeout(() => {
     controller.abort();
   }, ms);
+  // timer shouldn't keep node process alive
+  timer.unref();
   return controller.signal;
 };
 
