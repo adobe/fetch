@@ -57,4 +57,14 @@ describe('Misc. Tests', () => {
     const ts1 = Date.now();
     assert((ts1 - ts0) < 500 * 1.05);
   });
+
+  it('timeoutSignal can be cleared', async () => {
+    const signal = timeoutSignal(30000);
+    // if the timeout is not cleared the node process will hang for 30s on exit.
+    signal.clear();
+  });
+
+  it('timeoutSignal expects integer argument', async () => {
+    assert.throws(() => timeoutSignal('test'), TypeError);
+  });
 });

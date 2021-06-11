@@ -272,13 +272,17 @@ Using `timeoutSignal(ms)` extension:
 ```javascript
   const { fetch, timeoutSignal, AbortError } = require('@adobe/helix-fetch');
 
+  const signal = timeoutSignal(1000);
   try {
-    const resp = await fetch('https://httpbin.org/json', { signal: timeoutSignal(1000) });
+    const resp = await fetch('https://httpbin.org/json', { signal });
     const jsonData = await resp.json();
   } catch (err) {
     if (err instanceof AbortError) {
       console.log('fetch timed out after 1s');
     }
+  } finally {
+    // avoid pending timers which prevent node process from exiting
+    signal.clear();
   }
 ```
 
@@ -288,7 +292,7 @@ Using `AbortController`:
   const { fetch, AbortController, AbortError } = require('@adobe/helix-fetch');
 
   const controller = new AbortController();
-  setTimeout(() => controller.abort(), 1000);
+  const timerId = setTimeout(() => controller.abort(), 1000);
   const { signal } = controller;
 
   try {
@@ -298,6 +302,9 @@ Using `AbortController`:
     if (err instanceof AbortError) {
       console.log('fetch timed out after 1s');
     }
+  } finally {
+    // avoid pending timers which prevent node process from exiting
+    clearTimeout(timerId);
   }
 ```
 

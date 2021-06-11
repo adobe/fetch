@@ -81,6 +81,32 @@ Object.defineProperties(AbortSignal.prototype, {
   onabort: { enumerable: true },
 });
 
+/**
+ * The TimeoutSignal class.
+ */
+class TimeoutSignal extends AbortSignal {
+  constructor(timeout) {
+    if (!Number.isInteger(timeout)) {
+      throw new TypeError(`Expected an integer, got ${typeof timeout}`);
+    }
+    super();
+    this[SIGNAL_INTERNALS].timerId = setTimeout(() => {
+      this.fire();
+    }, timeout);
+  }
+
+  /**
+   * Clear the timeout associated with this signal.
+   */
+  clear() {
+    clearTimeout(this[SIGNAL_INTERNALS].timerId);
+  }
+}
+
+Object.defineProperties(TimeoutSignal.prototype, {
+  clear: { enumerable: true },
+});
+
 const CONTROLLER_INTERNALS = Symbol('AbortController internals');
 
 /**
@@ -117,4 +143,4 @@ Object.defineProperties(AbortController.prototype, {
   abort: { enumerable: true },
 });
 
-module.exports = { AbortController, AbortSignal };
+module.exports = { AbortController, AbortSignal, TimeoutSignal };
