@@ -1,3 +1,10 @@
+# [2.3.0](https://github.com/adobe/helix-fetch/compare/v2.2.1...v2.3.0) (2021-06-11)
+
+
+### Features
+
+* timeoutSignal can be canceled ([#187](https://github.com/adobe/helix-fetch/issues/187)) ([d0d25b7](https://github.com/adobe/helix-fetch/commit/d0d25b7f427eb4c956948868b6d9900913ec3eb2))
+
 ## [2.2.1](https://github.com/adobe/helix-fetch/compare/v2.2.0...v2.2.1) (2021-05-17)
 
 
