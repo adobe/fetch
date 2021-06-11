@@ -25,7 +25,7 @@ const { Headers } = require('./headers');
 const { Request } = require('./request');
 const { Response } = require('./response');
 const { FetchBaseError, FetchError, AbortError } = require('./errors');
-const { AbortController, AbortSignal } = require('./abort');
+const { AbortController, AbortSignal, TimeoutSignal } = require('./abort');
 const CachePolicy = require('./policy');
 const { cacheableResponse } = require('./cacheableResponse');
 
@@ -301,13 +301,7 @@ const createUrl = (url, qs = {}) => {
  *
  * @param {number} ms timeout in milliseconds
  */
-const timeoutSignal = (ms) => {
-  const controller = new AbortController();
-  setTimeout(() => {
-    controller.abort();
-  }, ms);
-  return controller.signal;
-};
+const timeoutSignal = (ms) => new TimeoutSignal(ms);
 
 class FetchContext {
   constructor(options) {
