@@ -1,3 +1,10 @@
+# [2.4.0](https://github.com/adobe/helix-fetch/compare/v2.3.0...v2.4.0) (2021-07-29)
+
+
+### Features
+
+* **types:** add full typedefs and esm support ([#196](https://github.com/adobe/helix-fetch/issues/196)) ([0859cd3](https://github.com/adobe/helix-fetch/commit/0859cd37fcfc25109290563d5da6508535f28477))
+
 # [2.3.0](https://github.com/adobe/helix-fetch/compare/v2.2.1...v2.3.0) (2021-06-11)
 
 
