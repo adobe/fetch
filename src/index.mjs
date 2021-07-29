@@ -10,17 +10,37 @@
  * governing permissions and limitations under the License.
  */
 
-export * from './api';
-import * as api from './api.d';
-import { ContextOptions } from './api';
+import api from './index.js';
 
-declare type HelixFetchAPI = typeof api;
+export const ALPNProtocol = {
+  ALPN_HTTP2: api.ALPN_HTTP2,
+  ALPN_HTTP2C: api.ALPN_HTTP2C,
+  ALPN_HTTP1_1: api.ALPN_HTTP1_1,
+  ALPN_HTTP1_0: api.ALPN_HTTP1_0
+}
 
-/**
-  * This function returns an object which looks like the public API,
-  * i.e. it will have the functions `fetch`, `context`, `reset`, etc. and provide its
-  * own isolated caches and specific behavior according to `options`.
-  *
-  * @param {ContextOptions} options
-  */
-export declare function context(options?: ContextOptions): HelixFetchAPI;
+export const {
+  Body,
+  cacheStats,
+  clearCache,
+  createUrl,
+  fetch,
+  offPush,
+  onPush,
+  reset,
+  Request,
+  Response,
+  timeoutSignal,
+  AbortController,
+  AbortSignal,
+  FormData,
+  FetchBaseError,
+  FetchError,
+  AbortError,
+  ALPN_HTTP2,
+  ALPN_HTTP2C,
+  ALPN_HTTP1_1,
+  ALPN_HTTP1_0,
+} = api;
+
+
