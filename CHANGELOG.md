@@ -1,3 +1,10 @@
+## [2.4.1](https://github.com/adobe/helix-fetch/compare/v2.4.0...v2.4.1) (2021-07-30)
+
+
+### Bug Fixes
+
+* add distinct exports for commonjs and esm ([#197](https://github.com/adobe/helix-fetch/issues/197)) ([418b6d3](https://github.com/adobe/helix-fetch/commit/418b6d34f53fe834418f680fddbf93d6f95e4113))
+
 # [2.4.0](https://github.com/adobe/helix-fetch/compare/v2.3.0...v2.4.0) (2021-07-29)
 
 
