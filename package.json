@@ -15,7 +15,8 @@
   },
   "types": "src/index.d.ts",
   "exports": {
-    ".": "./src/index.mjs"
+    "import": "./src/index.mjs",
+    "require": "./src/index.js"
   },
   "repository": {
     "type": "git",
