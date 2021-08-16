@@ -32,7 +32,7 @@ const getAgent = (ctx, protocol) => {
     }
     // use agent if either h1 options or rejectUnauthorized context option was specified
     if (opts || typeof rejectUnauthorized === 'boolean') {
-      h1.httpsAgent = new https.Agent({ ...(opts || {}), rejectUnauthorized });
+      h1.httpsAgent = new https.Agent(typeof rejectUnauthorized === 'boolean' ? { ...(opts || {}), rejectUnauthorized } : opts);
       return h1.httpsAgent;
     }
     // use default (global) agent
