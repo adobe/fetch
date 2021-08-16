@@ -17,9 +17,10 @@
 const assert = require('assert');
 const { Readable } = require('stream');
 
-const isStream = require('is-stream');
 const nock = require('nock');
 const parseCacheControl = require('parse-cache-control');
+
+const { isReadableStream } = require('../utils');
 
 const {
   fetch, onPush, offPush, reset, clearCache, cacheStats, context, Response, Headers,
@@ -214,7 +215,7 @@ describe('Cache Tests', () => {
     assert(!resp.fromCache);
 
     // body
-    assert(isStream.readable(resp.body));
+    assert(isReadableStream(resp.body));
   });
 
   it('text() works on un-cached response', async () => {
@@ -287,7 +288,7 @@ describe('Cache Tests', () => {
     assert(arrBuf instanceof ArrayBuffer);
     assert.strictEqual(arrBuf.byteLength, contentLength);
 
-    assert(isStream.readable(resp.body));
+    assert(isReadableStream(resp.body));
 
     assert.strictEqual(resp.headers.plain()['content-type'], 'application/json');
     const json = await resp.json();
