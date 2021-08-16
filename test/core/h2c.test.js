@@ -18,11 +18,11 @@ const assert = require('assert');
 const { finished } = require('stream');
 const { promisify } = require('util');
 
-const isStream = require('is-stream');
 const { WritableStreamBuffer } = require('stream-buffers');
 
 const streamFinished = promisify(finished);
 
+const { isReadableStream } = require('../utils');
 const { Server } = require('../server');
 const { request, reset } = require('../../src/core');
 
@@ -52,7 +52,7 @@ describe('unencrypted HTTP/2 (h2c)-specific Core Tests', () => {
     const resp = await request(`${server.origin}/hello`);
     assert.strictEqual(resp.statusCode, 200);
     assert.strictEqual(resp.httpVersionMajor, 2);
-    assert(isStream.readable(resp.readable));
+    assert(isReadableStream(resp.readable));
 
     const buf = await readStream(resp.readable);
     assert.strictEqual(buf.toString(), HELLO_WORLD);

@@ -19,9 +19,9 @@ const fs = require('fs');
 const stream = require('stream');
 const { promisify } = require('util');
 
-const isStream = require('is-stream');
 const { WritableStreamBuffer } = require('stream-buffers');
 
+const { isReadableStream } = require('../utils');
 const { Server } = require('../server');
 const defaultFetchContext = require('../../src/fetch');
 
@@ -133,7 +133,7 @@ testParams.forEach((params) => {
       assert.strictEqual(resp.httpVersion, httpVersion);
       assert.strictEqual(resp.headers.get('content-type'), contentType);
       const imageStream = resp.body;
-      assert(isStream.readable(imageStream));
+      assert(isReadableStream(imageStream));
 
       const finished = promisify(stream.finished);
       const out = new WritableStreamBuffer();

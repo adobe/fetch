@@ -19,9 +19,9 @@ const fs = require('fs');
 const { finished } = require('stream');
 const { promisify } = require('util');
 
-const isStream = require('is-stream');
 const { WritableStreamBuffer } = require('stream-buffers');
 
+const { isReadableStream } = require('../utils');
 const { AbortController } = require('../../src/fetch/abort');
 const { context, ALPN_HTTP1_1 } = require('../../src/core');
 const { RequestAbortedError } = require('../../src/core/errors');
@@ -81,7 +81,7 @@ describe('Core Tests', () => {
     });
     assert.strictEqual(resp.statusCode, 200);
     assert.strictEqual(resp.headers['content-type'], contentType);
-    assert(isStream.readable(resp.readable));
+    assert(isReadableStream(resp.readable));
 
     const buf = await readStream(resp.readable);
     assert.strictEqual(buf.length, dataLen);
