@@ -257,7 +257,16 @@ const request = async (ctx, uri, options) => {
   debug(`${url.host} -> ${protocol}`);
   switch (protocol) {
     case ALPN_HTTP2:
-      return h2.request(ctx, url, socket ? { ...opts, socket } : opts);
+      try {
+        return await h2.request(ctx, url, socket ? { ...opts, socket } : opts);
+      } catch (err) {
+        const { code, message } = err;
+        if (code === 'ERR_HTTP2_ERROR' && message === 'Protocol error') {
+          // server potentially downgraded from h2 to h1: clear alpn cache entry
+          ctx.alpnCache.del(`${url.protocol}//${url.host}`);
+        }
+        throw err;
+      }
     case ALPN_HTTP2C:
       // plain-text HTTP/2 (h2c)
       // url.protocol = 'http:'; => doesn't work ?!
