@@ -28,6 +28,22 @@
     "url": "https://github.com/adobe/helix-fetch/issues"
   },
   "homepage": "https://github.com/adobe/helix-fetch#readme",
+  "keywords": [
+    "fetch",
+    "whatwg",
+    "Fetch API",
+    "http",
+    "https",
+    "http2",
+    "h2",
+    "promise",
+    "async",
+    "request",
+    "RFC 7234",
+    "7234",
+    "caching",
+    "cache"
+  ],
   "dependencies": {
     "debug": "4.3.2",
     "form-data": "4.0.0",
