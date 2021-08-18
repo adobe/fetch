@@ -49,6 +49,39 @@ describe('Fetch Resiliance Tests', () => {
     }
   });
 
+  it('handles server protocol downgrade', async () => {
+    // start h2 server
+    let server = new Server(2, true, HELLO_MSG);
+    await server.start();
+
+    const ctx = context({ rejectUnauthorized: false });
+    try {
+      let resp = await ctx.fetch(`${server.origin}/hello`);
+      assert.strictEqual(resp.status, 200);
+      assert.strictEqual(resp.httpVersion, '2.0');
+      let body = await resp.text();
+      assert.strictEqual(body, HELLO_MSG);
+
+      const { port } = server;
+      // stop h2 server
+      await server.close();
+      // start h1 server
+      server = new Server(1, true, HELLO_MSG);
+      await server.start(port);
+      // expect FetchError: Protocol error
+      await assert.rejects(ctx.fetch(`${server.origin}/hello`), { name: 'FetchError', message: 'Protocol error' });
+      // the fetch context should have recovered by now, next request should succeed
+      resp = await ctx.fetch(`${server.origin}/hello`);
+      assert.strictEqual(resp.status, 200);
+      assert.strictEqual(resp.httpVersion, '1.1');
+      body = await resp.text();
+      assert.strictEqual(body, HELLO_MSG);
+    } finally {
+      await ctx.reset();
+      await server.close();
+    }
+  });
+
   it('handles aborted request', async () => {
     // start server
     const server = new Server(2, true, HELLO_MSG);
