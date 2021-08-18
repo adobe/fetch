@@ -1,3 +1,10 @@
+## [2.4.2](https://github.com/adobe/helix-fetch/compare/v2.4.1...v2.4.2) (2021-08-18)
+
+
+### Bug Fixes
+
+* handle server protocol h2->h1 downgrade ([#203](https://github.com/adobe/helix-fetch/issues/203)) ([1526126](https://github.com/adobe/helix-fetch/commit/1526126e7f0346f041a8224bd651f87edbb4b14e))
+
 ## [2.4.1](https://github.com/adobe/helix-fetch/compare/v2.4.0...v2.4.1) (2021-07-30)
 
 
