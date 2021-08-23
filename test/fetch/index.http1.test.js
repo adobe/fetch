@@ -85,7 +85,8 @@ testParams.forEach((params) => {
       this.timeout(5000);
 
       const { fetch, reset } = context({ alpnProtocols: [ALPN_HTTP1_1] });
-      const N = 500; // # of parallel requests
+      const N = 200; // # of parallel requests
+      // httpbingo.org seems to be more stable than httpbin.org
       const TEST_URL = `${protocol}://httpbin.org/bytes/`;
       // generete array of 'randomized' urls
       const urls = Array.from({ length: N }, () => Math.floor(Math.random() * N)).map((num) => `${TEST_URL}${num}`);
