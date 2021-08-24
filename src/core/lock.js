@@ -10,9 +10,7 @@
  * governing permissions and limitations under the License.
  */
 
-'use strict';
-
-const { EventEmitter } = require('events');
+import { EventEmitter } from 'events';
 
 /**
  * Creates a lock (mutex) for asynchronous resources.
@@ -64,4 +62,4 @@ const lock = () => {
   };
 };
 
-module.exports = lock;
+export default lock;

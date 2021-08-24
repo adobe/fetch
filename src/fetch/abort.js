@@ -12,9 +12,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-'use strict';
-
-const { EventEmitter } = require('events');
+import { EventEmitter } from 'events';
 
 const SIGNAL_INTERNALS = Symbol('AbortSignal internals');
 
@@ -143,4 +141,4 @@ Object.defineProperties(AbortController.prototype, {
   abort: { enumerable: true },
 });
 
-module.exports = { AbortController, AbortSignal, TimeoutSignal };
+export { AbortController, AbortSignal, TimeoutSignal };

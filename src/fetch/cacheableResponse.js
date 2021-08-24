@@ -12,12 +12,10 @@
 
 /* eslint-disable max-classes-per-file */
 
-'use strict';
+import { Readable } from 'stream';
 
-const { Readable } = require('stream');
-
-const { Headers } = require('./headers');
-const { Response } = require('./response');
+import { Headers } from './headers.js';
+import { Response } from './response.js';
 
 const INTERNALS = Symbol('CacheableResponse internals');
 
@@ -133,4 +131,4 @@ const cacheableResponse = async (res) => {
   );
 };
 
-module.exports = { cacheableResponse };
+export { cacheableResponse };

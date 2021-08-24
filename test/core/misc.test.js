@@ -12,17 +12,16 @@
 
 /* eslint-env mocha */
 
-'use strict';
+import assert from 'assert';
+import { finished } from 'stream';
+import { promisify } from 'util';
 
-const assert = require('assert');
-const { finished } = require('stream');
-const { promisify } = require('util');
+import { WritableStreamBuffer } from 'stream-buffers';
 
-const { WritableStreamBuffer } = require('stream-buffers');
-
-const { AbortController } = require('../../src/fetch/abort');
-const { context, ALPN_HTTP1_1 } = require('../../src/core');
-const { RequestAbortedError } = require('../../src/core/errors');
+import { AbortController } from '../../src/fetch/abort.js';
+import core from '../../src/core/index.js';
+const { context, ALPN_HTTP1_1 } = core;
+import { RequestAbortedError } from '../../src/core/errors.js';
 
 const streamFinished = promisify(finished);
 

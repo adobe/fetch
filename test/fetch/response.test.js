@@ -14,18 +14,16 @@
 /* eslint-disable guard-for-in */
 /* eslint-disable no-unused-expressions */
 
-'use strict';
+import { Readable } from 'stream';
 
-const { Readable } = require('stream');
-
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
+import chai from 'chai';
+import chaiAsPromised from 'chai-as-promised';
 
 chai.use(chaiAsPromised);
 
 const { expect } = chai;
 
-const { Response } = require('../../src/fetch');
+import { Response } from '../../src/index.js';
 
 describe('Response Tests', () => {
   it('overrides toStringTag', () => {

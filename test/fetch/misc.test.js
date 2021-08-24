@@ -14,11 +14,9 @@
 /* eslint-disable guard-for-in */
 /* eslint-disable no-restricted-syntax */
 
-'use strict';
+import assert from 'assert';
 
-const assert = require('assert');
-
-const { createUrl, timeoutSignal } = require('../../src');
+import { createUrl, timeoutSignal } from '../../src/index.js';
 
 describe('Misc. Tests', () => {
   it('createUrl encodes query paramters', async () => {

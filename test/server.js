@@ -10,14 +10,12 @@
  * governing permissions and limitations under the License.
  */
 
-'use strict';
+import http from 'http';
+import https from 'https';
+import http2 from 'http2';
+import util from 'util';
 
-const http = require('http');
-const https = require('https');
-const http2 = require('http2');
-const util = require('util');
-
-const pem = require('pem');
+import pem from 'pem';
 
 const createCertificate = util.promisify(pem.createCertificate);
 
@@ -193,4 +191,4 @@ class Server {
   }
 }
 
-module.exports = { Server };
+export { Server };

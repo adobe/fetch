@@ -10,16 +10,16 @@
  * governing permissions and limitations under the License.
  */
 
-'use strict';
+import http from 'http';
+import https from 'https';
+import { Readable } from 'stream';
 
-const http = require('http');
-const https = require('https');
-const { Readable } = require('stream');
+import debugFactory from 'debug';
 
-const debug = require('debug')('helix-fetch:h1');
+import { RequestAbortedError } from './errors.js';
+import { decodeStream } from '../common/utils.js';
 
-const { RequestAbortedError } = require('./errors');
-const { decodeStream } = require('../common/utils');
+const debug = debugFactory('helix-fetch:h1');
 
 const getAgent = (ctx, protocol) => {
   // getAgent is synchronous, no need for lock/mutex
@@ -138,14 +138,13 @@ const h1Request = async (ctx, url, options) => {
     const onAbortSignal = () => {
       // deregister from signal
       signal.removeEventListener('abort', onAbortSignal);
-      /* istanbul ignore next */
+      /* c8 ignore next 5 */
       if (socket && !socket.inUse) {
         // we have no use for the passed socket
         debug(`discarding redundant socket used for ALPN: #${socket.id} ${socket.servername}`);
         socket.destroy();
       }
       reject(new RequestAbortedError());
-      /* istanbul ignore else */
       if (req) {
         req.abort();
       }
@@ -163,7 +162,7 @@ const h1Request = async (ctx, url, options) => {
       if (signal) {
         signal.removeEventListener('abort', onAbortSignal);
       }
-      /* istanbul ignore next */
+      /* c8 ignore next 5 */
       if (socket && !socket.inUse) {
         // we have no use for the passed socket
         debug(`discarding redundant socket used for ALPN: #${socket.id} ${socket.servername}`);
@@ -173,17 +172,16 @@ const h1Request = async (ctx, url, options) => {
     });
     req.once('error', (err) => {
       // error occured during the request
-      /* istanbul ignore else */
       if (signal) {
         signal.removeEventListener('abort', onAbortSignal);
       }
-      /* istanbul ignore next */
+      /* c8 ignore next 5 */
       if (socket && !socket.inUse) {
         // we have no use for the passed socket
         debug(`discarding redundant socket used for ALPN: #${socket.id} ${socket.servername}`);
         socket.destroy();
       }
-      /* istanbul ignore next */
+      /* c8 ignore next 6 */
       if (!req.aborted) {
         debug(`${opts.method} ${url.href} failed with: ${err.message}`);
         // TODO: better call req.destroy(err) instead of req.abort() ?
@@ -203,4 +201,4 @@ const h1Request = async (ctx, url, options) => {
   });
 };
 
-module.exports = { request: h1Request, setupContext, resetContext };
+export default { request: h1Request, setupContext, resetContext };

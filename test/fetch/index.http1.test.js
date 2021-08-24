@@ -12,16 +12,10 @@
 
 /* eslint-env mocha */
 
-'use strict';
+import assert from 'assert';
+import crypto from 'crypto';
 
-const assert = require('assert');
-const crypto = require('crypto');
-
-const {
-  context,
-  ALPN_HTTP1_0,
-  ALPN_HTTP1_1,
-} = require('../../src/fetch');
+import { context, ALPN_HTTP1_0, ALPN_HTTP1_1 } from '../../src/index.js';
 
 const testParams = [
   {

@@ -14,15 +14,13 @@
 /* eslint-disable no-unused-expressions */
 /* eslint-disable guard-for-in */
 
-'use strict';
-
-const chai = require('chai');
-const chaiIterator = require('chai-iterator');
+import chai from 'chai';
+import chaiIterator from 'chai-iterator';
 
 chai.use(chaiIterator);
 const { expect } = chai;
 
-const { Headers } = require('../../src/fetch');
+import { Headers } from '../../src/fetch/headers.js';
 
 describe('Headers Tests', () => {
   it('overrides toStringTag', () => {

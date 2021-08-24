@@ -10,11 +10,9 @@
  * governing permissions and limitations under the License.
  */
 
-'use strict';
+import CachePolicy from 'http-cache-semantics';
 
-const CachePolicy = require('http-cache-semantics');
-
-const { Headers } = require('./headers');
+import { Headers } from './headers.js';
 
 /**
  *
@@ -116,4 +114,4 @@ class CachePolicyWrapper {
 */
 }
 
-module.exports = CachePolicyWrapper;
+export default CachePolicyWrapper;

@@ -10,18 +10,18 @@
  * governing permissions and limitations under the License.
  */
 
-'use strict';
+import http from 'http';
 
-const { validateHeaderName, validateHeaderValue } = require('http');
+import { isPlainObject } from '../common/utils.js';
 
-const { isPlainObject } = require('../common/utils');
+const { validateHeaderName, validateHeaderValue } = http;
 
 const INTERNALS = Symbol('Headers internals');
 
 const normalizeName = (name) => {
   const nm = typeof name !== 'string' ? String(name) : name;
 
-  /* istanbul ignore next */
+  /* c8 ignore next 3 */
   if (typeof validateHeaderName === 'function') {
     // since node 14.3.0
     validateHeaderName(nm);
@@ -40,7 +40,7 @@ const normalizeName = (name) => {
 const normalizeValue = (value) => {
   const val = typeof value !== 'string' ? String(value) : value;
 
-  /* istanbul ignore next */
+  /* c8 ignore next 3 */
   if (typeof validateHeaderValue === 'function') {
     // since node 14.3.0
     validateHeaderValue('dummy', val);
@@ -81,7 +81,7 @@ class Headers {
       init.forEach(([name, value]) => {
         this.append(name, value);
       });
-    } else /* istanbul ignore else  */ if (isPlainObject(init)) {
+    } else if (isPlainObject(init)) {
       for (const [name, value] of Object.entries(init)) {
         this.append(name, value);
       }
@@ -182,6 +182,6 @@ Object.defineProperties(
   }, {}),
 );
 
-module.exports = {
+export {
   Headers,
 };

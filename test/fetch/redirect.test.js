@@ -12,12 +12,10 @@
 
 /* eslint-env mocha */
 
-'use strict';
+import assert from 'assert';
 
-const assert = require('assert');
-
-const { Server } = require('../server');
-const { context } = require('../../src/fetch');
+import { Server } from '../server.js';
+import { context } from '../../src/index.js';
 
 describe('Redirect-specific Fetch Tests', () => {
   it('connection error in redirected http/1.1 location is handled correctly', async () => {

@@ -12,8 +12,6 @@
 
 /* eslint-disable no-underscore-dangle */
 
-'use strict';
-
 // misc. test helpers
 
 const isReadableStream = (val) => val !== null
@@ -23,4 +21,4 @@ const isReadableStream = (val) => val !== null
   && typeof val._read === 'function'
   && typeof val._readableState === 'object';
 
-module.exports = { isReadableStream };
+export { isReadableStream };

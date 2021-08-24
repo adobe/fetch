@@ -10,14 +10,11 @@
  * governing permissions and limitations under the License.
  */
 
-'use strict';
+import { PassThrough, Readable } from 'stream';
+import getStream from 'get-stream';
+import FormData from 'form-data';
 
-const { PassThrough, Readable } = require('stream');
-
-const getStream = require('get-stream');
-const FormData = require('form-data');
-
-const { FetchError, FetchBaseError } = require('./errors');
+import { FetchError, FetchBaseError } from './errors.js';
 
 const EMPTY_BUFFER = Buffer.alloc(0);
 const INTERNALS = Symbol('Body internals');
@@ -184,7 +181,6 @@ const cloneStream = (body) => {
   const { stream } = body[INTERNALS];
   let result = stream;
 
-  /* istanbul ignore else */
   if (stream instanceof Readable) {
     result = new PassThrough();
     const clonedStream = new PassThrough();
@@ -224,7 +220,6 @@ const guessContentType = (body) => {
     return null;
   }
 
-  /* istanbul ignore else */
   if (body instanceof Readable) {
     return null;
   }
@@ -233,7 +228,7 @@ const guessContentType = (body) => {
   return 'text/plain; charset=utf-8';
 };
 
-module.exports = {
+export {
   Body,
   cloneStream,
   guessContentType,

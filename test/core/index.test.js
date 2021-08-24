@@ -12,19 +12,22 @@
 
 /* eslint-env mocha */
 
-'use strict';
+import assert from 'assert';
+import fs from 'fs';
+import { finished } from 'stream';
+import { fileURLToPath } from 'url';
+import { promisify } from 'util';
 
-const assert = require('assert');
-const fs = require('fs');
-const { finished } = require('stream');
-const { promisify } = require('util');
+import { WritableStreamBuffer } from 'stream-buffers';
 
-const { WritableStreamBuffer } = require('stream-buffers');
+import { isReadableStream } from '../utils.js';
+import { AbortController } from '../../src/fetch/abort.js';
+import core from '../../src/core/index.js';
+const { context, ALPN_HTTP1_1 } = core;
+import { RequestAbortedError } from '../../src/core/errors.js';
 
-const { isReadableStream } = require('../utils');
-const { AbortController } = require('../../src/fetch/abort');
-const { context, ALPN_HTTP1_1 } = require('../../src/core');
-const { RequestAbortedError } = require('../../src/core/errors');
+// Workaround for ES6 which doesn't support the NodeJS global __filename
+const __filename = fileURLToPath(import.meta.url);
 
 const WOKEUP = 'woke up!';
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms, WOKEUP));

@@ -10,13 +10,10 @@
  * governing permissions and limitations under the License.
  */
 
-'use strict';
-
-const { AbortSignal } = require('./abort');
-const { Body, cloneStream, guessContentType } = require('./body');
-const { Headers } = require('./headers');
-
-const { isPlainObject } = require('../common/utils');
+import { AbortSignal } from './abort.js';
+import { Body, cloneStream, guessContentType } from './body.js';
+import { Headers } from './headers.js';
+import { isPlainObject } from '../common/utils.js';
 
 const DEFAULT_FOLLOW = 20;
 
@@ -173,6 +170,6 @@ Object.defineProperties(Request.prototype, {
   signal: { enumerable: true },
 });
 
-module.exports = {
+export {
   Request,
 };

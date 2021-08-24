@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Adobe. All rights reserved.
+ * Copyright 2021 Adobe. All rights reserved.
  * This file is licensed to you under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License. You may obtain a copy
  * of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -10,6 +10,36 @@
  * governing permissions and limitations under the License.
  */
 
-'use strict';
+import api from './fetch/index.js';
 
-module.exports = require('./fetch');
+export const ALPNProtocol = {
+  ALPN_HTTP2: api.ALPN_HTTP2,
+  ALPN_HTTP2C: api.ALPN_HTTP2C,
+  ALPN_HTTP1_1: api.ALPN_HTTP1_1,
+  ALPN_HTTP1_0: api.ALPN_HTTP1_0
+}
+
+export const {
+  Body,
+  cacheStats,
+  clearCache,
+  createUrl,
+  context,
+  fetch,
+  offPush,
+  onPush,
+  reset,
+  Request,
+  Response,
+  timeoutSignal,
+  AbortController,
+  AbortSignal,
+  FormData,
+  FetchBaseError,
+  FetchError,
+  AbortError,
+  ALPN_HTTP2,
+  ALPN_HTTP2C,
+  ALPN_HTTP1_1,
+  ALPN_HTTP1_0,
+} = api;

@@ -12,18 +12,20 @@
 
 /* eslint-env mocha */
 
-'use strict';
+import assert from 'assert';
+import fs from 'fs';
+import stream from 'stream';
+import { fileURLToPath } from 'url';
+import { promisify } from 'util';
 
-const assert = require('assert');
-const fs = require('fs');
-const stream = require('stream');
-const { promisify } = require('util');
+import { WritableStreamBuffer } from 'stream-buffers';
 
-const { WritableStreamBuffer } = require('stream-buffers');
+import { isReadableStream } from '../utils.js';
+import { Server } from '../server.js';
+import defaultFetchContext from '../../src/fetch/index.js';
 
-const { isReadableStream } = require('../utils');
-const { Server } = require('../server');
-const defaultFetchContext = require('../../src/fetch');
+// Workaround for ES6 which doesn't support the NodeJS global __filename
+const __filename = fileURLToPath(import.meta.url);
 
 const HELLO_WORLD = 'Hello, World!';
 

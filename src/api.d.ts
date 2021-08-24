@@ -10,7 +10,7 @@
  * governing permissions and limitations under the License.
  */
 
-import { SystemError } from "./fetch/errors";
+import { SystemError } from './fetch/errors.js';
 
 export declare enum ALPNProtocol {
   ALPN_HTTP2 = 'h2',

@@ -10,19 +10,13 @@
  * governing permissions and limitations under the License.
  */
 
-'use strict';
+import { pipeline } from 'stream';
+import { createGunzip, createInflate, createBrotliDecompress, constants } from 'zlib';
+const { Z_SYNC_FLUSH } = constants;
 
-const { pipeline } = require('stream');
-const {
-  createGunzip,
-  createInflate,
-  createBrotliDecompress,
-  constants: {
-    Z_SYNC_FLUSH,
-  },
-} = require('zlib');
+import debugFactory from 'debug';
 
-const debug = require('debug')('helix-fetch:utils');
+const debug = debugFactory('helix-fetch:utils');
 
 function shouldDecode(statusCode, headers) {
   if (statusCode === 204 || statusCode === 304) {
@@ -63,7 +57,7 @@ function decodeStream(statusCode, headers, readableStream, onError) {
     case 'br':
       return pipeline(readableStream, createBrotliDecompress(), cb);
 
-    /* istanbul ignore next */
+    /* c8 ignore next 4 */
     default:
       // dead branch since it's covered by shouldDecode already;
       // only here to make eslint stop complaining
@@ -88,4 +82,4 @@ function isPlainObject(val) {
   return Object.getPrototypeOf(val) === proto;
 }
 
-module.exports = { decodeStream, isPlainObject };
+export { decodeStream, isPlainObject };

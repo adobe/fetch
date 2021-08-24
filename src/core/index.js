@@ -10,11 +10,9 @@
  * governing permissions and limitations under the License.
  */
 
-'use strict';
+import debugFactory from 'debug';
 
-const debug = require('debug')('helix-fetch:core');
-
-const {
+import {
   request,
   setupContext,
   resetContext,
@@ -23,7 +21,9 @@ const {
   ALPN_HTTP2C,
   ALPN_HTTP1_1,
   ALPN_HTTP1_0,
-} = require('./request');
+} from './request.js';
+
+const debug = debugFactory('helix-fetch:core');
 
 class RequestContext {
   constructor(options) {
@@ -84,4 +84,4 @@ class RequestContext {
   }
 }
 
-module.exports = new RequestContext().api();
+export default new RequestContext().api();

@@ -12,11 +12,9 @@
 
 /* eslint-env mocha */
 
-'use strict';
+import assert from 'assert';
 
-const assert = require('assert');
-
-const { FetchBaseError, FetchError, AbortError } = require('../../src/fetch/errors');
+import { FetchBaseError, FetchError, AbortError } from '../../src/fetch/errors.js';
 
 describe('fetch errors Tests', () => {
   it('FetchBaseError', () => {

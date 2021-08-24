@@ -12,5 +12,6 @@
 
 module.exports = {
   root: true,
+  sourceType: 'module',
   extends: '@adobe/helix',
 };

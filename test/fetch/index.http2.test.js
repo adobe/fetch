@@ -12,21 +12,13 @@
 
 /* eslint-env mocha */
 
-'use strict';
+import assert from 'assert';
+import crypto from 'crypto';
 
-const assert = require('assert');
-const crypto = require('crypto');
+import sinon from 'sinon';
 
-const sinon = require('sinon');
-
-const { Server } = require('../server');
-const {
-  fetch,
-  context,
-  reset,
-  onPush,
-  offPush,
-} = require('../../src/fetch');
+import { Server } from '../server.js';
+import { fetch, context, reset, onPush, offPush } from '../../src/index.js';
 
 const WOKEUP = 'woke up!';
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms, WOKEUP));
