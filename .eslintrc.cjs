@@ -12,6 +12,9 @@
 
 module.exports = {
   root: true,
-  sourceType: 'module',
+  parserOptions: {
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+  },
   extends: '@adobe/helix',
 };

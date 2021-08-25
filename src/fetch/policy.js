@@ -12,7 +12,7 @@
 
 import CachePolicy from 'http-cache-semantics';
 
-import { Headers } from './headers.js';
+import Headers from './headers.js';
 
 /**
  *

@@ -20,8 +20,11 @@ import parseCacheControl from 'parse-cache-control';
 
 import { isReadableStream } from '../utils.js';
 import fetchAPI from '../../src/fetch/index.js';
-const { fetch, onPush, offPush, reset, clearCache, cacheStats, context, Response, Headers } = fetchAPI;
-import { cacheableResponse } from '../../src/fetch/cacheableResponse.js';
+import cacheableResponse from '../../src/fetch/cacheableResponse.js';
+
+const {
+  fetch, onPush, offPush, reset, clearCache, cacheStats, context, Response, Headers,
+} = fetchAPI;
 
 const WOKEUP = 'woke up!';
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms, WOKEUP));

@@ -182,6 +182,4 @@ Object.defineProperties(
   }, {}),
 );
 
-export {
-  Headers,
-};
+export default Headers;

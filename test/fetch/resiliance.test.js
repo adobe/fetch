@@ -14,7 +14,7 @@
 
 import assert from 'assert';
 
-import { Server } from '../server.js';
+import Server from '../server.js';
 import { context } from '../../src/index.js';
 
 const HELLO_MSG = 'Hello, World!';

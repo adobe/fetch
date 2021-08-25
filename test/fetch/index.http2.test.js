@@ -17,8 +17,10 @@ import crypto from 'crypto';
 
 import sinon from 'sinon';
 
-import { Server } from '../server.js';
-import { fetch, context, reset, onPush, offPush } from '../../src/index.js';
+import Server from '../server.js';
+import {
+  fetch, context, reset, onPush, offPush,
+} from '../../src/index.js';
 
 const WOKEUP = 'woke up!';
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms, WOKEUP));

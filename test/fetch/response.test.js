@@ -19,11 +19,10 @@ import { Readable } from 'stream';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 
+import Response from '../../src/index.js';
+
 chai.use(chaiAsPromised);
-
 const { expect } = chai;
-
-import { Response } from '../../src/index.js';
 
 describe('Response Tests', () => {
   it('overrides toStringTag', () => {

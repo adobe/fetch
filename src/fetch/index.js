@@ -19,16 +19,17 @@ import LRU from 'lru-cache';
 import sizeof from 'object-sizeof';
 
 import { Body } from './body.js';
-import { Headers } from './headers.js';
-import { Request } from './request.js';
-import { Response } from './response.js';
+import Headers from './headers.js';
+import Request from './request.js';
+import Response from './response.js';
 import { FetchBaseError, FetchError, AbortError } from './errors.js';
 import { AbortController, AbortSignal, TimeoutSignal } from './abort.js';
 import CachePolicy from './policy.js';
-import { cacheableResponse } from './cacheableResponse.js';
+import cacheableResponse from './cacheableResponse.js';
 
 // core abstraction layer
 import core from '../core/index.js';
+
 const { context, RequestAbortedError } = core;
 
 const debug = debugFactory('helix-fetch');

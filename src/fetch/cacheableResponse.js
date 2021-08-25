@@ -14,8 +14,8 @@
 
 import { Readable } from 'stream';
 
-import { Headers } from './headers.js';
-import { Response } from './response.js';
+import Headers from './headers.js';
+import Response from './response.js';
 
 const INTERNALS = Symbol('CacheableResponse internals');
 
@@ -131,4 +131,4 @@ const cacheableResponse = async (res) => {
   );
 };
 
-export { cacheableResponse };
+export default cacheableResponse;

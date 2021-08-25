@@ -14,7 +14,7 @@
 
 import assert from 'assert';
 
-import { Server } from '../server.js';
+import Server from '../server.js';
 import { context } from '../../src/index.js';
 
 describe('Redirect-specific Fetch Tests', () => {

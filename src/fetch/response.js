@@ -11,7 +11,7 @@
  */
 
 import { Body, cloneStream, guessContentType } from './body.js';
-import { Headers } from './headers.js';
+import Headers from './headers.js';
 import { isPlainObject } from '../common/utils.js';
 
 const INTERNALS = Symbol('Response internals');
@@ -138,4 +138,4 @@ Object.defineProperties(Response.prototype, {
   clone: { enumerable: true },
 });
 
-export { Response };
+export default Response;

@@ -11,12 +11,13 @@
  */
 
 import { pipeline } from 'stream';
-import { createGunzip, createInflate, createBrotliDecompress, constants } from 'zlib';
-const { Z_SYNC_FLUSH } = constants;
-
+import {
+  createGunzip, createInflate, createBrotliDecompress, constants as zlibConstants,
+} from 'zlib';
 import debugFactory from 'debug';
 
 const debug = debugFactory('helix-fetch:utils');
+const { Z_SYNC_FLUSH } = zlibConstants;
 
 function shouldDecode(statusCode, headers) {
   if (statusCode === 204 || statusCode === 304) {

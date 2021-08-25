@@ -10,6 +10,7 @@
  * governing permissions and limitations under the License.
  */
 
+/* eslint-disable no-underscore-dangle */
 /* eslint-env mocha */
 
 import assert from 'assert';
@@ -21,7 +22,7 @@ import { promisify } from 'util';
 import { WritableStreamBuffer } from 'stream-buffers';
 
 import { isReadableStream } from '../utils.js';
-import { Server } from '../server.js';
+import Server from '../server.js';
 import defaultFetchContext from '../../src/fetch/index.js';
 
 // Workaround for ES6 which doesn't support the NodeJS global __filename

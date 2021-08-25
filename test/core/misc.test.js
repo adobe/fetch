@@ -19,9 +19,10 @@ import { promisify } from 'util';
 import { WritableStreamBuffer } from 'stream-buffers';
 
 import { AbortController } from '../../src/fetch/abort.js';
-import core from '../../src/core/index.js';
-const { context, ALPN_HTTP1_1 } = core;
 import { RequestAbortedError } from '../../src/core/errors.js';
+import core from '../../src/core/index.js';
+
+const { context, ALPN_HTTP1_1 } = core;
 
 const streamFinished = promisify(finished);
 

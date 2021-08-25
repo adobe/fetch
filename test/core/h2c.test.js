@@ -18,12 +18,12 @@ import { promisify } from 'util';
 
 import { WritableStreamBuffer } from 'stream-buffers';
 
-const streamFinished = promisify(finished);
-
 import { isReadableStream } from '../utils.js';
-import { Server } from '../server.js';
+import Server from '../server.js';
 import core from '../../src/core/index.js';
+
 const { request, reset } = core;
+const streamFinished = promisify(finished);
 
 const readStream = async (stream) => {
   const out = new WritableStreamBuffer();

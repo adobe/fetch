@@ -17,10 +17,10 @@
 import chai from 'chai';
 import chaiIterator from 'chai-iterator';
 
+import Headers from '../../src/fetch/headers.js';
+
 chai.use(chaiIterator);
 const { expect } = chai;
-
-import { Headers } from '../../src/fetch/headers.js';
 
 describe('Headers Tests', () => {
   it('overrides toStringTag', () => {

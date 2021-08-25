@@ -10,6 +10,7 @@
  * governing permissions and limitations under the License.
  */
 
+/* eslint-disable no-underscore-dangle */
 /* eslint-env mocha */
 
 import assert from 'assert';
@@ -22,9 +23,10 @@ import { WritableStreamBuffer } from 'stream-buffers';
 
 import { isReadableStream } from '../utils.js';
 import { AbortController } from '../../src/fetch/abort.js';
-import core from '../../src/core/index.js';
-const { context, ALPN_HTTP1_1 } = core;
 import { RequestAbortedError } from '../../src/core/errors.js';
+import core from '../../src/core/index.js';
+
+const { context, ALPN_HTTP1_1 } = core;
 
 // Workaround for ES6 which doesn't support the NodeJS global __filename
 const __filename = fileURLToPath(import.meta.url);

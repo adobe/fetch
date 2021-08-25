@@ -16,8 +16,8 @@ export const ALPNProtocol = {
   ALPN_HTTP2: api.ALPN_HTTP2,
   ALPN_HTTP2C: api.ALPN_HTTP2C,
   ALPN_HTTP1_1: api.ALPN_HTTP1_1,
-  ALPN_HTTP1_0: api.ALPN_HTTP1_0
-}
+  ALPN_HTTP1_0: api.ALPN_HTTP1_0,
+};
 
 export const {
   Body,
