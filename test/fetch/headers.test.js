@@ -17,7 +17,7 @@
 import chai from 'chai';
 import chaiIterator from 'chai-iterator';
 
-import Headers from '../../src/fetch/headers.js';
+import { Headers } from '../../src/index.js';
 
 chai.use(chaiIterator);
 const { expect } = chai;

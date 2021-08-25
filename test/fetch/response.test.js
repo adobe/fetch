@@ -19,7 +19,7 @@ import { Readable } from 'stream';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 
-import Response from '../../src/index.js';
+import { Response } from '../../src/index.js';
 
 chai.use(chaiAsPromised);
 const { expect } = chai;

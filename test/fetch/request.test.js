@@ -16,9 +16,9 @@
 import { Readable } from 'stream';
 import chai from 'chai';
 
-const { expect } = chai;
-
 import { Request, AbortController } from '../../src/index.js';
+
+const { expect } = chai;
 
 const BASE_URL = 'https://example.com/';
 
