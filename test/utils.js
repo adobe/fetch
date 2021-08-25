@@ -21,4 +21,5 @@ const isReadableStream = (val) => val !== null
   && typeof val._read === 'function'
   && typeof val._readableState === 'object';
 
+// eslint-disable-next-line import/prefer-default-export
 export { isReadableStream };
