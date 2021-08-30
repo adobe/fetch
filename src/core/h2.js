@@ -87,6 +87,7 @@ const handlePush = (ctx, origin, pushedStream, requestHeaders, flags) => {
 
     // set timeout to automatically discard pushed streams that aren't consumed for some time
     pushedStream.setTimeout(pushedStreamIdleTimeout, () => {
+      /* c8 ignore next 2 */
       debug(`closing pushed stream #${pushedStream.id} after ${pushedStreamIdleTimeout} ms of inactivity`);
       pushedStream.close(NGHTTP2_CANCEL);
     });
