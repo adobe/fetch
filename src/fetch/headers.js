@@ -25,6 +25,7 @@ const normalizeName = (name) => {
   if (typeof validateHeaderName === 'function') {
     // since node 14.3.0
     validateHeaderName(nm);
+  /* c8 ignore next 8 */
   } else {
     // eslint-disable-next-line no-lonely-if
     if (!/^[\^`\-\w!#$%&'*+.|~]+$/.test(nm)) {
@@ -44,6 +45,7 @@ const normalizeValue = (value) => {
   if (typeof validateHeaderValue === 'function') {
     // since node 14.3.0
     validateHeaderValue('dummy', val);
+  /* c8 ignore next 8 */
   } else {
     // eslint-disable-next-line no-lonely-if
     if (/[^\t\u0020-\u007E\u0080-\u00FF]/.test(val)) {

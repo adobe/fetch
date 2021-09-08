@@ -270,6 +270,7 @@ const request = async (ctx, uri, options) => {
       return h2.request(
         ctx,
         new URL(`http://${url.host}${url.pathname}${url.hash}${url.search}`),
+        /* c8 ignore next */
         socket ? { ...opts, socket } : opts,
       );
     /* c8 ignore next */ case ALPN_HTTP1_0:

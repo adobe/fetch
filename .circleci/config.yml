@@ -29,7 +29,7 @@ commands:
 
 jobs:
   build:
-    executor: node12
+    executor: node14
 
     steps:
     - setup
