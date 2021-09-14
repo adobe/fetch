@@ -12,21 +12,21 @@
 
 import { builtinModules } from 'module';
 import json from '@rollup/plugin-json';
-import { terser } from 'rollup-plugin-terser';
 
 import { dependencies } from './package.json';
 
 export default {
   input: 'src/index.js',
-  output: {
-    file: 'dist/index.cjs',
-    format: 'cjs',
-    esModule: false,
-    interop: false,
-    sourcemap: true,
-    preferConst: true,
-    exports: 'named',
-  },
-  plugins: [json(), terser()],
+  output: [
+    {
+      file: 'dist/index.cjs',
+      format: 'cjs',
+    },
+    {
+      file: 'dist/index.js',
+      format: 'es',
+    },
+  ],
+  plugins: [json()],
   external: [...builtinModules, ...Object.keys(dependencies)],
 };
