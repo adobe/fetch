@@ -18,7 +18,6 @@ const { Readable } = require('stream');
 const debug = require('debug')('helix-fetch');
 const FormData = require('form-data');
 const LRU = require('lru-cache');
-const sizeof = require('object-sizeof');
 
 const { Body } = require('./body');
 const { Headers } = require('./headers');
@@ -28,6 +27,7 @@ const { FetchBaseError, FetchError, AbortError } = require('./errors');
 const { AbortController, AbortSignal, TimeoutSignal } = require('./abort');
 const CachePolicy = require('./policy');
 const { cacheableResponse } = require('./cacheableResponse');
+const { sizeof } = require('../common/utils');
 
 // core abstraction layer
 const { context, RequestAbortedError } = require('../core');
