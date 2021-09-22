@@ -1,8 +1,8 @@
 version: 2.1
 executors:
-  node12:
+  node14:
     docker:
-    - image: circleci/node:12
+    - image: circleci/node:14
     environment:
       NPM_CONFIG_PREFIX: ~/.npm-global
 
@@ -29,7 +29,7 @@ commands:
 
 jobs:
   build:
-    executor: node12
+    executor: node14
 
     steps:
     - setup
