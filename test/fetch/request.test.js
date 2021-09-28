@@ -17,6 +17,7 @@
 
 const { Readable } = require('stream');
 
+const { FormData } = require('formdata-node');
 const chai = require('chai');
 
 const { expect } = chai;
@@ -275,6 +276,18 @@ describe('Request Tests', () => {
     expect(req.headers.get('content-type')).to.be.null;
     return req.text().then((result) => {
       expect(result).to.equal('hello, world!');
+    });
+  });
+
+  it('should support spec-compliant FormData body', () => {
+    const method = 'POST';
+    const form = new FormData();
+    form.set('foo', 'bar');
+    const req = new Request(BASE_URL, { method, body: form });
+    // eslint-disable-next-line no-unused-expressions
+    expect(req.headers.get('content-type')).to.contain('multipart/form-data; boundary=');
+    return req.text().then((result) => {
+      expect(result).to.contain('Content-Disposition: form-data; name="foo"');
     });
   });
 

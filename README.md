@@ -343,15 +343,19 @@ Using `AbortController`:
 ### Post form data
 
 ```javascript
-  const fs = require('fs');
-  const { FormData, fetch } = require('@adobe/helix-fetch');
+  const { FormData, Blob, File } = require('formdata-node'); // spec-compliant implementations
+  const { fileFromPath } = require('formdata-node/file-from-path'); // helper for creating File instance from disk file
+
+  const { fetch } = require('@adobe/helix-fetch');
 
   const method = 'POST';
-  const body = new FormData();
-  body.append('foo', 'bar');
-  body.append('data', [ 0x68, 0x65, 0x6c, 0x69, 0x78, 0x2d, 0x66, 0x65, 0x74, 0x63, 0x68 ]);
-  body.append('some_file', fs.createReadStream('/foo/bar.jpg'), 'bar.jpg');
-  const resp = await fetch('https://httpbin.org/post', { method, body });
+  const fd = new FormData();
+  fd.set('field1', 'foo');
+  fd.set('field2', 'bar');
+  fd.set('blob', new Blob([0x68, 0x65, 0x6c, 0x69, 0x78, 0x2d, 0x66, 0x65, 0x74, 0x63, 0x68]));
+  fd.set('file', new File(['File content goes here'], 'file.txt'));
+  fd.set('other_file', await fileFromPath('/foo/bar.jpg', 'bar.jpg', { type: 'image/jpeg' }));
+  const resp = await fetch('https://httpbin.org/post', { method, body: fd });
 ```
 
 ### GET with query parameters object

@@ -16,7 +16,6 @@ const { EventEmitter } = require('events');
 const { Readable } = require('stream');
 
 const debug = require('debug')('helix-fetch');
-const FormData = require('form-data');
 const LRU = require('lru-cache');
 
 const { Body } = require('./body');
@@ -28,6 +27,7 @@ const { AbortController, AbortSignal, TimeoutSignal } = require('./abort');
 const CachePolicy = require('./policy');
 const { cacheableResponse } = require('./cacheableResponse');
 const { sizeof } = require('../common/utils');
+const { isFormData } = require('../common/formData');
 
 // core abstraction layer
 const { context, RequestAbortedError } = require('../core');
@@ -75,7 +75,7 @@ const fetch = async (ctx, url, options) => {
       ...options,
       method,
       headers: req.headers.plain(),
-      body: initBody && !(initBody instanceof Readable) ? initBody : body,
+      body: initBody && !(initBody instanceof Readable) && !isFormData(initBody) ? initBody : body,
       compress,
       follow,
       redirect,
@@ -385,7 +385,6 @@ class FetchContext {
       Response,
       AbortController,
       AbortSignal,
-      FormData,
 
       // extensions
 

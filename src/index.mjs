@@ -33,7 +33,6 @@ export const {
   timeoutSignal,
   AbortController,
   AbortSignal,
-  FormData,
   FetchBaseError,
   FetchError,
   AbortError,

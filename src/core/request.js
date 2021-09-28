@@ -15,7 +15,6 @@
 const { Readable } = require('stream');
 const tls = require('tls');
 
-const FormData = require('form-data');
 const LRU = require('lru-cache');
 const debug = require('debug')('helix-fetch:core');
 
@@ -24,6 +23,7 @@ const h1 = require('./h1');
 const h2 = require('./h2');
 const lock = require('./lock');
 const { isPlainObject } = require('../common/utils');
+const { isFormData, FormDataSerializer } = require('../common/formData');
 
 const { version } = require('../../package.json');
 
@@ -208,9 +208,16 @@ const request = async (ctx, uri, options) => {
   if (opts.body instanceof URLSearchParams) {
     contentType = 'application/x-www-form-urlencoded; charset=utf-8';
     opts.body = opts.body.toString();
-  } else if (opts.body instanceof FormData) {
-    contentType = `multipart/form-data;boundary=${opts.body.getBoundary()}`;
-    opts.body = opts.body.getBuffer();
+  } else if (isFormData(opts.body)) {
+    // spec-compliant FormData
+    const fd = new FormDataSerializer(opts.body);
+    contentType = fd.contentType();
+    opts.body = fd.stream();
+    /* istanbul ignore else */
+    if (opts.headers['transfer-encoding'] === undefined
+      && opts.headers['content-length'] === undefined) {
+      opts.headers['content-length'] = String(fd.length());
+    }
   } else if (typeof opts.body === 'string' || opts.body instanceof String) {
     contentType = 'text/plain; charset=utf-8';
   } else if (isPlainObject(opts.body)) {
