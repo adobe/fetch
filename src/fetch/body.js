@@ -14,9 +14,8 @@
 
 const { PassThrough, Readable } = require('stream');
 
-const getStream = require('get-stream');
-
 const { FetchError, FetchBaseError } = require('./errors');
+const { streamToBuffer } = require('../common/utils');
 
 const EMPTY_BUFFER = Buffer.alloc(0);
 const INTERNALS = Symbol('Body internals');
@@ -57,7 +56,7 @@ const consume = async (body) => {
     return EMPTY_BUFFER;
   }
 
-  return getStream.buffer(stream);
+  return streamToBuffer(stream);
 };
 
 /**

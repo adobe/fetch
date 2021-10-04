@@ -14,7 +14,9 @@
 
 /* eslint-disable guard-for-in */
 
-const { pipeline } = require('stream');
+const { constants: { MAX_LENGTH: maxBufferLength } } = require('buffer');
+const { pipeline, PassThrough } = require('stream');
+const { promisify } = require('util');
 const {
   createGunzip,
   createInflate,
@@ -25,6 +27,8 @@ const {
 } = require('zlib');
 
 const debug = require('debug')('helix-fetch:utils');
+
+const asyncPipeline = promisify(pipeline);
 
 const shouldDecode = (statusCode, headers) => {
   if (statusCode === 204 || statusCode === 304) {
@@ -167,4 +171,25 @@ const calcObjectSize = (obj, processed) => {
 
 const sizeof = (obj) => calcSize(obj, new WeakSet());
 
-module.exports = { decodeStream, isPlainObject, sizeof };
+const streamToBuffer = async (stream) => {
+  const passThroughStream = new PassThrough();
+
+  let length = 0;
+  const chunks = [];
+
+  passThroughStream.on('data', (chunk) => {
+    /* istanbul ignore next */
+    if ((length + chunk.length) > maxBufferLength) {
+      throw new Error('Buffer.constants.MAX_SIZE exceeded');
+    }
+    chunks.push(chunk);
+    length += chunk.length;
+  });
+
+  await asyncPipeline(stream, passThroughStream);
+  return Buffer.concat(chunks, length);
+};
+
+module.exports = {
+  decodeStream, isPlainObject, sizeof, streamToBuffer,
+};

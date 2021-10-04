@@ -19,9 +19,9 @@ const assert = require('assert');
 const { FormData, File, Blob } = require('formdata-node');
 // eslint-disable-next-line import/no-unresolved
 const { fileFromPathSync } = require('formdata-node/file-from-path');
-const getStream = require('get-stream');
 
 const { isReadableStream } = require('../utils');
+const { streamToBuffer } = require('../../src/common/utils');
 const { isFormData, FormDataSerializer } = require('../../src/common/formData');
 
 describe('FormData Helpers Test', () => {
@@ -50,7 +50,7 @@ describe('FormData Helpers Test', () => {
     const stream = fds.stream();
     assert(isReadableStream(stream));
     assert(typeof fds.length() === 'number');
-    const buf = await getStream.buffer(fds.stream());
+    const buf = await streamToBuffer(fds.stream());
     assert.strictEqual(fds.length(), buf.length);
     assert(fds.contentType().startsWith('multipart/form-data; boundary='));
   });

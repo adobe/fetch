@@ -46,7 +46,6 @@
   ],
   "dependencies": {
     "debug": "4.3.2",
-    "get-stream": "6.0.1",
     "http-cache-semantics": "4.1.0",
     "lru-cache": "6.0.0"
   },
