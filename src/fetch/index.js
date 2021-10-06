@@ -230,6 +230,10 @@ const fetch = async (ctx, url, options) => {
  * @returns {Response} cached response with buffered body or original response if uncached.
  */
 const cacheResponse = async (ctx, request, response) => {
+  if (ctx.options.maxCacheSize === 0) {
+    // caching is disabled: return original response
+    return response;
+  }
   if (!CACHEABLE_METHODS.includes(request.method)) {
     // return original un-cacheable response
     return response;
@@ -257,7 +261,7 @@ const cacheResponse = async (ctx, request, response) => {
 const cachingFetch = async (ctx, url, options) => {
   const req = new Request(url, options);
 
-  const lookupCache = CACHEABLE_METHODS.includes(req.method)
+  const lookupCache = ctx.options.maxCacheSize !== 0 && CACHEABLE_METHODS.includes(req.method)
     // respect cache mode (https://developer.mozilla.org/en-US/docs/Web/API/Request/cache)
     && !['no-store', 'reload'].includes(req.cache);
   if (lookupCache) {
@@ -309,7 +313,11 @@ class FetchContext {
     this.options = { ...options };
     // setup cache
     const { maxCacheSize } = this.options;
-    const max = typeof maxCacheSize === 'number' && maxCacheSize >= 0 ? maxCacheSize : DEFAULT_MAX_CACHE_SIZE;
+    let max = typeof maxCacheSize === 'number' && maxCacheSize >= 0 ? maxCacheSize : DEFAULT_MAX_CACHE_SIZE;
+    if (max === 0) {
+      // we need to set a dummy value as LRU would translate a 0 to Infinity
+      max = 1;
+    }
     const length = ({ response }, _) => sizeof(response);
     this.cache = new LRU({ max, length });
     // event emitter
