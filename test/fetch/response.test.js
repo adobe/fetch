@@ -18,6 +18,7 @@
 
 const { Readable } = require('stream');
 
+const { FormData } = require('formdata-node');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 
@@ -178,6 +179,17 @@ describe('Response Tests', () => {
     const res = new Response(Buffer.from('a=1'));
     return res.text().then((result) => {
       expect(result).to.equal('a=1');
+    });
+  });
+
+  it('should support spec-compliant FormData body', () => {
+    const form = new FormData();
+    form.set('foo', 'bar');
+    const res = new Response(form);
+    // eslint-disable-next-line no-unused-expressions
+    expect(res.headers.get('content-type')).to.contain('multipart/form-data; boundary=');
+    return res.text().then((result) => {
+      expect(result).to.contain('Content-Disposition: form-data; name="foo"');
     });
   });
 

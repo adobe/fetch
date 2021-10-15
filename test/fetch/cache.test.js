@@ -23,7 +23,7 @@ const parseCacheControl = require('parse-cache-control');
 const { isReadableStream } = require('../utils');
 
 const {
-  fetch, onPush, offPush, reset, clearCache, cacheStats, context, Response, Headers,
+  fetch, onPush, offPush, reset, clearCache, cacheStats, context, noCache, Response, Headers,
 } = require('../../src');
 const { cacheableResponse } = require('../../src/fetch/cacheableResponse');
 
@@ -138,6 +138,48 @@ describe('Cache Tests', () => {
     assert.strictEqual(count, urls.length - 1);
 
     ctx.clearCache();
+    await ctx.reset();
+  });
+
+  it('setting maxCacheSize = 0 disables cache', async () => {
+    // custom context with cache size limit 0
+    const ctx = context({ maxCacheSize: 0 });
+
+    const url = 'https://httpbin.org/cache/60'; // -> max-age=60 (seconds)
+    // send initial request
+    let resp = await ctx.fetch(url);
+    assert.strictEqual(resp.status, 200);
+
+    // re-send request and make sure it's not served from cache
+    resp = await ctx.fetch(url);
+    assert.strictEqual(resp.status, 200);
+    assert(!resp.fromCache);
+
+    const { size, count } = ctx.cacheStats();
+    assert(size === 0);
+    assert(count === 0);
+
+    await ctx.reset();
+  });
+
+  it('noCache() disables cache', async () => {
+    // custom context with cache size limit 0
+    const ctx = noCache();
+
+    const url = 'https://httpbin.org/cache/60'; // -> max-age=60 (seconds)
+    // send initial request
+    let resp = await ctx.fetch(url);
+    assert.strictEqual(resp.status, 200);
+
+    // re-send request and make sure it's not served from cache
+    resp = await ctx.fetch(url);
+    assert.strictEqual(resp.status, 200);
+    assert(!resp.fromCache);
+
+    const { size, count } = ctx.cacheStats();
+    assert(size === 0);
+    assert(count === 0);
+
     await ctx.reset();
   });
 

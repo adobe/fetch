@@ -40,6 +40,7 @@
   - [HTTP/1.1 Keep-Alive](#http11-keep-alive)
   - [Self-signed Certificates](#self-signed-certificates)
   - [Set cache size limit](#set-cache-size-limit)
+  - [Disable caching](#disable-caching)
   - [Set a custom user agent](#set-a-custom-user-agent)
 - [More examples](#more-examples)
 - [Development](#development)
@@ -125,6 +126,11 @@ Apart from the standard Fetch API
 * `offPush()`- deregisters a listener previously registered with `onPush()`
 * `clearCache()` - clears the HTTP cache (cached responses)
 * `cacheStats()` - returns cache statistics
+* `noCache()` - creates a customized API context with disabled caching (convenience)
+* `h1()` - creates a customized API context with with enforced HTTP/1.1 protocol (convenience)
+* `keepAlive()` - creates a customized API context with enforced HTTP/1.1 protocol and persistent connections (convenience)
+* `h1NoCache()` - creates a customized API context with disabled caching and enforced HTTP/1.1 protocol (convenience)
+* `keepAliveNoCache()` - creates a customized API context with disabled caching and enforced HTTP/1.1 protocol with persistent connections (convenience)
 * `createUrl()` - creates a URL with query parameters (convenience)
 * `timeoutSignal()` - ceates a timeout signal (convenience)
 
@@ -142,7 +148,7 @@ interface ContextOptions {
    */
   userAgent?: string;
   /**
-   * The maximum total size of the cached entries (in bytes)
+   * The maximum total size of the cached entries (in bytes). 0 disables caching.
    * @default 100 * 1024 * 1024
    */
   maxCacheSize?: number;
@@ -343,15 +349,19 @@ Using `AbortController`:
 ### Post form data
 
 ```javascript
-  const fs = require('fs');
-  const { FormData, fetch } = require('@adobe/helix-fetch');
+  const { FormData, Blob, File } = require('formdata-node'); // spec-compliant implementations
+  const { fileFromPath } = require('formdata-node/file-from-path'); // helper for creating File instance from disk file
+
+  const { fetch } = require('@adobe/helix-fetch');
 
   const method = 'POST';
-  const body = new FormData();
-  body.append('foo', 'bar');
-  body.append('data', [ 0x68, 0x65, 0x6c, 0x69, 0x78, 0x2d, 0x66, 0x65, 0x74, 0x63, 0x68 ]);
-  body.append('some_file', fs.createReadStream('/foo/bar.jpg'), 'bar.jpg');
-  const resp = await fetch('https://httpbin.org/post', { method, body });
+  const fd = new FormData();
+  fd.set('field1', 'foo');
+  fd.set('field2', 'bar');
+  fd.set('blob', new Blob([0x68, 0x65, 0x6c, 0x69, 0x78, 0x2d, 0x66, 0x65, 0x74, 0x63, 0x68]));
+  fd.set('file', new File(['File content goes here'], 'file.txt'));
+  fd.set('other_file', await fileFromPath('/foo/bar.jpg', 'bar.jpg', { type: 'image/jpeg' }));
+  const resp = await fetch('https://httpbin.org/post', { method, body: fd });
 ```
 
 ### GET with query parameters object
@@ -401,7 +411,7 @@ assert(resp.ok);
 assert(resp.fromCache);
 ```
 
-You can disable caching with the `cache: 'no-store'` option:
+You can disable caching per request with the `cache: 'no-store'` option:
 
 ```javascript
 const { fetch } = require('@adobe/helix-fetch');
@@ -409,6 +419,12 @@ const { fetch } = require('@adobe/helix-fetch');
 const resp = await fetch('https://httbin.org/', { cache: 'no-store' });
 assert(resp.ok);
 assert(!resp.fromCache);
+```
+
+You can disable caching entirely:
+
+```javascript
+const { fetch } = require('@adobe/helix-fetch').noCache();
 ```
 
 ## Advanced Usage Examples
@@ -430,10 +446,7 @@ You can however add a listener which will be notified on every pushed (and cache
 ### Force HTTP/1(.1) protocol
 
 ```javascript
-  const { context, ALPN_HTTP1_1 } = require('@adobe/helix-fetch');
-  const { fetch } = context({
-    alpnProtocols: [ALPN_HTTP1_1],
-  });
+  const { fetch } = require('@adobe/helix-fetch').h1();
 
   const resp = await fetch('https://nghttp2.org');
   console.log(`Http version: ${resp.httpVersion}`);
@@ -442,13 +455,7 @@ You can however add a listener which will be notified on every pushed (and cache
 ### HTTP/1.1 Keep-Alive
 
 ```javascript
-const { context, ALPN_HTTP1_1 } = require('@adobe/helix-fetch');
-const { fetch } = context({
-  alpnProtocols: [ALPN_HTTP1_1], // make sure we're talking HTTP/1.1 to the server
-  h1: { // http[s].Agent options
-    keepAlive: true
-  }
-});
+const { fetch } = require('@adobe/helix-fetch').keepAlive();
 
 const resp = await fetch('https://httpbin.org/status/200');
 console.log(`Connection: ${resp.headers.get('connection')}`); // -> keep-alive
@@ -472,6 +479,17 @@ const resp = await fetch('https://localhost:8443/');  // a server using a self-s
   let resp = await fetch('https://httpbin.org/bytes/60000'); // ~60kb response
   resp = await fetch('https://httpbin.org/bytes/50000'); // ~50kb response
   console.log(cacheStats());
+```
+
+### Disable caching
+
+```javascript
+  const { fetch } = require('@adobe/helix-fetch').noCache();
+
+  let resp = await fetch('https://httpbin.org/cache/60'); // -> max-age=60 (seconds)
+  // re-fetch
+  resp = await fetch('https://httpbin.org/cache/60');
+  assert(!resp.fromCache);
 ```
 
 ### Set a custom user agent
