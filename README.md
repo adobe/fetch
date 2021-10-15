@@ -126,13 +126,13 @@ Apart from the standard Fetch API
 * `offPush()`- deregisters a listener previously registered with `onPush()`
 * `clearCache()` - clears the HTTP cache (cached responses)
 * `cacheStats()` - returns cache statistics
-* `noCache()` - creates a customized API context with disabled caching (convenience)
-* `h1()` - creates a customized API context with with enforced HTTP/1.1 protocol (convenience)
-* `keepAlive()` - creates a customized API context with enforced HTTP/1.1 protocol and persistent connections (convenience)
-* `h1NoCache()` - creates a customized API context with disabled caching and enforced HTTP/1.1 protocol (convenience)
-* `keepAliveNoCache()` - creates a customized API context with disabled caching and enforced HTTP/1.1 protocol with persistent connections (convenience)
-* `createUrl()` - creates a URL with query parameters (convenience)
-* `timeoutSignal()` - ceates a timeout signal (convenience)
+* `noCache()` - creates a customized API context with disabled caching (_convenience_)
+* `h1()` - creates a customized API context with enforced HTTP/1.1 protocol (_convenience_)
+* `keepAlive()` - creates a customized API context with enforced HTTP/1.1 protocol and persistent connections (_convenience_)
+* `h1NoCache()` - creates a customized API context with disabled caching and enforced HTTP/1.1 protocol (_convenience_)
+* `keepAliveNoCache()` - creates a customized API context with disabled caching and enforced HTTP/1.1 protocol with persistent connections (_convenience_)
+* `createUrl()` - creates a URL with query parameters (_convenience_)
+* `timeoutSignal()` - ceates a timeout signal (_convenience_)
 
 ### Context
 
