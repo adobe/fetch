@@ -410,6 +410,69 @@ class FetchContext {
       context: (options = {}) => new FetchContext(options).api(),
 
       /**
+       * Convenience function which creates a new context with disabled caching,
+       * the equivalent of `context({ maxCacheSize: 0 })`.
+       *
+       * The optional `options` parameter allows to specify further options.
+       *
+       * @param {Object} [options={}]
+       */
+      noCache: (options = {}) => new FetchContext({ ...options, maxCacheSize: 0 }).api(),
+
+      /**
+       * Convenience function which creates a new context with enforced HTTP/1.1 protocol,
+       * the equivalent of `context({ alpnProtocols: [ALPN_HTTP1_1] })`.
+       *
+       * The optional `options` parameter allows to specify further options.
+       *
+       * @param {Object} [options={}]
+       */
+      h1: (options = {}) => new FetchContext({
+        ...options, alpnProtocols: [this.context.ALPN_HTTP1_1],
+      }).api(),
+
+      /**
+       * Convenience function which creates a new context with enforced HTTP/1.1 protocol
+       * and persistent connections (keep-alive), the equivalent of
+       * `context({ alpnProtocols: [ALPN_HTTP1_1], h1: { keepAlive: true } })`.
+       *
+       * The optional `options` parameter allows to specify further options.
+       *
+       * @param {Object} [options={}]
+       */
+      keepAlive: (options = {}) => new FetchContext({
+        ...options, alpnProtocols: [this.context.ALPN_HTTP1_1], h1: { keepAlive: true },
+      }).api(),
+
+      /**
+       * Convenience function which creates a new context with disabled caching
+       * and enforced HTTP/1.1 protocol, a combination of `h1()` and `noCache()`.
+       *
+       * The optional `options` parameter allows to specify further options.
+       *
+       * @param {Object} [options={}]
+       */
+      h1NoCache: (options = {}) => new FetchContext({
+        ...options, maxCacheSize: 0, alpnProtocols: [this.context.ALPN_HTTP1_1],
+      }).api(),
+
+      /**
+       * Convenience function which creates a new context with disabled caching
+       * and enforced HTTP/1.1 protocol with persistent connections (keep-alive),
+       * a combination of `keepAlive()` and `noCache()`.
+       *
+       * The optional `options` parameter allows to specify further options.
+       *
+       * @param {Object} [options={}]
+       */
+      keepAliveNoCache: (options = {}) => new FetchContext({
+        ...options,
+        maxCacheSize: 0,
+        alpnProtocols: [this.context.ALPN_HTTP1_1],
+        h1: { keepAlive: true },
+      }).api(),
+
+      /**
        * Resets the current context, i.e. disconnects all open/pending sessions, clears caches etc..
        */
       reset: async () => this.context.reset(),

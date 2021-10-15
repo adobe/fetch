@@ -10,6 +10,8 @@
  * governing permissions and limitations under the License.
  */
 
+import { appendFile } from "fs";
+import { Context } from "mocha";
 import { SystemError } from "./fetch/errors";
 
 export declare enum ALPNProtocol {
@@ -68,6 +70,8 @@ export interface Http1Options {
   maxCachedSessions?: number;
 }
 
+type HeadersInit = Headers | Object | Iterable<readonly [string, string]> | Iterable<Iterable<string>>;
+
 declare interface RequestInit {
   /**
    * A BodyInit object or null to set request's body.
@@ -95,7 +99,22 @@ type BodyInit =
   | NodeJS.ReadableStream
   | string;
 
-declare class Body {
+  export declare class Headers implements Iterable<[string, string]> {
+    constructor(init?: HeadersInit);
+  
+    append(name: string, value: string): void;
+    delete(name: string): void;
+    get(name: string): string | null;
+    has(name: string): boolean;
+    set(name: string, value: string): void;
+  
+    entries(): Iterator<[string, string]>;
+    keys(): Iterator<string>;
+    values(): Iterator<string>;
+    [Symbol.iterator](): Iterator<[string, string]>;
+  }
+
+export declare class Body {
   constructor(body?: BodyInit);
 
   readonly body: NodeJS.ReadableStream | null;
@@ -173,7 +192,7 @@ export interface ContextOptions {
    */
   userAgent?: string;
   /**
-   * The maximum total size of the cached entries (in bytes)
+   * The maximum total size of the cached entries (in bytes). 0 disables caching.
    * @default 100 * 1024 * 1024
    */
   maxCacheSize?: number;
@@ -209,8 +228,6 @@ type AbortSignal = {
 	addEventListener(type: 'abort', listener: (this: AbortSignal) => void): void;
 	removeEventListener(type: 'abort', listener: (this: AbortSignal) => void): void;
 };
-
-type HeadersInit = Headers | Object | Iterable<readonly [string, string]> | Iterable<Iterable<string>>;
 
 export interface RequestOptions {
   /**
@@ -258,6 +275,149 @@ export interface RequestOptions {
 }
 
 /**
+ * @see https://dom.spec.whatwg.org/#interface-abortcontroller
+ */
+export type AbortController = Window["window"]["AbortController"];
+
+// Errors
+export interface FetchBaseError extends Error {
+  type?: string;
+}
+export interface FetchError extends FetchBaseError{
+  code: number;
+  erroredSysCall?: SystemError;
+}
+export interface AbortError extends FetchBaseError{
+  type: 'aborted'
+}
+
+interface CacheStats {
+  size: number;
+  count: number;
+}
+
+interface API {
+  /**
+   * Fetches a resource from the network. Returns a Promise which resolves once
+   * the response is available.
+   *
+   * @param {string|Request} url
+   * @param {RequestOptions} [options]
+   * @returns {Promise<Response>}
+   * @throws {FetchError}
+   * @throws {AbortError}
+   * @throws {TypeError}
+   */
+  declare fetch(url: string, options: RequestOptions): Promise<Response>;
+
+  /**
+   * Returns an object which looks like the public API, i.e. it will have the functions
+   * `fetch`, `context`, `reset`, etc. and provide its own isolated caches and specific
+   * behavior according to `options`.
+   *
+   * @param {ContextOptions} options 
+   */
+  declare context(options: ContextOptions): API;
+
+  /**
+   * Convenience function which creates a new context with disabled caching,
+   * the equivalent of `context({ maxCacheSize: 0 })`.
+   *
+   * The optional `options` parameter allows to specify further options.
+   *
+   * @param {ContextOptions} [options={}]
+   */
+  declare noCache(options?: ContextOptions): API;
+
+  /**
+   * Convenience function which creates a new context with enforced HTTP/1.1 protocol,
+   * the equivalent of `context({ alpnProtocols: [ALPN_HTTP1_1] })`.
+   *
+   * The optional `options` parameter allows to specify further options.
+   *
+   * @param {ContextOptions} [options={}]
+   */
+  declare h1(options?: ContextOptions): API;
+  
+  /**
+   * Convenience function which creates a new context with enforced HTTP/1.1 protocol
+   * and persistent connections (keep-alive), the equivalent of
+   * `context({ alpnProtocols: [ALPN_HTTP1_1], h1: { keepAlive: true } })`.
+   *
+   * The optional `options` parameter allows to specify further options.
+   *
+   * @param {ContextOptions} [options={}]
+   */
+  declare keepAlive(options?: ContextOptions): API;
+
+  /**
+   * Convenience function which creates a new context with disabled caching
+   * and enforced HTTP/1.1 protocol, a combination of `h1()` and `noCache()`.
+   *
+   * The optional `options` parameter allows to specify further options.
+   *
+   * @param {ContextOptions} [options={}]
+   */
+  declare h1NoCache(options?: ContextOptions): API;
+
+  /**
+   * Convenience function which creates a new context with disabled caching
+   * and enforced HTTP/1.1 protocol with persistent connections (keep-alive),
+   * a combination of `keepAlive()` and `noCache()`.
+   *
+   * The optional `options` parameter allows to specify further options.
+   *
+   * @param {ContextOptions} [options={}]
+   */
+  declare keepAliveNoCache(options?: ContextOptions): API;
+
+  /**
+   * Resets the current context, i.e. disconnects all open/pending sessions, clears caches etc..
+   */
+  declare reset(): Promise<[void, void]>;
+
+  /**
+   * Register a callback which gets called once a server Push has been received.
+   *
+   * @param {PushHandler} fn callback function invoked with the url and the pushed Response
+   */
+  declare onPush(fn: PushHandler): void;
+
+  /**
+   * Deregister a callback previously registered with {#onPush}.
+   *
+   * @param {PushHandler} fn callback function registered with {#onPush}
+   */
+  declare offPush(fn: PushHandler): void;
+
+  /**
+   * Create a URL with query parameters
+   *
+   * @param {string} url request url
+   * @param {object} [qs={}] request query parameters
+   */
+  declare createUrl(url: string, qs?: Record<string, unknown>): string;
+
+  /**
+   * Creates a timeout signal which allows to specify
+   * a timeout for a `fetch` operation via the `signal` option.
+   *
+   * @param {number} ms timeout in milliseconds
+   */
+  declare timeoutSignal(ms: number): AbortSignal;
+
+  /**
+   * Clear the cache entirely, throwing away all values.
+   */
+  declare clearCache(): void;
+
+  /**
+   * Cache stats for diagnostic purposes
+   */
+  declare cacheStats(): CacheStats;
+}
+
+/**
  * Fetches a resource from the network. Returns a Promise which resolves once
  * the response is available.
  *
@@ -271,21 +431,65 @@ export interface RequestOptions {
 export declare function fetch(url: string, options: RequestOptions): Promise<Response>;
 
 /**
- * @see https://dom.spec.whatwg.org/#interface-abortcontroller
+ * Returns an object which looks like the public API, i.e. it will have the functions
+ * `fetch`, `context`, `reset`, etc. and provide its own isolated caches and specific
+ * behavior according to `options`.
+ *
+ * @param {ContextOptions} options 
  */
-export type AbortController = Window["window"]["AbortController"];
+export declare function context(options: ContextOptions): API;
 
-// Errors
-interface FetchBaseError extends Error {
-  type?: string;
-}
-export interface FetchError extends FetchBaseError{
-  code: number;
-  erroredSysCall?: SystemError;
-}
-export interface AbortError extends FetchBaseError{
-  type: 'aborted'
-}
+/**
+ * Convenience function which creates a new context with disabled caching,
+ * the equivalent of `context({ maxCacheSize: 0 })`.
+ *
+ * The optional `options` parameter allows to specify further options.
+ *
+ * @param {ContextOptions} [options={}]
+ */
+export declare function noCache(options?: ContextOptions): API;
+
+/**
+ * Convenience function which creates a new context with enforced HTTP/1.1 protocol,
+ * the equivalent of `context({ alpnProtocols: [ALPN_HTTP1_1] })`.
+ *
+ * The optional `options` parameter allows to specify further options.
+ *
+ * @param {ContextOptions} [options={}]
+ */
+export declare function h1(options?: ContextOptions): API;
+ 
+/**
+ * Convenience function which creates a new context with enforced HTTP/1.1 protocol
+ * with persistent connections (keep-alive), the equivalent of
+ * `context({ alpnProtocols: [ALPN_HTTP1_1], h1: { keepAlive: true } })`.
+ *
+ * The optional `options` parameter allows to specify further options.
+ *
+ * @param {ContextOptions} [options={}]
+ */
+export declare function keepAlive(options?: ContextOptions): API;
+
+/**
+ * Convenience function which creates a new context with disabled caching
+ * and enforced HTTP/1.1 protocol, a combination of `h1()` and `noCache()`.
+ *
+ * The optional `options` parameter allows to specify further options.
+ *
+ * @param {ContextOptions} [options={}]
+ */
+export declare function h1NoCache(options?: ContextOptions): API;
+
+/**
+ * Convenience function which creates a new context with disabled caching
+ * and enforced HTTP/1.1 protocol with persistent connections (keep-alive),
+ * a combination of `keepAlive()` and `noCache()`.
+ *
+ * The optional `options` parameter allows to specify further options.
+ *
+ * @param {ContextOptions} [options={}]
+ */
+export declare function keepAliveNoCache(options?: ContextOptions): API;
 
 /**
  * Resets the current context, i.e. disconnects all open/pending sessions, clears caches etc..
@@ -320,19 +524,15 @@ export declare function createUrl(url: string, qs?: Record<string, unknown>): st
  *
  * @param {number} ms timeout in milliseconds
  */
-export declare function timeoutSignal(ms: number): void;
+export declare function timeoutSignal(ms: number): AbortSignal;
 
 /**
  * Clear the cache entirely, throwing away all values.
  */
 export declare function clearCache(): void;
 
-interface CacheStats {
-  size: number;
-  count: number;
-}
-
 /**
  * Cache stats for diagnostic purposes
  */
-export declare function cacheStats(): CacheStats;
+export declare function  cacheStats(): CacheStats;
+ 
