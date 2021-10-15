@@ -1,3 +1,24 @@
+# [3.0.0](https://github.com/adobe/helix-fetch/compare/v2.4.2...v3.0.0) (2021-10-15)
+
+
+### Features
+
+* reduce dependencies ([#211](https://github.com/adobe/helix-fetch/issues/211)) ([5562f5f](https://github.com/adobe/helix-fetch/commit/5562f5ff170914c2b9ea1a9d7c445b052ae4aaf0))
+
+
+### BREAKING CHANGES
+
+* FormData is no longer exported by helix-fetch. You can use a spec-compliant
+FormData implementation instead (e.g. `formdata-node`)
+
+* feat: setting maxCacheSize = 0 disables cache
+
+* feat: new convenience functions: noCache(), h1(), keepAlive(), h1NoCache(), keepAliveNoCche()
+
+* chore: fix ts declarations
+
+* chore: update deps
+
 ## [2.4.2](https://github.com/adobe/helix-fetch/compare/v2.4.1...v2.4.2) (2021-08-18)
 
 
