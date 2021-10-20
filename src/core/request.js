@@ -10,6 +10,7 @@
  * governing permissions and limitations under the License.
  */
 
+import { readFileSync } from 'fs';
 import { Readable } from 'stream';
 import tls from 'tls';
 
@@ -22,11 +23,12 @@ import h2 from './h2.js';
 import lock from './lock.js';
 import { isFormData, FormDataSerializer } from '../common/formData.js';
 import { isPlainObject } from '../common/utils.js';
-import pkg from '../../package.json';
+// as of node v16 support for importing JSON modules is still experimental
+// import pkg from '../../package.json';
+const pkg = JSON.parse(readFileSync(new URL('../../package.json', import.meta.url)));
+const { version } = pkg;
 
 const debug = debugFactory('helix-fetch:core');
-
-const { version } = pkg;
 
 const ALPN_HTTP2 = 'h2';
 const ALPN_HTTP2C = 'h2c';

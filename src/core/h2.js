@@ -240,8 +240,8 @@ const request = async (ctx, url, options) => {
       signal.addEventListener('abort', onAbortSignal);
     }
 
+    /* c8 ignore next 4 */
     const onSessionError = (err) => {
-      /* c8 ignore next 2 */
       debug(`session ${origin} encountered error during ${opts.method} ${url.href}: ${err}`);
       reject(err);
     };

@@ -8,8 +8,8 @@
   "type": "module",
   "scripts": {
     "build": "rollup -c",
-    "test": "NODE_OPTIONS=\"--experimental-json-modules\" c8 --reporter=text --reporter=lcov --check-coverage --branches 100 --statements 100 --lines 100 mocha --recursive --timeout 5000",
-    "test-ci": "NODE_OPTIONS=\"--experimental-json-modules\" c8 --reporter=text --reporter=lcov --check-coverage --branches 100 --statements 100 --lines 100 mocha --recursive --timeout 5000 --reporter xunit --reporter-options output=./junit/test-results.xml && codecov",
+    "test": "c8 --reporter=text --reporter=lcov --check-coverage --branches 100 --statements 100 --lines 100 mocha --recursive --timeout 5000",
+    "test-ci": "c8 --reporter=text --reporter=lcov --check-coverage --branches 100 --statements 100 --lines 100 mocha --recursive --timeout 5000 --reporter xunit --reporter-options output=./junit/test-results.xml && codecov",
     "lint": "./node_modules/.bin/eslint .",
     "semantic-release": "semantic-release",
     "commit": "git-cz"
