@@ -10,16 +10,22 @@
  * governing permissions and limitations under the License.
  */
 
-import { pipeline } from 'stream';
+/* eslint-disable guard-for-in */
+import { constants as bufferConstants } from 'buffer';
+import { pipeline, PassThrough } from 'stream';
+import { promisify } from 'util';
 import {
   createGunzip, createInflate, createBrotliDecompress, constants as zlibConstants,
 } from 'zlib';
 import debugFactory from 'debug';
 
 const debug = debugFactory('helix-fetch:utils');
+const { MAX_LENGTH: maxBufferLength } = bufferConstants;
 const { Z_SYNC_FLUSH } = zlibConstants;
 
-function shouldDecode(statusCode, headers) {
+const asyncPipeline = promisify(pipeline);
+
+const shouldDecode = (statusCode, headers) => {
   if (statusCode === 204 || statusCode === 304) {
     return false;
   }
@@ -27,9 +33,9 @@ function shouldDecode(statusCode, headers) {
     return false;
   }
   return /^\s*(?:(x-)?deflate|(x-)?gzip|br)\s*$/.test(headers['content-encoding']);
-}
+};
 
-function decodeStream(statusCode, headers, readableStream, onError) {
+const decodeStream = (statusCode, headers, readableStream, onError) => {
   if (!shouldDecode(statusCode, headers)) {
     return readableStream;
   }
@@ -64,9 +70,9 @@ function decodeStream(statusCode, headers, readableStream, onError) {
       // only here to make eslint stop complaining
       return readableStream;
   }
-}
+};
 
-function isPlainObject(val) {
+const isPlainObject = (val) => {
   if (!val || typeof val !== 'object') {
     return false;
   }
@@ -81,6 +87,104 @@ function isPlainObject(val) {
     proto = Object.getPrototypeOf(proto);
   }
   return Object.getPrototypeOf(val) === proto;
-}
+};
 
-export { decodeStream, isPlainObject };
+const calcSize = (obj, processed) => {
+  if (Buffer.isBuffer(obj)) {
+    return obj.length;
+  }
+
+  switch (typeof obj) {
+    case 'string':
+      return obj.length * 2;
+    case 'boolean':
+      return 4;
+    case 'number':
+      return 8;
+    case 'symbol':
+      return Symbol.keyFor(obj)
+        ? Symbol.keyFor(obj).length * 2 // global symbol '<string>'
+        : (obj.toString().length - 8) * 2; // local symbol 'Symbol(<string>)'
+    case 'object':
+      if (Array.isArray(obj)) {
+        // eslint-disable-next-line no-use-before-define
+        return calcArraySize(obj, processed);
+      } else {
+        // eslint-disable-next-line no-use-before-define
+        return calcObjectSize(obj, processed);
+      }
+    default:
+      return 0;
+  }
+};
+
+const calcArraySize = (arr, processed) => {
+  processed.add(arr);
+
+  return arr.map((entry) => {
+    if (processed.has(entry)) {
+      // skip circular references
+      return 0;
+    }
+    return calcSize(entry, processed);
+  }).reduce((acc, curr) => acc + curr, 0);
+};
+
+const calcObjectSize = (obj, processed) => {
+  if (obj == null) {
+    return 0;
+  }
+
+  processed.add(obj);
+
+  let bytes = 0;
+  const names = [];
+
+  // eslint-disable-next-line no-restricted-syntax
+  for (const key in obj) {
+    names.push(key);
+  }
+
+  names.push(...Object.getOwnPropertySymbols(obj));
+
+  names.forEach((nm) => {
+    // key
+    bytes += calcSize(nm, processed);
+    // value
+    if (typeof obj[nm] === 'object' && obj[nm] !== null) {
+      if (processed.has(obj[nm])) {
+        // skip circular references
+        return;
+      }
+      processed.add(obj[nm]);
+    }
+    bytes += calcSize(obj[nm], processed);
+  });
+
+  return bytes;
+};
+
+const sizeof = (obj) => calcSize(obj, new WeakSet());
+
+const streamToBuffer = async (stream) => {
+  const passThroughStream = new PassThrough();
+
+  let length = 0;
+  const chunks = [];
+
+  passThroughStream.on('data', (chunk) => {
+    /* istanbul ignore next */
+    if ((length + chunk.length) > maxBufferLength) {
+      throw new Error('Buffer.constants.MAX_SIZE exceeded');
+    }
+    chunks.push(chunk);
+    length += chunk.length;
+  });
+
+  await asyncPipeline(stream, passThroughStream);
+  return Buffer.concat(chunks, length);
+};
+
+export {
+  decodeStream, isPlainObject, sizeof, streamToBuffer,
+};

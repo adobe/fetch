@@ -13,7 +13,6 @@
 import { Readable } from 'stream';
 import tls from 'tls';
 
-import FormData from 'form-data';
 import LRU from 'lru-cache';
 import debugFactory from 'debug';
 
@@ -21,6 +20,7 @@ import { RequestAbortedError } from './errors.js';
 import h1 from './h1.js';
 import h2 from './h2.js';
 import lock from './lock.js';
+import { isFormData, FormDataSerializer } from '../common/formData.js';
 import { isPlainObject } from '../common/utils.js';
 import pkg from '../../package.json';
 
@@ -206,9 +206,16 @@ const request = async (ctx, uri, options) => {
   if (opts.body instanceof URLSearchParams) {
     contentType = 'application/x-www-form-urlencoded; charset=utf-8';
     opts.body = opts.body.toString();
-  } else if (opts.body instanceof FormData) {
-    contentType = `multipart/form-data;boundary=${opts.body.getBoundary()}`;
-    opts.body = opts.body.getBuffer();
+  } else if (isFormData(opts.body)) {
+    // spec-compliant FormData
+    const fd = new FormDataSerializer(opts.body);
+    contentType = fd.contentType();
+    opts.body = fd.stream();
+    /* istanbul ignore else */
+    if (opts.headers['transfer-encoding'] === undefined
+      && opts.headers['content-length'] === undefined) {
+      opts.headers['content-length'] = String(fd.length());
+    }
   } else if (typeof opts.body === 'string' || opts.body instanceof String) {
     contentType = 'text/plain; charset=utf-8';
   } else if (isPlainObject(opts.body)) {

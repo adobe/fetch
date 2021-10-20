@@ -24,3 +24,56 @@ declare type HelixFetchAPI = typeof api;
   * @param {ContextOptions} options
   */
 export declare function context(options?: ContextOptions): HelixFetchAPI;
+
+/**
+ * Convenience function which creates a new context with disabled caching,
+ * the equivalent of `context({ maxCacheSize: 0 })`.
+ *
+ * The optional `options` parameter allows to specify further options.
+ *
+  * @param {ContextOptions} options
+ */
+export declare function noCache(options?: ContextOptions): HelixFetchAPI;
+ 
+ /**
+  * Convenience function which creates a new context with enforced HTTP/1.1 protocol,
+  * the equivalent of `context({ alpnProtocols: [ALPN_HTTP1_1] })`.
+  *
+  * The optional `options` parameter allows to specify further options.
+  *
+  * @param {ContextOptions} options
+  */
+ export declare function h1(options?: ContextOptions): HelixFetchAPI;
+  
+ /**
+  * Convenience function which creates a new context with enforced HTTP/1.1 protocol
+  * with persistent connections (keep-alive), the equivalent of
+  * `context({ alpnProtocols: [ALPN_HTTP1_1], h1: { keepAlive: true } })`.
+  *
+  * The optional `options` parameter allows to specify further options.
+  *
+  * @param {ContextOptions} options
+  */
+ export declare function keepAlive(options?: ContextOptions): HelixFetchAPI;
+ 
+ /**
+  * Convenience function which creates a new context with disabled caching
+  * and enforced HTTP/1.1 protocol, a combination of `h1()` and `noCache()`.
+  *
+  * The optional `options` parameter allows to specify further options.
+  *
+  * @param {ContextOptions} options
+  */
+ export declare function h1NoCache(options?: ContextOptions): HelixFetchAPI;
+ 
+ /**
+  * Convenience function which creates a new context with disabled caching
+  * and enforced HTTP/1.1 protocol with persistent connections (keep-alive),
+  * a combination of `keepAlive()` and `noCache()`.
+  *
+  * The optional `options` parameter allows to specify further options.
+  *
+  * @param {ContextOptions} options
+  */
+ export declare function keepAliveNoCache(options?: ContextOptions): HelixFetchAPI;
+ 

@@ -17,10 +17,11 @@ import { Readable } from 'stream';
 import { promisify } from 'util';
 import zlib from 'zlib';
 
-import getStream from 'get-stream';
 import sinon from 'sinon';
 
-import { decodeStream, isPlainObject } from '../../src/common/utils.js';
+import {
+  decodeStream, isPlainObject, sizeof, streamToBuffer,
+} from '../../src/common/utils.js';
 
 const gzip = promisify(zlib.gzip);
 const deflate = promisify(zlib.deflate);
@@ -48,7 +49,7 @@ describe('decodeStream Tests', () => {
     const onError = sinon.fake();
     const decStream = decodeStream(200, { 'content-length': encBuf.length, 'content-encoding': 'gzip' }, encStream, onError);
     assert(onError.notCalled);
-    const decBuf = await getStream.buffer(decStream);
+    const decBuf = await streamToBuffer(decStream);
     assert.strictEqual(Buffer.compare(decBuf, TEST_DATA), 0);
   });
 
@@ -58,7 +59,7 @@ describe('decodeStream Tests', () => {
     const onError = sinon.fake();
     const decStream = decodeStream(200, { 'content-length': encBuf.length, 'content-encoding': 'deflate' }, encStream, onError);
     assert(onError.notCalled);
-    const decBuf = await getStream.buffer(decStream);
+    const decBuf = await streamToBuffer(decStream);
     assert.strictEqual(Buffer.compare(decBuf, TEST_DATA), 0);
   });
 
@@ -68,7 +69,7 @@ describe('decodeStream Tests', () => {
     const onError = sinon.fake();
     const decStream = decodeStream(200, { 'content-length': encBuf.length, 'content-encoding': 'br' }, encStream, onError);
     assert(onError.notCalled);
-    const decBuf = await getStream.buffer(decStream);
+    const decBuf = await streamToBuffer(decStream);
     assert.strictEqual(Buffer.compare(decBuf, TEST_DATA), 0);
   });
 
@@ -79,7 +80,7 @@ describe('decodeStream Tests', () => {
     const encStream = Readable.from(encBuf);
     const onError = sinon.fake();
     const decStream = decodeStream(200, { 'content-length': encBuf.length, 'content-encoding': 'gzip' }, encStream, onError);
-    await assert.rejects(async () => getStream.buffer(decStream));
+    await assert.rejects(async () => streamToBuffer(decStream));
     assert(onError.calledOnce);
   });
 
@@ -99,5 +100,44 @@ describe('decodeStream Tests', () => {
     const decStream = decodeStream(200, { 'content-length': encBuf.length, 'content-encoding': 'Gzip' }, encStream, onError);
     assert(onError.notCalled);
     assert.strictEqual(encStream, decStream);
+  });
+});
+
+describe('sizeof Tests', () => {
+  it('sizeof primitives works', async () => {
+    assert.strictEqual(10, sizeof('12345'));
+    assert.strictEqual(8, sizeof(42));
+    assert.strictEqual(4, sizeof(true));
+  });
+
+  it('sizeof symbols works', async () => {
+    const localSymbal = Symbol('foo');
+    assert.strictEqual(6, sizeof(localSymbal));
+    const globalSymbal = Symbol.for('bar');
+    assert.strictEqual(6, sizeof(globalSymbal));
+  });
+
+  it('sizeof object with circular reference works', async () => {
+    const obj = {
+      a: 'a',
+    };
+    assert.strictEqual(sizeof(obj), 4);
+    obj.b = obj;
+    assert.strictEqual(sizeof(obj), 4 + 2);
+  });
+
+  it('sizeof array with circular reference works', async () => {
+    const arr = ['a'];
+    assert.strictEqual(sizeof(arr), 2);
+    arr.push(arr);
+    assert.strictEqual(sizeof(arr), 2);
+  });
+});
+
+describe('streamToBuffer Tests', () => {
+  it('streamToBuffer works', async () => {
+    const stream = Readable.from(TEST_DATA);
+    const buf = await streamToBuffer(stream);
+    assert.strictEqual(Buffer.compare(buf, TEST_DATA), 0);
   });
 });

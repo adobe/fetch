@@ -13,6 +13,7 @@
 import { Body, cloneStream, guessContentType } from './body.js';
 import Headers from './headers.js';
 import { isPlainObject } from '../common/utils.js';
+import { isFormData, FormDataSerializer } from '../common/formData.js';
 
 const INTERNALS = Symbol('Response internals');
 
@@ -33,7 +34,23 @@ class Response extends Body {
     const headers = new Headers(init.headers);
 
     let respBody = body;
-    if (body !== null && !headers.has('content-type')) {
+
+    if (isFormData(respBody)) {
+      // spec-compliant FormData
+      /* istanbul ignore else */
+      if (!headers.has('content-type')) {
+        const fd = new FormDataSerializer(respBody);
+        respBody = fd.stream();
+        headers.set('content-type', fd.contentType());
+        /* istanbul ignore else */
+        if (!headers.has('transfer-encoding')
+          && !headers.has('content-length')) {
+          headers.set('content-length', fd.length());
+        }
+      }
+    }
+
+    if (respBody !== null && !headers.has('content-type')) {
       if (isPlainObject(respBody)) {
         // extension: support plain js object body (JSON serialization)
         respBody = JSON.stringify(respBody);

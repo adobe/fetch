@@ -19,6 +19,7 @@ import stream from 'stream';
 import { fileURLToPath } from 'url';
 import { promisify } from 'util';
 
+import { FormData } from 'formdata-node';
 import { WritableStreamBuffer } from 'stream-buffers';
 
 import { isReadableStream } from '../utils.js';
@@ -34,7 +35,6 @@ const {
   context,
   ALPN_HTTP1_1,
   ALPN_HTTP2,
-  FormData,
   FetchError,
   AbortController,
   AbortError,
@@ -547,7 +547,7 @@ testParams.forEach((params) => {
       assert.deepStrictEqual(form, searchParams);
     });
 
-    it('supports FormData body', async () => {
+    it('supports spec-compliant FormData body', async () => {
       const searchParams = {
         name: 'André Citroën',
         rumple: 'stiltskin',
@@ -563,8 +563,7 @@ testParams.forEach((params) => {
       const jsonResponseBody = await resp.json();
       assert(jsonResponseBody !== null && typeof jsonResponseBody === 'object');
       const { form: reqForm, headers } = jsonResponseBody;
-      assert(headers['Content-Type'].startsWith('multipart/form-data;boundary='));
-      assert.strictEqual(+headers['Content-Length'], form.getBuffer().length);
+      assert(headers['Content-Type'].startsWith('multipart/form-data; boundary='));
       assert.deepStrictEqual(reqForm, searchParams);
     });
 

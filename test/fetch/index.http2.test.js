@@ -13,7 +13,7 @@
 /* eslint-env mocha */
 
 import assert from 'assert';
-import crypto from 'crypto';
+import { createHash } from 'crypto';
 
 import sinon from 'sinon';
 
@@ -137,7 +137,7 @@ describe('HTTP/2-specific Fetch Tests', () => {
       const res = await fetch(url);
       assert.strictEqual(res.httpVersion, '2.0');
       const data = await res.text();
-      return crypto.createHash('md5').update(data).digest().toString('hex');
+      return createHash('md5').update(data).digest().toString('hex');
     };
 
     const results = await Promise.all([

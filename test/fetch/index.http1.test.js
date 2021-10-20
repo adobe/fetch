@@ -13,9 +13,17 @@
 /* eslint-env mocha */
 
 import assert from 'assert';
-import crypto from 'crypto';
+import { createHash } from 'crypto';
 
-import { context, ALPN_HTTP1_0, ALPN_HTTP1_1 } from '../../src/index.js';
+import {
+  context,
+  h1,
+  keepAlive,
+  h1NoCache,
+  keepAliveNoCache,
+  ALPN_HTTP1_0,
+  ALPN_HTTP1_1,
+} from '../../src/index.js';
 
 const testParams = [
   {
@@ -35,6 +43,48 @@ testParams.forEach((params) => {
   } = params;
 
   describe(`HTTP/1.x-specific Fetch Tests (${name})`, () => {
+    it(`forcing HTTP/1.1 using context option works' (${name})`, async () => {
+      const { fetch, reset } = context({ alpnProtocols: [ALPN_HTTP1_1] });
+      try {
+        const resp = await fetch(`${protocol}://httpbin.org/status/200`);
+        assert.strictEqual(resp.status, 200);
+        assert.strictEqual(resp.httpVersion, '1.1');
+      } finally {
+        await reset();
+      }
+    });
+
+    it(`forcing HTTP/1.1 using h1() works' (${name})`, async () => {
+      const { fetch, reset } = h1();
+      try {
+        const resp = await fetch(`${protocol}://httpbin.org/status/200`);
+        assert.strictEqual(resp.status, 200);
+        assert.strictEqual(resp.httpVersion, '1.1');
+      } finally {
+        await reset();
+      }
+    });
+
+    it(`supports h1NoCache() (${name})`, async () => {
+      const { fetch, cacheStats, reset } = h1NoCache();
+      try {
+        let resp = await fetch(`${protocol}://httpbin.org/cache/60`);
+        assert.strictEqual(resp.status, 200);
+        assert.strictEqual(resp.httpVersion, '1.1');
+        // re-fetch (force reuse of custom agent => coverage)
+        resp = await fetch(`${protocol}://httpbin.org/cache/60`);
+        assert.strictEqual(resp.status, 200);
+        assert.strictEqual(resp.httpVersion, '1.1');
+        assert(!resp.fromCache);
+
+        const { size, count } = cacheStats();
+        assert(size === 0);
+        assert(count === 0);
+      } finally {
+        await reset();
+      }
+    });
+
     it(`defaults to 'no keep-alive' (${name})`, async () => {
       const { fetch, reset } = context({ alpnProtocols: [ALPN_HTTP1_1] });
       try {
@@ -47,7 +97,7 @@ testParams.forEach((params) => {
       }
     });
 
-    it(`supports keep-alive (${name})`, async () => {
+    it(`supports h1.keepAlive context option (${name})`, async () => {
       const { fetch, reset } = context({ alpnProtocols: [ALPN_HTTP1_1], h1: { keepAlive: true } });
       try {
         let resp = await fetch(`${protocol}://httpbin.org/status/200`, { cache: 'no-store' });
@@ -59,6 +109,45 @@ testParams.forEach((params) => {
         assert.strictEqual(resp.status, 200);
         assert.strictEqual(resp.httpVersion, '1.1');
         assert.strictEqual(resp.headers.get('connection'), 'keep-alive');
+      } finally {
+        await reset();
+      }
+    });
+
+    it(`supports keepAlive() (${name})`, async () => {
+      const { fetch, reset } = keepAlive();
+      try {
+        let resp = await fetch(`${protocol}://httpbin.org/status/200`, { cache: 'no-store' });
+        assert.strictEqual(resp.status, 200);
+        assert.strictEqual(resp.httpVersion, '1.1');
+        assert.strictEqual(resp.headers.get('connection'), 'keep-alive');
+        // re-fetch (force reuse of custom agent => coverage)
+        resp = await fetch(`${protocol}://httpbin.org/status/200`, { cache: 'no-store' });
+        assert.strictEqual(resp.status, 200);
+        assert.strictEqual(resp.httpVersion, '1.1');
+        assert.strictEqual(resp.headers.get('connection'), 'keep-alive');
+      } finally {
+        await reset();
+      }
+    });
+
+    it(`supports keepAliveNoCache() (${name})`, async () => {
+      const { fetch, reset, cacheStats } = keepAliveNoCache();
+      try {
+        let resp = await fetch(`${protocol}://httpbin.org/cache/60`);
+        assert.strictEqual(resp.status, 200);
+        assert.strictEqual(resp.httpVersion, '1.1');
+        assert.strictEqual(resp.headers.get('connection'), 'keep-alive');
+        // re-fetch (force reuse of custom agent => coverage)
+        resp = await fetch(`${protocol}://httpbin.org/cache/60`);
+        assert.strictEqual(resp.status, 200);
+        assert.strictEqual(resp.httpVersion, '1.1');
+        assert.strictEqual(resp.headers.get('connection'), 'keep-alive');
+        assert(!resp.fromCache);
+
+        const { size, count } = cacheStats();
+        assert(size === 0);
+        assert(count === 0);
       } finally {
         await reset();
       }
@@ -105,7 +194,7 @@ testParams.forEach((params) => {
         const res = await fetch(url);
         assert.strictEqual(res.httpVersion, '1.1');
         const data = await res.text();
-        return crypto.createHash('md5').update(data).digest().toString('hex');
+        return createHash('md5').update(data).digest().toString('hex');
       };
 
       let results;
