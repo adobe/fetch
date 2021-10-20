@@ -10,11 +10,10 @@
  * governing permissions and limitations under the License.
  */
 
+/* eslint-disable no-underscore-dangle */
 /* eslint-env mocha */
 
-'use strict';
-
-import assert  from 'assert';
+import assert from 'assert';
 import { fileURLToPath } from 'url';
 
 import { FormData, File, Blob } from 'formdata-node';
