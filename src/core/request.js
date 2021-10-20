@@ -211,7 +211,6 @@ const request = async (ctx, uri, options) => {
     const fd = new FormDataSerializer(opts.body);
     contentType = fd.contentType();
     opts.body = fd.stream();
-    /* istanbul ignore else */
     if (opts.headers['transfer-encoding'] === undefined
       && opts.headers['content-length'] === undefined) {
       opts.headers['content-length'] = String(fd.length());

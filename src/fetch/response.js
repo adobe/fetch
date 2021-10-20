@@ -37,12 +37,10 @@ class Response extends Body {
 
     if (isFormData(respBody)) {
       // spec-compliant FormData
-      /* istanbul ignore else */
       if (!headers.has('content-type')) {
         const fd = new FormDataSerializer(respBody);
         respBody = fd.stream();
         headers.set('content-type', fd.contentType());
-        /* istanbul ignore else */
         if (!headers.has('transfer-encoding')
           && !headers.has('content-length')) {
           headers.set('content-length', fd.length());

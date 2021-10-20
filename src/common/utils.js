@@ -173,7 +173,7 @@ const streamToBuffer = async (stream) => {
   const chunks = [];
 
   passThroughStream.on('data', (chunk) => {
-    /* istanbul ignore next */
+    /* c8 ignore next 3 */
     if ((length + chunk.length) > maxBufferLength) {
       throw new Error('Buffer.constants.MAX_SIZE exceeded');
     }
