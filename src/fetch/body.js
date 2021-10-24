@@ -14,10 +14,8 @@
 
 const { PassThrough, Readable } = require('stream');
 
-const getStream = require('get-stream');
-const FormData = require('form-data');
-
 const { FetchError, FetchBaseError } = require('./errors');
+const { streamToBuffer } = require('../common/utils');
 
 const EMPTY_BUFFER = Buffer.alloc(0);
 const INTERNALS = Symbol('Body internals');
@@ -58,7 +56,7 @@ const consume = async (body) => {
     return EMPTY_BUFFER;
   }
 
-  return getStream.buffer(stream);
+  return streamToBuffer(stream);
 };
 
 /**
@@ -80,8 +78,6 @@ class Body {
       stream = null;
     } else if (body instanceof URLSearchParams) {
       stream = Readable.from(body.toString());
-    } else if (body instanceof FormData) {
-      stream = Readable.from(body.getBuffer());
     } else if (body instanceof Readable) {
       stream = body;
     } else if (Buffer.isBuffer(body)) {
@@ -214,10 +210,6 @@ const guessContentType = (body) => {
 
   if (body instanceof URLSearchParams) {
     return 'application/x-www-form-urlencoded; charset=utf-8';
-  }
-
-  if (body instanceof FormData) {
-    return `multipart/form-data;boundary=${body.getBoundary()}`;
   }
 
   if (Buffer.isBuffer(body)) {

@@ -16,9 +16,7 @@ const { EventEmitter } = require('events');
 const { Readable } = require('stream');
 
 const debug = require('debug')('helix-fetch');
-const FormData = require('form-data');
 const LRU = require('lru-cache');
-const sizeof = require('object-sizeof');
 
 const { Body } = require('./body');
 const { Headers } = require('./headers');
@@ -28,6 +26,8 @@ const { FetchBaseError, FetchError, AbortError } = require('./errors');
 const { AbortController, AbortSignal, TimeoutSignal } = require('./abort');
 const CachePolicy = require('./policy');
 const { cacheableResponse } = require('./cacheableResponse');
+const { sizeof } = require('../common/utils');
+const { isFormData } = require('../common/formData');
 
 // core abstraction layer
 const { context, RequestAbortedError } = require('../core');
@@ -75,7 +75,7 @@ const fetch = async (ctx, url, options) => {
       ...options,
       method,
       headers: req.headers.plain(),
-      body: initBody && !(initBody instanceof Readable) ? initBody : body,
+      body: initBody && !(initBody instanceof Readable) && !isFormData(initBody) ? initBody : body,
       compress,
       follow,
       redirect,
@@ -230,6 +230,10 @@ const fetch = async (ctx, url, options) => {
  * @returns {Response} cached response with buffered body or original response if uncached.
  */
 const cacheResponse = async (ctx, request, response) => {
+  if (ctx.options.maxCacheSize === 0) {
+    // caching is disabled: return original response
+    return response;
+  }
   if (!CACHEABLE_METHODS.includes(request.method)) {
     // return original un-cacheable response
     return response;
@@ -257,7 +261,7 @@ const cacheResponse = async (ctx, request, response) => {
 const cachingFetch = async (ctx, url, options) => {
   const req = new Request(url, options);
 
-  const lookupCache = CACHEABLE_METHODS.includes(req.method)
+  const lookupCache = ctx.options.maxCacheSize !== 0 && CACHEABLE_METHODS.includes(req.method)
     // respect cache mode (https://developer.mozilla.org/en-US/docs/Web/API/Request/cache)
     && !['no-store', 'reload'].includes(req.cache);
   if (lookupCache) {
@@ -309,7 +313,11 @@ class FetchContext {
     this.options = { ...options };
     // setup cache
     const { maxCacheSize } = this.options;
-    const max = typeof maxCacheSize === 'number' && maxCacheSize >= 0 ? maxCacheSize : DEFAULT_MAX_CACHE_SIZE;
+    let max = typeof maxCacheSize === 'number' && maxCacheSize >= 0 ? maxCacheSize : DEFAULT_MAX_CACHE_SIZE;
+    if (max === 0) {
+      // we need to set a dummy value as LRU would translate a 0 to Infinity
+      max = 1;
+    }
     const length = ({ response }, _) => sizeof(response);
     this.cache = new LRU({ max, length });
     // event emitter
@@ -385,7 +393,6 @@ class FetchContext {
       Response,
       AbortController,
       AbortSignal,
-      FormData,
 
       // extensions
 
@@ -401,6 +408,69 @@ class FetchContext {
        * @param {Object} options
        */
       context: (options = {}) => new FetchContext(options).api(),
+
+      /**
+       * Convenience function which creates a new context with disabled caching,
+       * the equivalent of `context({ maxCacheSize: 0 })`.
+       *
+       * The optional `options` parameter allows to specify further options.
+       *
+       * @param {Object} [options={}]
+       */
+      noCache: (options = {}) => new FetchContext({ ...options, maxCacheSize: 0 }).api(),
+
+      /**
+       * Convenience function which creates a new context with enforced HTTP/1.1 protocol,
+       * the equivalent of `context({ alpnProtocols: [ALPN_HTTP1_1] })`.
+       *
+       * The optional `options` parameter allows to specify further options.
+       *
+       * @param {Object} [options={}]
+       */
+      h1: (options = {}) => new FetchContext({
+        ...options, alpnProtocols: [this.context.ALPN_HTTP1_1],
+      }).api(),
+
+      /**
+       * Convenience function which creates a new context with enforced HTTP/1.1 protocol
+       * and persistent connections (keep-alive), the equivalent of
+       * `context({ alpnProtocols: [ALPN_HTTP1_1], h1: { keepAlive: true } })`.
+       *
+       * The optional `options` parameter allows to specify further options.
+       *
+       * @param {Object} [options={}]
+       */
+      keepAlive: (options = {}) => new FetchContext({
+        ...options, alpnProtocols: [this.context.ALPN_HTTP1_1], h1: { keepAlive: true },
+      }).api(),
+
+      /**
+       * Convenience function which creates a new context with disabled caching
+       * and enforced HTTP/1.1 protocol, a combination of `h1()` and `noCache()`.
+       *
+       * The optional `options` parameter allows to specify further options.
+       *
+       * @param {Object} [options={}]
+       */
+      h1NoCache: (options = {}) => new FetchContext({
+        ...options, maxCacheSize: 0, alpnProtocols: [this.context.ALPN_HTTP1_1],
+      }).api(),
+
+      /**
+       * Convenience function which creates a new context with disabled caching
+       * and enforced HTTP/1.1 protocol with persistent connections (keep-alive),
+       * a combination of `keepAlive()` and `noCache()`.
+       *
+       * The optional `options` parameter allows to specify further options.
+       *
+       * @param {Object} [options={}]
+       */
+      keepAliveNoCache: (options = {}) => new FetchContext({
+        ...options,
+        maxCacheSize: 0,
+        alpnProtocols: [this.context.ALPN_HTTP1_1],
+        h1: { keepAlive: true },
+      }).api(),
 
       /**
        * Resets the current context, i.e. disconnects all open/pending sessions, clears caches etc..

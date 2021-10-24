@@ -19,6 +19,7 @@ const fs = require('fs');
 const { finished } = require('stream');
 const { promisify } = require('util');
 
+const { FormData } = require('formdata-node');
 const { WritableStreamBuffer } = require('stream-buffers');
 
 const { isReadableStream } = require('../utils');
@@ -423,6 +424,26 @@ describe('Core Tests', () => {
     assert.strictEqual(headers['Content-Type'], 'application/x-www-form-urlencoded; charset=utf-8');
     assert.strictEqual(+headers['Content-Length'], body.toString().length);
     assert.deepStrictEqual(form, params);
+  });
+
+  it('supports spec-compliant FormData body', async () => {
+    const searchParams = {
+      name: 'André Citroën',
+      rumple: 'stiltskin',
+    };
+    const method = 'POST';
+    const form = new FormData();
+    Object.entries(searchParams).forEach(([k, v]) => form.append(k, v));
+
+    const resp = await defaultCtx.request('https://httpbin.org/post', { method, body: form });
+    assert.strictEqual(resp.statusCode, 200);
+    assert.strictEqual(resp.headers['content-type'], 'application/json');
+    const buf = await readStream(resp.readable);
+    const jsonResponseBody = JSON.parse(buf);
+    assert(typeof jsonResponseBody === 'object');
+    const { form: reqForm, headers } = jsonResponseBody;
+    assert(headers['Content-Type'].startsWith('multipart/form-data; boundary='));
+    assert.deepStrictEqual(reqForm, searchParams);
   });
 
   it('supports POST without body', async () => {

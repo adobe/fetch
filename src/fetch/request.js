@@ -17,6 +17,7 @@ const { Body, cloneStream, guessContentType } = require('./body');
 const { Headers } = require('./headers');
 
 const { isPlainObject } = require('../common/utils');
+const { isFormData, FormDataSerializer } = require('../common/formData');
 
 const DEFAULT_FOLLOW = 20;
 
@@ -52,6 +53,21 @@ class Request extends Body {
 
     let body = init.body || (req && req.body ? cloneStream(req) : null);
     const headers = new Headers(init.headers || (req && req.headers) || {});
+
+    if (isFormData(body)) {
+      // spec-compliant FormData
+      /* istanbul ignore else */
+      if (!headers.has('content-type')) {
+        const fd = new FormDataSerializer(body);
+        body = fd.stream();
+        headers.set('content-type', fd.contentType());
+        /* istanbul ignore else */
+        if (!headers.has('transfer-encoding')
+          && !headers.has('content-length')) {
+          headers.set('content-length', fd.length());
+        }
+      }
+    }
 
     if (!headers.has('content-type')) {
       if (isPlainObject(body)) {

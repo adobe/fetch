@@ -68,6 +68,8 @@ export interface Http1Options {
   maxCachedSessions?: number;
 }
 
+type HeadersInit = Headers | Object | Iterable<readonly [string, string]> | Iterable<Iterable<string>>;
+
 declare interface RequestInit {
   /**
    * A BodyInit object or null to set request's body.
@@ -95,7 +97,22 @@ type BodyInit =
   | NodeJS.ReadableStream
   | string;
 
-declare class Body {
+  export declare class Headers implements Iterable<[string, string]> {
+    constructor(init?: HeadersInit);
+  
+    append(name: string, value: string): void;
+    delete(name: string): void;
+    get(name: string): string | null;
+    has(name: string): boolean;
+    set(name: string, value: string): void;
+  
+    entries(): Iterator<[string, string]>;
+    keys(): Iterator<string>;
+    values(): Iterator<string>;
+    [Symbol.iterator](): Iterator<[string, string]>;
+  }
+
+export declare class Body {
   constructor(body?: BodyInit);
 
   readonly body: NodeJS.ReadableStream | null;
@@ -173,7 +190,7 @@ export interface ContextOptions {
    */
   userAgent?: string;
   /**
-   * The maximum total size of the cached entries (in bytes)
+   * The maximum total size of the cached entries (in bytes). 0 disables caching.
    * @default 100 * 1024 * 1024
    */
   maxCacheSize?: number;
@@ -209,8 +226,6 @@ type AbortSignal = {
 	addEventListener(type: 'abort', listener: (this: AbortSignal) => void): void;
 	removeEventListener(type: 'abort', listener: (this: AbortSignal) => void): void;
 };
-
-type HeadersInit = Headers | Object | Iterable<readonly [string, string]> | Iterable<Iterable<string>>;
 
 export interface RequestOptions {
   /**
@@ -258,6 +273,28 @@ export interface RequestOptions {
 }
 
 /**
+ * @see https://dom.spec.whatwg.org/#interface-abortcontroller
+ */
+export type AbortController = Window["window"]["AbortController"];
+
+// Errors
+export interface FetchBaseError extends Error {
+  type?: string;
+}
+export interface FetchError extends FetchBaseError{
+  code: number;
+  erroredSysCall?: SystemError;
+}
+export interface AbortError extends FetchBaseError{
+  type: 'aborted'
+}
+
+interface CacheStats {
+  size: number;
+  count: number;
+}
+
+/**
  * Fetches a resource from the network. Returns a Promise which resolves once
  * the response is available.
  *
@@ -269,23 +306,6 @@ export interface RequestOptions {
  * @throws {TypeError}
  */
 export declare function fetch(url: string, options: RequestOptions): Promise<Response>;
-
-/**
- * @see https://dom.spec.whatwg.org/#interface-abortcontroller
- */
-export type AbortController = Window["window"]["AbortController"];
-
-// Errors
-interface FetchBaseError extends Error {
-  type?: string;
-}
-export interface FetchError extends FetchBaseError{
-  code: number;
-  erroredSysCall?: SystemError;
-}
-export interface AbortError extends FetchBaseError{
-  type: 'aborted'
-}
 
 /**
  * Resets the current context, i.e. disconnects all open/pending sessions, clears caches etc..
@@ -320,19 +340,15 @@ export declare function createUrl(url: string, qs?: Record<string, unknown>): st
  *
  * @param {number} ms timeout in milliseconds
  */
-export declare function timeoutSignal(ms: number): void;
+export declare function timeoutSignal(ms: number): AbortSignal;
 
 /**
  * Clear the cache entirely, throwing away all values.
  */
 export declare function clearCache(): void;
 
-interface CacheStats {
-  size: number;
-  count: number;
-}
-
 /**
  * Cache stats for diagnostic purposes
  */
-export declare function cacheStats(): CacheStats;
+export declare function  cacheStats(): CacheStats;
+ 
