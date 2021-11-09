@@ -33,7 +33,9 @@ const readStream = async (stream) => {
 };
 
 const WOKEUP = 'woke up!';
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms, WOKEUP));
+const sleep = (ms) => new Promise((resolve) => {
+  setTimeout(resolve, ms, WOKEUP);
+});
 
 describe('Misc. Core Tests (edge cases to improve code coverage)', () => {
   let defaultCtx;

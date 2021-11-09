@@ -22,7 +22,9 @@ const pem = require('pem');
 const createCertificate = util.promisify(pem.createCertificate);
 
 const WOKEUP = 'woke up!';
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms, WOKEUP));
+const sleep = (ms) => new Promise((resolve) => {
+  setTimeout(resolve, ms, WOKEUP);
+});
 
 const HELLO_WORLD = 'Hello, World!';
 

@@ -48,7 +48,9 @@ const resetContext = async ({ h2 }) => {
 };
 
 const createResponse = (
-  headers, clientHttp2Stream, /* istanbul ignore next */ onError = () => {},
+  headers,
+  clientHttp2Stream,
+  /* istanbul ignore next */ onError = () => {},
 ) => {
   const hdrs = { ...headers };
   const statusCode = hdrs[':status'];
