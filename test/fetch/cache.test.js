@@ -28,7 +28,9 @@ const {
 const { cacheableResponse } = require('../../src/fetch/cacheableResponse');
 
 const WOKEUP = 'woke up!';
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms, WOKEUP));
+const sleep = (ms) => new Promise((resolve) => {
+  setTimeout(resolve, ms, WOKEUP);
+});
 
 describe('CacheableResponse Tests', () => {
   it('supports cacheable Response', async () => {
@@ -381,10 +383,12 @@ describe('Cache Tests', () => {
     this.timeout(5000);
 
     let pushedResponse;
-    const receivedPush = () => new Promise((resolve) => onPush((url, response) => {
-      pushedResponse = response;
-      resolve(response);
-    }));
+    const receivedPush = () => new Promise((resolve) => {
+      onPush((url, response) => {
+        pushedResponse = response;
+        resolve(response);
+      });
+    });
 
     let [resp, result] = await Promise.all([
       // see https://nghttp2.org/blog/2015/02/10/nghttp2-dot-org-enabled-http2-server-push/
