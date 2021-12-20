@@ -10,8 +10,6 @@
  * governing permissions and limitations under the License.
  */
 
-import { SystemError } from "./fetch/errors";
-
 export declare enum ALPNProtocol {
   ALPN_HTTP2 = 'h2',
   ALPN_HTTP2C = 'h2c',
@@ -281,6 +279,19 @@ export type AbortController = Window["window"]["AbortController"];
 export interface FetchBaseError extends Error {
   type?: string;
 }
+
+interface SystemError {
+  address?: string;
+  code: string;
+  dest?: string;
+  errno: number;
+  info?: object;
+  message: string;
+  path?: string;
+  port?: number;
+  syscall: string;
+}
+
 export interface FetchError extends FetchBaseError{
   code: number;
   erroredSysCall?: SystemError;
