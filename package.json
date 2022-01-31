@@ -73,7 +73,7 @@
     "pathval": "1.1.1",
     "pem": "1.14.6",
     "semantic-release": "19.0.2",
-    "sinon": "12.0.1",
+    "sinon": "13.0.0",
     "stream-buffers": "3.0.2"
   },
   "lint-staged": {
