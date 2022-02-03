@@ -1,3 +1,10 @@
+## [3.0.2](https://github.com/adobe/helix-fetch/compare/v3.0.1...v3.0.2) (2022-02-03)
+
+
+### Bug Fixes
+
+* request body cleanup on abort ([#253](https://github.com/adobe/helix-fetch/issues/253)) ([229a05c](https://github.com/adobe/helix-fetch/commit/229a05c0fbcdd130a855c912fc781b2225660db3))
+
 ## [3.0.1](https://github.com/adobe/helix-fetch/compare/v3.0.0...v3.0.1) (2022-02-03)
 
 
