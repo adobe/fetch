@@ -10,12 +10,13 @@
  * governing permissions and limitations under the License.
  */
 
-export declare enum ALPNProtocol {
+export enum ALPNProtocol {
   ALPN_HTTP2 = 'h2',
   ALPN_HTTP2C = 'h2c',
   ALPN_HTTP1_1 = 'http/1.1',
   ALPN_HTTP1_0 = 'http/1.0',
 }
+
 export interface Http1Options {
   /**
    * Keep sockets around in a pool to be used by other requests in the future.
@@ -68,7 +69,7 @@ export interface Http1Options {
 
 type HeadersInit = Headers | Object | Iterable<readonly [string, string]> | Iterable<Iterable<string>>;
 
-declare interface RequestInit {
+export interface RequestInit {
   /**
    * A BodyInit object or null to set request's body.
    */
@@ -83,7 +84,7 @@ declare interface RequestInit {
   method?: string;
 }
 
-interface ResponseInit {
+export interface ResponseInit {
   headers?: HeadersInit;
   status?: number;
   statusText?: string;
@@ -95,22 +96,22 @@ type BodyInit =
   | NodeJS.ReadableStream
   | string;
 
-  export declare class Headers implements Iterable<[string, string]> {
-    constructor(init?: HeadersInit);
-  
-    append(name: string, value: string): void;
-    delete(name: string): void;
-    get(name: string): string | null;
-    has(name: string): boolean;
-    set(name: string, value: string): void;
-  
-    entries(): Iterator<[string, string]>;
-    keys(): Iterator<string>;
-    values(): Iterator<string>;
-    [Symbol.iterator](): Iterator<[string, string]>;
-  }
+export class Headers implements Iterable<[string, string]> {
+  constructor(init?: HeadersInit);
 
-export declare class Body {
+  append(name: string, value: string): void;
+  delete(name: string): void;
+  get(name: string): string | null;
+  has(name: string): boolean;
+  set(name: string, value: string): void;
+
+  entries(): Iterator<[string, string]>;
+  keys(): Iterator<string>;
+  values(): Iterator<string>;
+  [Symbol.iterator](): Iterator<[string, string]>;
+}
+
+export class Body {
   constructor(body?: BodyInit);
 
   readonly body: NodeJS.ReadableStream | null;
@@ -124,14 +125,14 @@ export declare class Body {
 
 type RequestInfo = string | Body;
 
-declare class Request extends Body {
+export class Request extends Body {
   constructor(input: RequestInfo, init?: RequestInit);
   readonly headers: Headers;
   readonly method: string;
   readonly url: string;
 }
 
-export declare class Response extends Body {
+export class Response extends Body {
   constructor(body?: BodyInit | Object | null, init?: ResponseInit);
 
   readonly url: string;
@@ -141,19 +142,13 @@ export declare class Response extends Body {
   readonly redirected: boolean;
   readonly httpVersion: string;
   headers: Headers;
+
+  // extensions
+  /**
+   * A boolean specifying whether the response was retrieved from the cache.
+   */
+   readonly fromCache?: boolean;
 }
-
-export type PushPromiseHandler = (
-  url: string,
-  headers: NodeJS.Dict<string | string[]>,
-	reject: () => void
-) => void;
-
-export type PushHandler = (
-  url: string,
-  headers: NodeJS.Dict<string | string[]>,
-  response: Response
-) => void;
 
 export interface Http2Options {
   /**
@@ -166,8 +161,6 @@ export interface Http2Options {
    * @default true
    */
   enablePush?: boolean;
-  // pushPromiseHandler?: PushPromiseHandler;
-  // pushHandler?: PushHandler;
   /**
    * Max idle time in milliseconds after which a pushed stream will be automatically closed.
    * @default 5000
@@ -218,11 +211,22 @@ export interface ContextOptions {
   h2?: Http2Options;
 }
 
-type AbortSignal = {
+class AbortSignal {
 	readonly aborted: boolean;
 
 	addEventListener(type: 'abort', listener: (this: AbortSignal) => void): void;
 	removeEventListener(type: 'abort', listener: (this: AbortSignal) => void): void;
+};
+
+class TimeoutSignal extends AbortSignal {
+  constructor(timeout: number);
+
+  clear(): void;
+}
+
+export class AbortController {
+  readonly signal: AbortSignal;
+  abort(): void;
 };
 
 export interface RequestOptions {
@@ -270,17 +274,12 @@ export interface RequestOptions {
   follow?: number;
 }
 
-/**
- * @see https://dom.spec.whatwg.org/#interface-abortcontroller
- */
-export type AbortController = Window["window"]["AbortController"];
-
 // Errors
-export interface FetchBaseError extends Error {
+export class FetchBaseError extends Error {
   type?: string;
 }
 
-interface SystemError {
+export type SystemError = {
   address?: string;
   code: string;
   dest?: string;
@@ -290,13 +289,14 @@ interface SystemError {
   path?: string;
   port?: number;
   syscall: string;
-}
+};
 
-export interface FetchError extends FetchBaseError{
+export class FetchError extends FetchBaseError {
   code: number;
   erroredSysCall?: SystemError;
 }
-export interface AbortError extends FetchBaseError{
+
+export class AbortError extends FetchBaseError {
   type: 'aborted'
 }
 
@@ -304,6 +304,11 @@ interface CacheStats {
   size: number;
   count: number;
 }
+
+export type PushHandler = (
+  url: string,
+  response: Response
+) => void;
 
 /**
  * Fetches a resource from the network. Returns a Promise which resolves once
@@ -316,26 +321,26 @@ interface CacheStats {
  * @throws {AbortError}
  * @throws {TypeError}
  */
-export declare function fetch(url: string, options: RequestOptions): Promise<Response>;
+export function fetch(url: string|Request, options?: RequestOptions): Promise<Response>;
 
 /**
  * Resets the current context, i.e. disconnects all open/pending sessions, clears caches etc..
  */
-export declare function reset(): Promise<[void, void]>;
+export function reset(): Promise<[void, void]>;
 
 /**
  * Register a callback which gets called once a server Push has been received.
  *
  * @param {PushHandler} fn callback function invoked with the url and the pushed Response
  */
-export declare function onPush(fn: PushHandler): void;
+export function onPush(fn: PushHandler): void;
 
 /**
  * Deregister a callback previously registered with {#onPush}.
  *
  * @param {PushHandler} fn callback function registered with {#onPush}
  */
-export declare function offPush(fn: PushHandler): void;
+export function offPush(fn: PushHandler): void;
 
 /**
  * Create a URL with query parameters
@@ -343,7 +348,7 @@ export declare function offPush(fn: PushHandler): void;
  * @param {string} url request url
  * @param {object} [qs={}] request query parameters
  */
-export declare function createUrl(url: string, qs?: Record<string, unknown>): string;
+export function createUrl(url: string, qs?: Record<string, unknown>): string;
 
 /**
  * Creates a timeout signal which allows to specify
@@ -351,15 +356,14 @@ export declare function createUrl(url: string, qs?: Record<string, unknown>): st
  *
  * @param {number} ms timeout in milliseconds
  */
-export declare function timeoutSignal(ms: number): AbortSignal;
+export function timeoutSignal(ms: number): TimeoutSignal;
 
 /**
  * Clear the cache entirely, throwing away all values.
  */
-export declare function clearCache(): void;
+export function clearCache(): void;
 
 /**
  * Cache stats for diagnostic purposes
  */
-export declare function  cacheStats(): CacheStats;
- 
+export function  cacheStats(): CacheStats;
