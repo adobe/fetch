@@ -61,8 +61,8 @@ const fetch = async (ctx, url, options) => {
     const err = new AbortError('The operation was aborted.');
     // cleanup request
     /* istanbul ignore else */
-    if (req.body instanceof Readable) {
-      req.body.destroy(err);
+    if (req.init.body instanceof Readable) {
+      req.init.body.destroy(err);
     }
     throw err;
   }
@@ -83,8 +83,8 @@ const fetch = async (ctx, url, options) => {
     });
   } catch (err) {
     // cleanup request
-    if (body instanceof Readable) {
-      body.destroy(err);
+    if (initBody instanceof Readable) {
+      initBody.destroy(err);
     }
     /* istanbul ignore next */
     if (err instanceof TypeError) {
@@ -104,8 +104,8 @@ const fetch = async (ctx, url, options) => {
     const err = new AbortError('The operation was aborted.');
     // cleanup request
     /* istanbul ignore else */
-    if (req.body instanceof Readable) {
-      req.body.destroy(err);
+    if (req.init.body instanceof Readable) {
+      req.init.body.destroy(err);
     }
     // propagate error on response stream
     coreResp.readable.emit('error', err);

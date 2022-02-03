@@ -256,6 +256,22 @@ testParams.forEach((params) => {
       assert(body.destroyed);
     });
 
+    it('AbortController works (POST with string body)', async () => {
+      const controller = new AbortController();
+      setTimeout(() => controller.abort(), 5);
+      const { signal } = controller;
+
+      const method = 'POST';
+      const body = 'hello, world!';
+
+      try {
+        await fetch(`${baseUrl}/post`, { signal, method, body });
+        assert.fail();
+      } catch (err) {
+        assert(err instanceof AbortError);
+      }
+    });
+
     it('AbortController works (dripping response)', async function test() {
       this.timeout(5000);
 
