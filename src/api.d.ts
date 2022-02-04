@@ -211,14 +211,14 @@ export interface ContextOptions {
   h2?: Http2Options;
 }
 
-class AbortSignal {
+export class AbortSignal {
 	readonly aborted: boolean;
 
 	addEventListener(type: 'abort', listener: (this: AbortSignal) => void): void;
 	removeEventListener(type: 'abort', listener: (this: AbortSignal) => void): void;
-};
+}
 
-class TimeoutSignal extends AbortSignal {
+export class TimeoutSignal extends AbortSignal {
   constructor(timeout: number);
 
   clear(): void;
@@ -227,7 +227,7 @@ class TimeoutSignal extends AbortSignal {
 export class AbortController {
   readonly signal: AbortSignal;
   abort(): void;
-};
+}
 
 export interface RequestOptions {
   /**
