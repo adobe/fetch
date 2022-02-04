@@ -1,3 +1,10 @@
+## [3.0.3](https://github.com/adobe/helix-fetch/compare/v3.0.2...v3.0.3) (2022-02-04)
+
+
+### Bug Fixes
+
+* DTS ([c55e58a](https://github.com/adobe/helix-fetch/commit/c55e58a7ad77e681e8633c01c42f4aba1484d867))
+
 ## [3.0.2](https://github.com/adobe/helix-fetch/compare/v3.0.1...v3.0.2) (2022-02-03)
 
 
