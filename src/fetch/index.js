@@ -315,11 +315,13 @@ class FetchContext {
     // setup cache
     const { maxCacheSize } = this.options;
     let maxSize = typeof maxCacheSize === 'number' && maxCacheSize >= 0 ? maxCacheSize : DEFAULT_MAX_CACHE_SIZE;
+    let max = DEFAULT_MAX_CACHE_ITEMS;
     if (maxSize === 0) {
       // we need to set a dummy value as LRU would translate a 0 to Infinity
       maxSize = 1;
+      // no need to allocate memory if cache is disabled
+      max = 1;
     }
-    const max = DEFAULT_MAX_CACHE_ITEMS;
     const sizeCalculation = ({ response }, _) => sizeof(response);
     this.cache = new LRU({ max, maxSize, sizeCalculation });
     // event emitter
