@@ -1,3 +1,10 @@
+## [3.0.5](https://github.com/adobe/helix-fetch/compare/v3.0.4...v3.0.5) (2022-02-14)
+
+
+### Bug Fixes
+
+* **cache:** don't allocate memory if cache is disabled ([#259](https://github.com/adobe/helix-fetch/issues/259)) ([9653b4c](https://github.com/adobe/helix-fetch/commit/9653b4c08b407a5a425679054ef74fe00601dac1))
+
 ## [3.0.4](https://github.com/adobe/helix-fetch/compare/v3.0.3...v3.0.4) (2022-02-14)
 
 
