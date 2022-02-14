@@ -258,7 +258,7 @@ testParams.forEach((params) => {
 
     it('AbortController works (POST with string body)', async () => {
       const controller = new AbortController();
-      setTimeout(() => controller.abort(), 5);
+      setTimeout(() => controller.abort(), 50);
       const { signal } = controller;
 
       const method = 'POST';
