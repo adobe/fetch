@@ -270,7 +270,7 @@ const request = async (ctx, uri, options) => {
         const { code, message } = err;
         if (code === 'ERR_HTTP2_ERROR' && message === 'Protocol error') {
           // server potentially downgraded from h2 to h1: clear alpn cache entry
-          ctx.alpnCache.del(`${url.protocol}//${url.host}`);
+          ctx.alpnCache.delete(`${url.protocol}//${url.host}`);
         }
         throw err;
       }
@@ -293,7 +293,7 @@ const request = async (ctx, uri, options) => {
 };
 
 const resetContext = async (ctx) => {
-  ctx.alpnCache.reset();
+  ctx.alpnCache.clear();
   return Promise.all([
     h1.resetContext(ctx),
     h2.resetContext(ctx),
@@ -311,7 +311,7 @@ const setupContext = (ctx) => {
   } = ctx;
 
   ctx.alpnProtocols = alpnProtocols;
-  ctx.alpnCache = new LRU({ max: alpnCacheSize, maxAge: alpnCacheTTL });
+  ctx.alpnCache = new LRU({ max: alpnCacheSize, ttl: alpnCacheTTL });
 
   ctx.userAgent = userAgent;
 

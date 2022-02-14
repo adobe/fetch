@@ -33,6 +33,7 @@ const { isFormData } = require('../common/formData');
 const { context, RequestAbortedError } = require('../core');
 
 const CACHEABLE_METHODS = ['GET', 'HEAD'];
+const DEFAULT_MAX_CACHE_ITEMS = 500;
 const DEFAULT_MAX_CACHE_SIZE = 100 * 1024 * 1024; // 100mb
 
 // events
@@ -313,13 +314,14 @@ class FetchContext {
     this.options = { ...options };
     // setup cache
     const { maxCacheSize } = this.options;
-    let max = typeof maxCacheSize === 'number' && maxCacheSize >= 0 ? maxCacheSize : DEFAULT_MAX_CACHE_SIZE;
-    if (max === 0) {
+    let maxSize = typeof maxCacheSize === 'number' && maxCacheSize >= 0 ? maxCacheSize : DEFAULT_MAX_CACHE_SIZE;
+    if (maxSize === 0) {
       // we need to set a dummy value as LRU would translate a 0 to Infinity
-      max = 1;
+      maxSize = 1;
     }
-    const length = ({ response }, _) => sizeof(response);
-    this.cache = new LRU({ max, length });
+    const max = DEFAULT_MAX_CACHE_ITEMS;
+    const sizeCalculation = ({ response }, _) => sizeof(response);
+    this.cache = new LRU({ max, maxSize, sizeCalculation });
     // event emitter
     this.eventEmitter = new EventEmitter();
 
@@ -540,13 +542,13 @@ class FetchContext {
   }
 
   clearCache() {
-    this.cache.reset();
+    this.cache.clear();
   }
 
   cacheStats() {
     return {
-      size: this.cache.length,
-      count: this.cache.itemCount,
+      size: this.cache.calculatedSize,
+      count: this.cache.size,
     };
   }
 
