@@ -1,3 +1,10 @@
+## [3.0.6](https://github.com/adobe/helix-fetch/compare/v3.0.5...v3.0.6) (2022-02-28)
+
+
+### Bug Fixes
+
+* trigger release ([6a0edf6](https://github.com/adobe/helix-fetch/commit/6a0edf6556c0c3906d02318a40db8cb67b7d9e9e))
+
 ## [3.0.5](https://github.com/adobe/helix-fetch/compare/v3.0.4...v3.0.5) (2022-02-14)
 
 
