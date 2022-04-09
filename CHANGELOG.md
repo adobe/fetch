@@ -1,3 +1,10 @@
+## [3.0.9](https://github.com/adobe/helix-fetch/compare/v3.0.8...v3.0.9) (2022-04-09)
+
+
+### Bug Fixes
+
+* **deps:** update dependency lru-cache to v7.8.1 ([6710be6](https://github.com/adobe/helix-fetch/commit/6710be6ea9832cbbe2a55aad5a68769bdd4fea20))
+
 ## [3.0.8](https://github.com/adobe/helix-fetch/compare/v3.0.7...v3.0.8) (2022-04-02)
 
 
