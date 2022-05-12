@@ -3,8 +3,6 @@ executors:
   node14:
     docker:
     - image: circleci/node:14
-    environment:
-      NPM_CONFIG_PREFIX: ~/.npm-global
 
 commands:
   setup:
