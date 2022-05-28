@@ -2,52 +2,52 @@ version: 2.1
 executors:
   node14:
     docker:
-    - image: circleci/node:14
+      - image: cimg/node:14.19
+
+orbs:
+  codecov: codecov/codecov@3.2.2
 
 commands:
   setup:
     steps:
-    - checkout
-    # - restore_cache:
-    #     keys:
-    #     - v1-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
-    - run:
-        name: install npm@latest
-        command: sudo npm -g install npm@latest
-    - run:
-        name: Installing Dependencies
-        command: npm ci
-    # - save_cache:
-    #     paths:
-    #     - node_modules
-    #     key: v1-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
-    - run:
-        name: prepare test git user
-        command: git config --global user.email "circleci@example.com" && git config --global user.name "CircleCi Build"
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
+      - run:
+          name: install npm@latest
+          command: npm -g install npm@latest
+      - run:
+          name: Installing Dependencies
+          command: npm ci
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
+      - run:
+          name: prepare test git user
+          command: git config --global user.email "circleci@example.com" && git config --global user.name "CircleCi Build"
 
 jobs:
   build:
     executor: node14
-
     steps:
-    - setup
-    - run: mkdir junit
-    - run:
-        name: Lint
-        command: npm run lint
-
-    - run:
-        name: Getting Code Coverage
-        command: npm run test-ci
-
-    - store_test_results:
-        path: junit
-
-    - store_artifacts:
-        path: junit
+      - setup
+      - run: mkdir junit
+      - run:
+          name: Lint
+          command: npm run lint
+      - run:
+          name: Running Tests
+          command: npm run test
+      - codecov/upload
+      - store_test_results:
+          path: junit
+      - store_artifacts:
+          path: junit
 
 workflows:
   version: 2
   build:
     jobs:
-    - build
+      - build
