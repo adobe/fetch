@@ -1,3 +1,10 @@
+## [3.0.11](https://github.com/adobe/helix-fetch/compare/v3.0.10...v3.0.11) (2022-06-16)
+
+
+### Bug Fixes
+
+* report name of header with illegal value ([#287](https://github.com/adobe/helix-fetch/issues/287)) ([3ed4ae0](https://github.com/adobe/helix-fetch/commit/3ed4ae08bbe82b1e7dddc697834bc9453ff4a910))
+
 ## [3.0.10](https://github.com/adobe/helix-fetch/compare/v3.0.9...v3.0.10) (2022-05-14)
 
 
