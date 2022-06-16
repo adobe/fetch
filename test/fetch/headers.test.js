@@ -149,6 +149,8 @@ describe('Headers Tests', () => {
     expect(() => headers.set('Hé-y', 'ok')).to.throw(TypeError);
     // Should reject empty header
     expect(() => headers.append('', 'ok')).to.throw(TypeError);
+    // Should repoort header name in error
+    expect(() => new Headers({ 'Faulty-Header': 'ăk' })).to.throw(/Faulty-Header/);
   });
 
   it('constructor should support plain object', () => {

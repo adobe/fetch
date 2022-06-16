@@ -37,17 +37,17 @@ const normalizeName = (name) => {
   return nm.toLowerCase();
 };
 
-const normalizeValue = (value) => {
+const normalizeValue = (value, name) => {
   const val = typeof value !== 'string' ? String(value) : value;
 
   /* istanbul ignore next */
   if (typeof validateHeaderValue === 'function') {
     // since node 14.3.0
-    validateHeaderValue('dummy', val);
+    validateHeaderValue(name, val);
   } else {
     // eslint-disable-next-line no-lonely-if
     if (/[^\t\u0020-\u007E\u0080-\u00FF]/.test(val)) {
-      const err = new TypeError(`Invalid character in header content ["${val}"]`);
+      const err = new TypeError(`Invalid character in header content ["${name}"]`);
       Object.defineProperty(err, 'code', { value: 'ERR_INVALID_CHAR' });
       throw err;
     }
@@ -89,7 +89,7 @@ class Headers {
   }
 
   set(name, value) {
-    this[INTERNALS].map.set(normalizeName(name), normalizeValue(value));
+    this[INTERNALS].map.set(normalizeName(name), normalizeValue(value, name));
   }
 
   has(name) {
@@ -103,7 +103,7 @@ class Headers {
 
   append(name, value) {
     const nm = normalizeName(name);
-    const val = normalizeValue(value);
+    const val = normalizeValue(value, name);
     const oldVal = this[INTERNALS].map.get(nm);
     this[INTERNALS].map.set(nm, oldVal ? `${oldVal}, ${val}` : val);
   }
