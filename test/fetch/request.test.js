@@ -211,6 +211,7 @@ describe('Request Tests', () => {
       cache: 'no-store',
       follow: 3,
       compress: false,
+      decode: false,
       signal,
     });
     const cl = request.clone();
@@ -222,6 +223,7 @@ describe('Request Tests', () => {
     expect(cl.method).to.equal('POST');
     expect(cl.follow).to.equal(3);
     expect(cl.compress).to.equal(false);
+    expect(cl.decode).to.equal(false);
     expect(cl.counter).to.equal(0);
     expect(cl.signal).to.equal(signal);
     // Clone body shouldn't be the same body

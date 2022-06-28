@@ -493,6 +493,27 @@ testParams.forEach((params) => {
       assert.strictEqual(resp.redirected, true);
     });
 
+    it('supports gzip/deflate/br content decoding (default)', async () => {
+      const resp = await fetch(`${protocol}://example.com/`, { cache: 'no-store' });
+      assert.strictEqual(resp.status, 200);
+      assert.strictEqual(resp.httpVersion, httpVersion);
+      assert.strictEqual(resp.headers.get('content-encoding'), 'gzip');
+      const body = await resp.text();
+      assert(body.startsWith('<!doctype html>'));
+      assert(+resp.headers.get('content-length') < body.length);
+      assert.strictEqual(resp.decoded, true);
+    });
+
+    it('supports disabling gzip/deflate/br content decoding', async () => {
+      const resp = await fetch(`${protocol}://example.com/`, { decode: false, cache: 'no-store' });
+      assert.strictEqual(resp.status, 200);
+      assert.strictEqual(resp.httpVersion, httpVersion);
+      assert.strictEqual(resp.headers.get('content-encoding'), 'gzip');
+      const body = await resp.arrayBuffer();
+      assert.strictEqual(+resp.headers.get('content-length'), body.byteLength);
+      assert.strictEqual(resp.decoded, false);
+    });
+
     it('fails non-GET redirect if body is a readable stream', async () => {
       const method = 'POST';
       const body = stream.Readable.from('foo bar');

@@ -141,6 +141,7 @@ export class Response extends Body {
   readonly ok: boolean;
   readonly redirected: boolean;
   readonly httpVersion: string;
+  readonly decoded: boolean;
   headers: Headers;
 
   // extensions
@@ -268,6 +269,11 @@ export interface RequestOptions {
    */
   compress?: boolean;
   /**
+   * A boolean specifying whether gzip/deflate/brotli-endoced content should be decoded.
+   * @default true
+   */
+   decode?: boolean;
+   /**
    * Maximum number of redirects to follow, 0 to not follow redirect.
    * @default 20
    */

@@ -135,6 +135,16 @@ class Request extends Body {
     } else {
       this.compress = init.compress;
     }
+    if (init.decode === undefined) {
+      if (!req || req.decode === undefined) {
+        // default
+        this.decode = true;
+      } else {
+        this.decode = req.decode;
+      }
+    } else {
+      this.decode = init.decode;
+    }
   }
 
   get method() {

@@ -50,12 +50,17 @@ const resetContext = async ({ h2 }) => {
 const createResponse = (
   headers,
   clientHttp2Stream,
+  decode,
   /* istanbul ignore next */ onError = () => {},
 ) => {
   const hdrs = { ...headers };
   const statusCode = hdrs[':status'];
   delete hdrs[':status'];
 
+  const readable = decode
+    ? decodeStream(statusCode, headers, clientHttp2Stream, onError)
+    : clientHttp2Stream;
+  const decoded = !!(decode && readable !== clientHttp2Stream);
   return {
     statusCode,
     statusText: '',
@@ -63,11 +68,12 @@ const createResponse = (
     httpVersionMajor: 2,
     httpVersionMinor: 0,
     headers: hdrs, // header names are always lower-cased
-    readable: decodeStream(statusCode, headers, clientHttp2Stream, onError),
+    readable,
+    decoded,
   };
 };
 
-const handlePush = (ctx, origin, pushedStream, requestHeaders, flags) => {
+const handlePush = (ctx, origin, decode, pushedStream, requestHeaders, flags) => {
   const {
     options: {
       h2: {
@@ -90,7 +96,7 @@ const handlePush = (ctx, origin, pushedStream, requestHeaders, flags) => {
     pushPromiseHandler(url, requestHeaders, rejectPush);
   }
   pushedStream.on('push', (responseHeaders, flgs) => {
-    // received headers for the pushed streamn
+    // received headers for the pushed stream
     // similar to 'response' event on ClientHttp2Stream
     debug(`received push headers for ${origin}${path}, stream #${pushedStream.id}, headers: ${JSON.stringify(responseHeaders)}, flags: ${flgs}`);
 
@@ -102,7 +108,7 @@ const handlePush = (ctx, origin, pushedStream, requestHeaders, flags) => {
 
     /* istanbul ignore else */
     if (pushHandler) {
-      pushHandler(url, requestHeaders, createResponse(responseHeaders, pushedStream));
+      pushHandler(url, requestHeaders, createResponse(responseHeaders, pushedStream, decode));
     }
   });
   // log stream errors
@@ -143,6 +149,7 @@ const request = async (ctx, url, options) => {
     headers,
     socket,
     body,
+    decode,
   } = opts;
   if (socket) {
     delete opts.socket;
@@ -214,7 +221,7 @@ const request = async (ctx, url, options) => {
         // session will be closed automatically
       });
       session.on('stream', (stream, hdrs, flags) => {
-        handlePush(ctx, origin, stream, hdrs, flags);
+        handlePush(ctx, origin, decode, stream, hdrs, flags);
       });
     } else {
       // we have a cached session
@@ -261,7 +268,7 @@ const request = async (ctx, url, options) => {
       if (signal) {
         signal.removeEventListener('abort', onAbortSignal);
       }
-      resolve(createResponse(hdrs, req, reject));
+      resolve(createResponse(hdrs, req, opts.decode, reject));
     });
     req.once('error', (err) => {
       // error occured during the request

@@ -75,6 +75,7 @@ class Response extends Body {
       statusText: init.statusText || '',
       headers,
       httpVersion: init.httpVersion,
+      decoded: init.decoded,
       counter: init.counter,
     };
   }
@@ -106,6 +107,11 @@ class Response extends Body {
   // extension
   get httpVersion() {
     return this[INTERNALS].httpVersion;
+  }
+
+  // extension
+  get decoded() {
+    return this[INTERNALS].decoded;
   }
 
   /**

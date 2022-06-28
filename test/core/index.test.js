@@ -102,6 +102,28 @@ describe('Core Tests', () => {
     assert.strictEqual(resp.headers['content-encoding'], undefined);
   });
 
+  it('supports gzip/deflate/br content decoding (default)', async () => {
+    const resp = await defaultCtx.request('https://example.com/');
+    assert.strictEqual(resp.statusCode, 200);
+    assert.strictEqual(resp.headers['content-encoding'], 'gzip');
+    assert(isReadableStream(resp.readable));
+    const buf = await readStream(resp.readable);
+    const body = buf.toString();
+    assert(body.startsWith('<!doctype html>'));
+    assert(+resp.headers['content-length'] < body.length);
+    assert.strictEqual(resp.decoded, true);
+  });
+
+  it('supports disabling gzip/deflate/br content decoding', async () => {
+    const resp = await defaultCtx.request('https://example.com/', { decode: false });
+    assert.strictEqual(resp.statusCode, 200);
+    assert.strictEqual(resp.headers['content-encoding'], 'gzip');
+    assert(isReadableStream(resp.readable));
+    const buf = await readStream(resp.readable);
+    assert.strictEqual(+resp.headers['content-length'], buf.length);
+    assert.strictEqual(resp.decoded, false);
+  });
+
   it('does not overwrite accept-encoding header', async () => {
     const acceptEncoding = 'deflate';
     const headers = { 'accept-encoding': acceptEncoding };
