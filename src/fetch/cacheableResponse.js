@@ -95,12 +95,12 @@ class CacheableResponse extends Response {
 
   clone() {
     const {
-      url, status, statusText, headers, httpVersion, counter,
+      url, status, statusText, headers, httpVersion, decoded, counter,
     } = this;
     return new CacheableResponse(
       this[INTERNALS].bufferedBody,
       {
-        url, status, statusText, headers, httpVersion, counter,
+        url, status, statusText, headers, httpVersion, decoded, counter,
       },
     );
   }
@@ -123,12 +123,12 @@ class CacheableResponse extends Response {
 const cacheableResponse = async (res) => {
   const buf = await res.buffer();
   const {
-    url, status, statusText, headers, httpVersion, counter,
+    url, status, statusText, headers, httpVersion, decoded, counter,
   } = res;
   return new CacheableResponse(
     buf,
     {
-      url, status, statusText, headers, httpVersion, counter,
+      url, status, statusText, headers, httpVersion, decoded, counter,
     },
   );
 };

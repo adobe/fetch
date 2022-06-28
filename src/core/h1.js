@@ -72,7 +72,7 @@ const resetContext = async ({ h1 }) => {
   }
 };
 
-const createResponse = (incomingMessage, onError) => {
+const createResponse = (incomingMessage, decode, onError) => {
   const {
     statusCode,
     statusMessage,
@@ -81,6 +81,10 @@ const createResponse = (incomingMessage, onError) => {
     httpVersionMinor,
     headers, // header names are always lower-cased
   } = incomingMessage;
+  const readable = decode
+    ? decodeStream(statusCode, headers, incomingMessage, onError)
+    : incomingMessage;
+  const decoded = !!(decode && readable !== incomingMessage);
   return {
     statusCode,
     statusText: statusMessage,
@@ -88,7 +92,8 @@ const createResponse = (incomingMessage, onError) => {
     httpVersionMajor,
     httpVersionMinor,
     headers,
-    readable: decodeStream(statusCode, headers, incomingMessage, onError),
+    readable,
+    decoded,
   };
 };
 
@@ -169,7 +174,7 @@ const h1Request = async (ctx, url, options) => {
         debug(`discarding redundant socket used for ALPN: #${socket.id} ${socket.servername}`);
         socket.destroy();
       }
-      resolve(createResponse(res, reject));
+      resolve(createResponse(res, opts.decode, reject));
     });
     req.once('error', (err) => {
       // error occured during the request

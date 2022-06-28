@@ -30,7 +30,7 @@ const debug = require('debug')('helix-fetch:utils');
 
 const asyncPipeline = promisify(pipeline);
 
-const shouldDecode = (statusCode, headers) => {
+const canDecode = (statusCode, headers) => {
   if (statusCode === 204 || statusCode === 304) {
     return false;
   }
@@ -41,7 +41,7 @@ const shouldDecode = (statusCode, headers) => {
 };
 
 const decodeStream = (statusCode, headers, readableStream, onError) => {
-  if (!shouldDecode(statusCode, headers)) {
+  if (!canDecode(statusCode, headers)) {
     return readableStream;
   }
 

@@ -74,11 +74,13 @@
 * There are no forbidden header names.
 * The `Response` object has an extra property `httpVersion` which is one of `'1.0'`, `'1.1'` or `'2.0'`, depending on what was negotiated with the server.
 * The `Response` object has an extra property `fromCache` which determines whether the response was retrieved from cache.
+* The `Response` object has an extra property `decoded` which determines whether the response body was automatically decoded (see Fetch option `decode` below).
 * `Response.headers.plain()` returns the headers as a plain object.
 * The Fetch option `follow` allows to limit the number of redirects to follow (default: `20`).
-* The Fetch option `compress` enables transparent gzip/deflate/br content decoding (default: `true`)
+* The Fetch option `compress` enables transparent gzip/deflate/br content encoding (default: `true`).
+* The Fetch option `decode` enables transparent gzip/deflate/br content decoding (default: `true`).
 
-Note that non-standard Fetch options have been aligned with [node-fetch](https://github.com/node-fetch/node-fetch) where possible.
+Note that non-standard Fetch options have been aligned with [node-fetch](https://github.com/node-fetch/node-fetch) where appropriate.
   
 ## Features
 

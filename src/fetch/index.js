@@ -53,7 +53,7 @@ const fetch = async (ctx, url, options) => {
 
   // extract options
   const {
-    method, body, signal, compress, follow, redirect, init: { body: initBody },
+    method, body, signal, compress, decode, follow, redirect, init: { body: initBody },
   } = req;
 
   let coreResp;
@@ -78,6 +78,7 @@ const fetch = async (ctx, url, options) => {
       headers: req.headers.plain(),
       body: initBody && !(initBody instanceof Readable) && !isFormData(initBody) ? initBody : body,
       compress,
+      decode,
       follow,
       redirect,
       signal,
@@ -122,6 +123,7 @@ const fetch = async (ctx, url, options) => {
     httpVersion,
     headers,
     readable,
+    decoded,
   } = coreResp;
 
   // redirect?
@@ -162,6 +164,7 @@ const fetch = async (ctx, url, options) => {
           headers: new Headers(req.headers),
           follow: req.follow,
           compress: req.compress,
+          decode: req.decode,
           counter: req.counter + 1,
           method: req.method,
           body: req.body,
@@ -216,6 +219,7 @@ const fetch = async (ctx, url, options) => {
       statusText,
       headers,
       httpVersion,
+      decoded,
       counter: req.counter,
     },
   );
@@ -355,6 +359,7 @@ class FetchContext {
           httpVersion,
           headers,
           readable,
+          decoded,
         } = response;
         this.pushHandler(
           url,
@@ -365,6 +370,7 @@ class FetchContext {
             statusText,
             headers,
             httpVersion,
+            decoded,
           }),
         );
       };

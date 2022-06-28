@@ -43,6 +43,7 @@ const DEFAULT_USER_AGENT = `helix-fetch/${version}`;
 const DEFAULT_OPTIONS = {
   method: 'GET',
   compress: true,
+  decode: true,
 };
 
 let socketIdCounter = 0;
