@@ -1,3 +1,10 @@
+# [3.1.0](https://github.com/adobe/helix-fetch/compare/v3.0.11...v3.1.0) (2022-06-28)
+
+
+### Features
+
+* decode option to disable automatic response body decoding ([#289](https://github.com/adobe/helix-fetch/issues/289)) ([6546487](https://github.com/adobe/helix-fetch/commit/65464876ae60552b687987dfb81d9ceeb121f361))
+
 ## [3.0.11](https://github.com/adobe/helix-fetch/compare/v3.0.10...v3.0.11) (2022-06-16)
 
 
