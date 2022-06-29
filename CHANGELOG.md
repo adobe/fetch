@@ -1,3 +1,10 @@
+## [3.1.1](https://github.com/adobe/helix-fetch/compare/v3.1.0...v3.1.1) (2022-06-29)
+
+
+### Bug Fixes
+
+* arrayBuffer request body ([#290](https://github.com/adobe/helix-fetch/issues/290)) ([84c465c](https://github.com/adobe/helix-fetch/commit/84c465c912f9ccc8d4a2302dc13340c798ae0e27))
+
 # [3.1.0](https://github.com/adobe/helix-fetch/compare/v3.0.11...v3.1.0) (2022-06-28)
 
 
