@@ -12,6 +12,8 @@
 
 'use strict';
 
+const { isAnyArrayBuffer } = require('util/types');
+
 const { AbortSignal } = require('./abort');
 const { Body, cloneStream, guessContentType } = require('./body');
 const { Headers } = require('./headers');

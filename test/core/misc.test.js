@@ -79,7 +79,7 @@ describe('Misc. Core Tests (edge cases to improve code coverage)', () => {
 
   it('supports text body (code coverage, HTTP/1.1)', async () => {
     const method = 'POST';
-    const body = 'hello, world!';
+    const body = 'Hello, World!';
 
     // force HTTP/1.1
     const customCtx = context({ alpnProtocols: [ALPN_HTTP1_1] });

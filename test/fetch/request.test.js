@@ -18,7 +18,7 @@
 const { Readable } = require('stream');
 
 const { FormData } = require('formdata-node');
-const chai = require('chai');
+const chai = require('chai').use(require('chai-bytes'));
 
 const { expect } = chai;
 
@@ -272,12 +272,24 @@ describe('Request Tests', () => {
 
   it('should support buffer body', () => {
     const method = 'POST';
-    const body = Buffer.from('hello, world!', 'utf8');
+    const body = Buffer.from('Hello, World!', 'utf8');
     const req = new Request(BASE_URL, { method, body });
     // eslint-disable-next-line no-unused-expressions
     expect(req.headers.get('content-type')).to.be.null;
     return req.text().then((result) => {
-      expect(result).to.equal('hello, world!');
+      expect(result).to.equal('Hello, World!');
+    });
+  });
+
+  it('should support ArrayBuffer body', () => {
+    const method = 'POST';
+    const data = new Uint8Array([0xfe, 0xff, 0x41]);
+    const body = data.buffer; // ArrayBuffer instance
+    const req = new Request(BASE_URL, { method, body });
+    // eslint-disable-next-line no-unused-expressions
+    expect(req.headers.get('content-type')).to.be.null;
+    return req.arrayBuffer().then((result) => {
+      expect(new Uint8Array(result)).to.equalBytes(data);
     });
   });
 
