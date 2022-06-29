@@ -195,7 +195,7 @@ testParams.forEach((params) => {
       assert(signal.aborted);
 
       const method = 'POST';
-      const body = stream.Readable.from('hello, world!');
+      const body = stream.Readable.from('Hello, World!');
 
       const ts0 = Date.now();
       try {
@@ -216,7 +216,7 @@ testParams.forEach((params) => {
       const signal = timeoutSignal(500);
 
       const method = 'POST';
-      const body = stream.Readable.from('hello, world!');
+      const body = stream.Readable.from('Hello, World!');
 
       const ts0 = Date.now();
       try {
@@ -240,7 +240,7 @@ testParams.forEach((params) => {
       const { signal } = controller;
 
       const method = 'POST';
-      const body = stream.Readable.from('hello, world!');
+      const body = stream.Readable.from('Hello, World!');
 
       const ts0 = Date.now();
       try {
@@ -262,7 +262,7 @@ testParams.forEach((params) => {
       const { signal } = controller;
 
       const method = 'POST';
-      const body = 'hello, world!';
+      const body = 'Hello, World!';
 
       try {
         await fetch(`${baseUrl}/post`, { signal, method, body });
@@ -287,7 +287,7 @@ testParams.forEach((params) => {
       const { signal } = controller;
 
       const method = 'POST';
-      const body = stream.Readable.from('hello, world!');
+      const body = stream.Readable.from('Hello, World!');
 
       const ts0 = Date.now();
       try {
@@ -535,7 +535,7 @@ testParams.forEach((params) => {
 
     it('supports text body', async () => {
       const method = 'POST';
-      const body = 'hello, world!';
+      const body = 'Hello, World!';
       const resp = await fetch(`${baseUrl}/post`, { method, body });
       assert.strictEqual(resp.status, 200);
       assert.strictEqual(resp.httpVersion, httpVersion);

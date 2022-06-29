@@ -14,6 +14,7 @@
 
 const { Readable } = require('stream');
 const tls = require('tls');
+const { types: { isAnyArrayBuffer } } = require('util');
 
 const LRU = require('lru-cache');
 const debug = require('debug')('helix-fetch:core');
@@ -224,11 +225,14 @@ const request = async (ctx, uri, options) => {
   } else if (isPlainObject(opts.body)) {
     opts.body = JSON.stringify(opts.body);
     contentType = 'application/json';
+  } else if (isAnyArrayBuffer(opts.body)) {
+    opts.body = Buffer.from(opts.body);
   }
+
   if (opts.headers['content-type'] === undefined && contentType !== undefined) {
     opts.headers['content-type'] = contentType;
   }
-  // by now all supported custom body types are converted to string or buffer
+  // by now all supported custom body types are converted to string, readable or buffer
   if (opts.body != null) {
     if (!(opts.body instanceof Readable)) {
       // non-stream body

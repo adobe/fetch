@@ -13,6 +13,7 @@
 'use strict';
 
 const { PassThrough, Readable } = require('stream');
+const { types: { isAnyArrayBuffer } } = require('util');
 
 const { FetchError, FetchBaseError } = require('./errors');
 const { streamToBuffer } = require('../common/utils');
@@ -82,6 +83,8 @@ class Body {
       stream = body;
     } else if (Buffer.isBuffer(body)) {
       stream = Readable.from(body);
+    } else if (isAnyArrayBuffer(body)) {
+      stream = Readable.from(Buffer.from(body));
     } else if (typeof body === 'string' || body instanceof String) {
       stream = Readable.from(body);
     } else {
@@ -213,6 +216,10 @@ const guessContentType = (body) => {
   }
 
   if (Buffer.isBuffer(body)) {
+    return null;
+  }
+
+  if (isAnyArrayBuffer(body)) {
     return null;
   }
 

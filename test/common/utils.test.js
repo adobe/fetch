@@ -29,7 +29,7 @@ const gzip = promisify(zlib.gzip);
 const deflate = promisify(zlib.deflate);
 const brotliCompress = promisify(zlib.brotliCompress);
 
-const TEST_DATA = Buffer.from('hello, world!', 'utf8');
+const TEST_DATA = Buffer.from('Hello, World!', 'utf8');
 
 describe('isPlainObject Tests', () => {
   it('isPlainObject works', () => {
