@@ -14,7 +14,7 @@
 
 const { Readable } = require('stream');
 const tls = require('tls');
-const { isAnyArrayBuffer } = require('util/types');
+const { types: { isAnyArrayBuffer } } = require('util');
 
 const LRU = require('lru-cache');
 const debug = require('debug')('helix-fetch:core');

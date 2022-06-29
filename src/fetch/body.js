@@ -13,7 +13,7 @@
 'use strict';
 
 const { PassThrough, Readable } = require('stream');
-const { isAnyArrayBuffer } = require('util/types');
+const { types: { isAnyArrayBuffer } } = require('util');
 
 const { FetchError, FetchBaseError } = require('./errors');
 const { streamToBuffer } = require('../common/utils');
