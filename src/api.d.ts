@@ -175,6 +175,12 @@ export interface Http2Options {
   rejectUnauthorized?: boolean;
 }
 
+export interface CreatSocketOptions {
+  alpnProtocol: ALPNProtocol;
+  //TODO: real types for this
+  createSocket: (requestOptions: any) => any;
+}
+
 export interface ContextOptions {
   /**
    * Value of `user-agent` request header
@@ -210,6 +216,8 @@ export interface ContextOptions {
 
   h1?: Http1Options;
   h2?: Http2Options;
+
+  socketFactory?: CreatSocketOptions;
 }
 
 export class AbortSignal {

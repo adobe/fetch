@@ -182,6 +182,34 @@ const sanitizeHeaders = (headers) => {
   return result;
 };
 
+const getProtocolAndSocketFromFactory = async (agentOptions, url, requestOptions) => {
+  const isSecure = url.protocol === 'https:';
+  // Add fallback port if no port is specified
+  let port;
+  if (url.port) {
+    port = url.port;
+  } else if (isSecure) {
+    port = 443;
+  } else {
+    port = 80;
+  }
+  const options = {
+    ...requestOptions, host: url.host, port,
+  };
+  const socket = await agentOptions.createSocket(options);
+  if (isSecure) {
+    // Make sure to pass ALPNProtocols to the secure handshake
+    // otherwise it will fallback to HTTP/1.1
+    const secOpts = { ...options, ALPNProtocols: [agentOptions.alpnProtocol] };
+    const secureSocket = await connectTLS(url, secOpts);
+    return { protocol: agentOptions.alpnProtocol, socket: secureSocket };
+  }
+  return {
+    protocol: agentOptions.alpnProtocol,
+    socket,
+  };
+};
+
 const request = async (ctx, uri, options) => {
   const url = new URL(uri);
 
@@ -265,7 +293,9 @@ const request = async (ctx, uri, options) => {
   const { signal } = opts;
 
   // delegate to protocol-specific request handler
-  const { protocol, socket = null } = await determineProtocol(ctx, url, signal);
+  const { protocol, socket = null } = ctx.socketFactory
+    ? await getProtocolAndSocketFromFactory(ctx.socketFactory, url, opts)
+    : await determineProtocol(ctx, url, signal);
   debug(`${url.host} -> ${protocol}`);
   switch (protocol) {
     case ALPN_HTTP2:
@@ -312,6 +342,7 @@ const setupContext = (ctx) => {
       alpnCacheTTL = ALPN_CACHE_TTL,
       alpnCacheSize = ALPN_CACHE_SIZE,
       userAgent = DEFAULT_USER_AGENT,
+      socketFactory,
     },
   } = ctx;
 
@@ -319,6 +350,7 @@ const setupContext = (ctx) => {
   ctx.alpnCache = new LRU({ max: alpnCacheSize, ttl: alpnCacheTTL });
 
   ctx.userAgent = userAgent;
+  ctx.socketFactory = socketFactory;
 
   h1.setupContext(ctx);
   h2.setupContext(ctx);
