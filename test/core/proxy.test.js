@@ -15,7 +15,7 @@
 const assert = require('assert');
 const tunnel = require('tunnel');
 const Proxy = require('proxy');
-const { context, ALPN_HTTP1_1, ALPN_HTTP2 } = require('../../src/core');
+const { context, ALPN_HTTP1_1 } = require('../../src/core');
 
 // This should go into our code base
 const createSocketFactory = (port) => {
@@ -57,10 +57,7 @@ describe('Proxy tests', () => {
 
   it('Tunnel to HTTP 1.1 server using HTTP over HTTP proxy', async () => {
     const customCtx = context({
-      socketFactory: {
-        alpnProtocol: ALPN_HTTP1_1,
-        createSocket: createSocketFactory(proxyPort),
-      },
+      socketFactory: createSocketFactory(proxyPort),
     });
     try {
       const resp = await customCtx.request('http://httpbin.org/status/200');
@@ -73,10 +70,9 @@ describe('Proxy tests', () => {
 
   it('Tunnel to HTTP 1.1 server with HTTPS over HTTP proxy', async () => {
     const customCtx = context({
-      socketFactory: {
-        alpnProtocol: ALPN_HTTP1_1,
-        createSocket: createSocketFactory(proxyPort),
-      },
+      // Make sure we don't upgrade to HTTP2
+      alpnProtocols: [ALPN_HTTP1_1],
+      socketFactory: createSocketFactory(proxyPort),
     });
     try {
       const resp = await customCtx.request('https://httpbin.org/status/200');
@@ -89,10 +85,7 @@ describe('Proxy tests', () => {
 
   it('Tunnel to HTTP2 server using HTTPS over HTTP proxy', async () => {
     const customCtx = context({
-      socketFactory: {
-        alpnProtocol: ALPN_HTTP2,
-        createSocket: createSocketFactory(proxyPort),
-      },
+      socketFactory: createSocketFactory(proxyPort),
     });
     try {
       const resp = await customCtx.request('https://www.nghttp2.org/httpbin/status/200');

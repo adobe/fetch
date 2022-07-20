@@ -182,7 +182,7 @@ const sanitizeHeaders = (headers) => {
   return result;
 };
 
-const getProtocolAndSocketFromFactory = async (agentOptions, url, requestOptions) => {
+const getProtocolAndSocketFromFactory = async (socketFactory, url, requestOptions, alpns) => {
   const isSecure = url.protocol === 'https:';
   // Add fallback port if no port is specified
   let port;
@@ -196,16 +196,16 @@ const getProtocolAndSocketFromFactory = async (agentOptions, url, requestOptions
   const options = {
     ...requestOptions, host: url.host, port,
   };
-  const socket = await agentOptions.createSocket(options);
+  const socket = await socketFactory(options);
   if (isSecure) {
     // Make sure to pass ALPNProtocols to the secure handshake
     // otherwise it will fallback to HTTP/1.1
-    const secOpts = { ...options, ALPNProtocols: [agentOptions.alpnProtocol] };
+    const secOpts = { ...options, ALPNProtocols: alpns };
     const secureSocket = await connectTLS(url, secOpts);
-    return { protocol: agentOptions.alpnProtocol, socket: secureSocket };
+    return { protocol: secureSocket.alpnProtocol ?? ALPN_HTTP1_1, socket: secureSocket };
   }
   return {
-    protocol: agentOptions.alpnProtocol,
+    protocol: socket.alpnProtocol ?? ALPN_HTTP1_1,
     socket,
   };
 };
@@ -294,7 +294,7 @@ const request = async (ctx, uri, options) => {
 
   // delegate to protocol-specific request handler
   const { protocol, socket = null } = ctx.socketFactory
-    ? await getProtocolAndSocketFromFactory(ctx.socketFactory, url, opts)
+    ? await getProtocolAndSocketFromFactory(ctx.socketFactory, url, opts, ctx.alpnProtocols)
     : await determineProtocol(ctx, url, signal);
   debug(`${url.host} -> ${protocol}`);
   switch (protocol) {
