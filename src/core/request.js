@@ -203,10 +203,12 @@ const getProtocolAndSocketFromFactory = async (socketFactory, url, requestOption
     const secOpts = { ...options, ALPNProtocols: alpns };
     secOpts.socket = socket;
     const secureSocket = await connectTLS(url, secOpts);
-    return { protocol: secureSocket.alpnProtocol ?? ALPN_HTTP1_1, socket: secureSocket };
+    const protocol = secureSocket.alpnProtocol || ALPN_HTTP1_1;
+    return { protocol, socket: secureSocket };
   }
+  const protocol = socket.alpnProtocol || ALPN_HTTP1_1;
   return {
-    protocol: socket.alpnProtocol ?? ALPN_HTTP1_1,
+    protocol,
     socket,
   };
 };
