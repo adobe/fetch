@@ -55,7 +55,6 @@
             "--colors",
             "${file}"
         ],
-        "env": {"DEBUG": "proxy*"},
         "console": "integratedTerminal",
         "internalConsoleOptions": "neverOpen"
     }
