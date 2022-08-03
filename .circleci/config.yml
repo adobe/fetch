@@ -2,7 +2,7 @@ version: 2.1
 executors:
   node14:
     docker:
-      - image: cimg/node:14.19
+      - image: cimg/node:14.20
 
 orbs:
   codecov: codecov/codecov@3.2.3
@@ -16,7 +16,7 @@ commands:
             - v1-dependencies-{{ arch }}-{{ checksum "package-lock.json" }}
       - run:
           name: install npm@latest
-          command: npm -g install npm@latest
+          command: npm install npm@latest
       - run:
           name: Installing Dependencies
           command: npm ci
