@@ -14,7 +14,7 @@ export * from './api';
 import * as api from './api.d';
 import { ContextOptions } from './api';
 
-declare type HelixFetchAPI = typeof api;
+declare type FetchAPI = typeof api;
 
 /**
   * This function returns an object which looks like the public API,
@@ -23,7 +23,7 @@ declare type HelixFetchAPI = typeof api;
   *
   * @param {ContextOptions} options
   */
-export declare function context(options?: ContextOptions): HelixFetchAPI;
+export declare function context(options?: ContextOptions): FetchAPI;
 
 /**
  * Convenience function which creates a new context with disabled caching,
@@ -33,7 +33,7 @@ export declare function context(options?: ContextOptions): HelixFetchAPI;
  *
   * @param {ContextOptions} options
  */
-export declare function noCache(options?: ContextOptions): HelixFetchAPI;
+export declare function noCache(options?: ContextOptions): FetchAPI;
  
  /**
   * Convenience function which creates a new context with enforced HTTP/1.1 protocol,
@@ -43,7 +43,7 @@ export declare function noCache(options?: ContextOptions): HelixFetchAPI;
   *
   * @param {ContextOptions} options
   */
- export declare function h1(options?: ContextOptions): HelixFetchAPI;
+ export declare function h1(options?: ContextOptions): FetchAPI;
   
  /**
   * Convenience function which creates a new context with enforced HTTP/1.1 protocol
@@ -54,7 +54,7 @@ export declare function noCache(options?: ContextOptions): HelixFetchAPI;
   *
   * @param {ContextOptions} options
   */
- export declare function keepAlive(options?: ContextOptions): HelixFetchAPI;
+ export declare function keepAlive(options?: ContextOptions): FetchAPI;
  
  /**
   * Convenience function which creates a new context with disabled caching
@@ -64,7 +64,7 @@ export declare function noCache(options?: ContextOptions): HelixFetchAPI;
   *
   * @param {ContextOptions} options
   */
- export declare function h1NoCache(options?: ContextOptions): HelixFetchAPI;
+ export declare function h1NoCache(options?: ContextOptions): FetchAPI;
  
  /**
   * Convenience function which creates a new context with disabled caching
@@ -75,5 +75,5 @@ export declare function noCache(options?: ContextOptions): HelixFetchAPI;
   *
   * @param {ContextOptions} options
   */
- export declare function keepAliveNoCache(options?: ContextOptions): HelixFetchAPI;
+ export declare function keepAliveNoCache(options?: ContextOptions): FetchAPI;
  

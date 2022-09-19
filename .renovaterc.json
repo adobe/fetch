@@ -1,3 +1,43 @@
 {
-  "extends": ["github>adobe/helix-shared"]
+  "extends": [
+    "config:base",
+    ":semanticCommits",
+    ":autodetectPinVersions"
+  ],
+  "timezone": "Europe/Zurich",
+  "branchPrefix": "renovate-",
+  "packageRules": [
+    {
+      "packageNames": ["circleci/node"],
+      "allowedVersions": "<15"
+    },
+    {
+      "packageNames": ["cimg/node"],
+      "allowedVersions": "<15"
+    },
+    {
+      "groupName": "external fixes",
+      "updateTypes": ["patch", "pin", "digest", "minor"],
+      "automerge": true,
+      "schedule": ["after 2pm on Saturday"],
+      "packagePatterns": ["^.+"],
+      "excludePackagePatterns": ["^@adobe/"]
+    },
+    {
+      "groupName": "external major",
+      "updateTypes": ["major"],
+      "automerge": false,
+      "packagePatterns": ["^.+"],
+      "excludePackagePatterns": ["^@adobe/"],
+      "schedule": ["after 2pm on Monday"]
+    },
+    {
+      "datasources": ["orb"],
+      "updateTypes": ["patch", "minor"],
+      "automerge": true
+    }
+  ],
+  "encrypted": {
+    "npmToken": "ohOXR8y4hdfHs/2go7YBdEwkhCFA+atc0qqw0UdLoAkKITfpmD538MiXVQf1ZgRFfnmVyHy9uf9KV9DH0fSHl4QDbOZ/+0Y4JgalbaC0LgpWrvZIa3JRarMhfEq8oM2ZVCZrJQehLyh2zKTnkeiTRQWMQwNPOIbByJAqhRwzwCJWjHQk8ztC6T2DyJPO6KvkOusTRY2SN19FmkccUBRyAWdR6IkHels3zlQOnKPNx+FJRp9J1RLzHMlFmJ7878wrAoFBrSKRq6fSWfCro4q5iPe7xih2JvRzZmPX2vi/7KBktzBVr+1Pjr8C4XPX9I6NNztDEGlAJNLLQX2da6ZTjg=="
+  }
 }

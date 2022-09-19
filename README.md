@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="banner.jpeg" alt="Helix Fetch"/>
+  <img src="banner.jpeg" alt="adobe/fetch"/>
   <br>
   <p>Light-weight <a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API">Fetch API</a> implementation transparently supporting both <b>HTTP/1(.1)</b> and <b>HTTP/2</b></p>
   <a href="https://codecov.io/gh/adobe/fetch"><img src="https://img.shields.io/codecov/c/github/adobe/fetch.svg" alt="codecov"></a>
@@ -364,7 +364,7 @@ Using `AbortController`:
 const { createUrl, fetch } = require('@adobe/fetch');
 
 const qs = {
-  helix: 'dummy',
+  fake: 'dummy',
   foo: 'bar',
   rumple: "stiltskin",
 };
@@ -378,7 +378,7 @@ or using `URLSearchParams`:
 const { fetch } = require('@adobe/fetch');
 
 const body = new URLSearchParams({
-  helix: 'dummy',
+  fake: 'dummy',
   foo: 'bar',
   rumple: "stiltskin",
 });

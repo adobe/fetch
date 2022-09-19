@@ -22,9 +22,9 @@ const { createUrl, timeoutSignal } = require('../../src');
 
 describe('Misc. Tests', () => {
   it('createUrl encodes query paramters', async () => {
-    const EXPECTED = 'https://httpbin.org/json?helix=42&dummy=true&name=Andr%C3%A9+Citro%C3%ABn&rumple=stiltskin&nephews=Huey&nephews=Louie&nephews=Dewey';
+    const EXPECTED = 'https://httpbin.org/json?foo=42&dummy=true&name=Andr%C3%A9+Citro%C3%ABn&rumple=stiltskin&nephews=Huey&nephews=Louie&nephews=Dewey';
     const qs = {
-      helix: 42,
+      foo: 42,
       dummy: true,
       name: 'André Citroën',
       rumple: 'stiltskin',
