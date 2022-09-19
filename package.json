@@ -1,5 +1,5 @@
 {
-  "name": "@adobe/helix-fetch",
+  "name": "@adobe/fetch",
   "version": "3.1.2",
   "description": "Light-weight Fetch implementation transparently supporting both HTTP/1(.1) and HTTP/2",
   "main": "src/index.js",
@@ -24,14 +24,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/adobe/helix-fetch"
+    "url": "https://github.com/adobe/fetch"
   },
   "author": "",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/adobe/helix-fetch/issues"
+    "url": "https://github.com/adobe/fetch/issues"
   },
-  "homepage": "https://github.com/adobe/helix-fetch#readme",
+  "homepage": "https://github.com/adobe/fetch#readme",
   "keywords": [
     "fetch",
     "whatwg",

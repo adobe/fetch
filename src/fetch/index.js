@@ -15,7 +15,7 @@
 const { EventEmitter } = require('events');
 const { Readable } = require('stream');
 
-const debug = require('debug')('helix-fetch');
+const debug = require('debug')('adobe/fetch');
 const LRU = require('lru-cache');
 
 const { Body } = require('./body');

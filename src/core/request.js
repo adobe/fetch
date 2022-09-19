@@ -17,7 +17,7 @@ const tls = require('tls');
 const { types: { isAnyArrayBuffer } } = require('util');
 
 const LRU = require('lru-cache');
-const debug = require('debug')('helix-fetch:core');
+const debug = require('debug')('adobe/fetch:core');
 
 const { RequestAbortedError } = require('./errors');
 const h1 = require('./h1');
