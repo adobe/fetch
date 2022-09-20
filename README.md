@@ -112,7 +112,7 @@ Apart from the standard Fetch API
 * `Headers`
 * `Body`
 
-`adobe/fetch` exposes the following extensions:
+`@adobe/fetch` exposes the following extensions:
 
 * `context()` - creates a new customized API context
 * `reset()` - resets the current API context, i.e. closes pending sessions/sockets, clears internal caches, etc ...
