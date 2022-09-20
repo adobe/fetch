@@ -49,7 +49,7 @@ class RequestContext {
       request: async (url, options) => this.request(url, options),
 
       /**
-       * This function returns an object which looks like the global `adobe/fetch` API,
+       * This function returns an object which looks like the global `@adobe/fetch` API,
        * i.e. it will have the functions `request`, `reset`, etc. and provide its
        * own isolated caches.
        *
