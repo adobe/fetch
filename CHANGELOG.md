@@ -1,3 +1,10 @@
+## [3.1.4](https://github.com/adobe/fetch/compare/v3.1.3...v3.1.4) (2022-09-20)
+
+
+### Bug Fixes
+
+* user-agent ([4e3bacf](https://github.com/adobe/fetch/commit/4e3bacf579ad34ff538cb9a08b17d5773a5ff543))
+
 ## [3.1.3](https://github.com/adobe/fetch/compare/v3.1.2...v3.1.3) (2022-09-20)
 
 
