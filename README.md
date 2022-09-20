@@ -524,7 +524,7 @@ $ npm run lint
 
 ### Troubleshooting
 
-You can enable `adobe/fetch` low-level debug console output by setting the `DEBUG` environment variable to `adobe/fetch*`, e.g.:
+You can enable `@adobe/fetch` low-level debug console output by setting the `DEBUG` environment variable to `adobe/fetch*`, e.g.:
 
 ```bash
 $ DEBUG=adobe/fetch* node test.js
