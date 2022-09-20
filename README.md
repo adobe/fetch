@@ -1,15 +1,15 @@
 <div align="center">
-  <img src="banner.jpeg" alt="Helix Fetch"/>
+  <img src="banner.jpeg" alt="Adobe Fetch"/>
   <br>
   <p>Light-weight <a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API">Fetch API</a> implementation transparently supporting both <b>HTTP/1(.1)</b> and <b>HTTP/2</b></p>
   <a href="https://codecov.io/gh/adobe/helix-fetch"><img src="https://img.shields.io/codecov/c/github/adobe/helix-fetch.svg" alt="codecov"></a>
   <a href="https://circleci.com/gh/adobe/helix-fetch"><img src="https://img.shields.io/circleci/project/github/adobe/helix-fetch.svg" alt="CircleCI"></a>
   <a href="https://github.com/adobe/helix-fetch/blob/main/LICENSE.txt"><img src="https://img.shields.io/github/license/adobe/helix-fetch.svg" alt="GitHub license"></a>
   <a href="https://github.com/adobe/helix-fetch/issues"><img src="https://img.shields.io/github/issues/adobe/helix-fetch.svg" alt="GitHub issues"></a>
-  <a href="https://lgtm.com/projects/g/adobe/helix-fetch"><img src="https://img.shields.io/lgtm/grade/javascript/g/adobe/helix-fetch.svg?logo=lgtm&logoWidth=18" alt="LGTM Code Quality Grade: JavaScript"></a>
+  <a href="https://lgtm.com/projects/g/adobe/fetch"><img src="https://img.shields.io/lgtm/grade/javascript/g/adobe/fetch.svg?logo=lgtm&logoWidth=18" alt="LGTM Code Quality Grade: JavaScript"></a>
   <a href="https://renovatebot.com/"><img src="https://img.shields.io/badge/renovate-enabled-brightgreen.svg" alt="Renovate enabled"></a>
   <a href="https://github.com/semantic-release/semantic-release"><img src="https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg" alt="semantic-release"></a>
-	<a href="https://packagephobia.now.sh/result?p=@adobe/helix-fetch"><img src="https://badgen.net/packagephobia/install/@adobe/helix-fetch" alt="Install size"></a>
+	<a href="https://packagephobia.now.sh/result?p=@adobe/helix-fetch"><img src="https://badgen.net/packagephobia/install/@adobe/fetch" alt="Install size"></a>
   <a href="https://www.npmjs.com/package/@adobe/helix-fetch"><img src="https://img.shields.io/npm/v/@adobe/helix-fetch" alt="Current version"></a>
 </div>
 
