@@ -65,7 +65,7 @@
 * The following `fetch()` options are ignored due to the nature of Node.js and since `@adobe/fetch` doesn't have the concept of web pages: `mode`, `referrer`, `referrerPolicy`, `integrity` and `credentials`.
 * The `fetch()` option `keepalive` is not supported. But you can use the `h1.keepAlive` context option, as demonstrated [here](#http11-keep-alive).
 
-`adobe/fetch` also supports the following extensions:
+`@adobe/fetch` also supports the following extensions:
 
 * `Response.buffer()` returns a Node.js `Buffer`.
 * `Response.url` contains the final url when following redirects.
