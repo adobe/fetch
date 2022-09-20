@@ -78,13 +78,5 @@
   },
   "lint-staged": {
     "*.js": "eslint"
-  },
-  "config": {
-    "commitizen": {
-      "path": "node_modules/cz-conventional-changelog"
-    },
-    "ghooks": {
-      "pre-commit": "npx lint-staged"
-    }
   }
 }
