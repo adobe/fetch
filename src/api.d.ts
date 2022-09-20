@@ -178,7 +178,7 @@ export interface Http2Options {
 export interface ContextOptions {
   /**
    * Value of `user-agent` request header
-   * @default 'helix-fetch/<version>'
+   * @default 'adobe-fetch/<version>'
    */
   userAgent?: string;
   /**

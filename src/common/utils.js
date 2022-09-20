@@ -26,7 +26,7 @@ const {
   },
 } = require('zlib');
 
-const debug = require('debug')('helix-fetch:utils');
+const debug = require('debug')('adobe/fetch:utils');
 
 const asyncPipeline = promisify(pipeline);
 
