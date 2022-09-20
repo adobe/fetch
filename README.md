@@ -62,7 +62,7 @@
 * `Response.formData()` is not implemented.
 * Cookies are not stored by default. However, cookies can be extracted and passed by manipulating request and response headers.
 * The following values of the `fetch()` option `cache` are supported: `'default'` (the implicit default) and `'no-store'`. All other values are currently ignored.  
-* The following `fetch()` options are ignored due to the nature of Node.js and since `adobe/fetch` doesn't have the concept of web pages: `mode`, `referrer`, `referrerPolicy`, `integrity` and `credentials`.
+* The following `fetch()` options are ignored due to the nature of Node.js and since `@adobe/fetch` doesn't have the concept of web pages: `mode`, `referrer`, `referrerPolicy`, `integrity` and `credentials`.
 * The `fetch()` option `keepalive` is not supported. But you can use the `h1.keepAlive` context option, as demonstrated [here](#http11-keep-alive).
 
 `adobe/fetch` also supports the following extensions:
