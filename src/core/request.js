@@ -38,7 +38,7 @@ const ALPN_CACHE_SIZE = 100; // # of entries
 const ALPN_CACHE_TTL = 60 * 60 * 1000; // (ms): 1h
 const ALPN_PROTOCOLS = [ALPN_HTTP2, ALPN_HTTP1_1, ALPN_HTTP1_0];
 
-const DEFAULT_USER_AGENT = `helix-fetch/${version}`;
+const DEFAULT_USER_AGENT = `adobe-fetch/${version}`;
 
 // request option defaults
 const DEFAULT_OPTIONS = {
