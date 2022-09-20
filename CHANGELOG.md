@@ -1,3 +1,10 @@
+## [3.1.3](https://github.com/adobe/fetch/compare/v3.1.2...v3.1.3) (2022-09-20)
+
+
+### Bug Fixes
+
+* force release (rename adobe/helix-fetch to adobe/fetch) ([dbfc05f](https://github.com/adobe/fetch/commit/dbfc05f5506005c880b8864ba01a9c738324a9f5))
+
 ## [3.1.2](https://github.com/adobe/helix-fetch/compare/v3.1.1...v3.1.2) (2022-08-07)
 
 
