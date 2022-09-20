@@ -1,4 +1,4 @@
-# Contributing to adobe/fetch
+# Contributing to `@adobe/fetch`
 
 This project is an Open Development project and welcomes contributions from everyone who finds it useful or lacking.
 
