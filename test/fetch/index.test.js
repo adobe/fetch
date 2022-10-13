@@ -601,6 +601,17 @@ testParams.forEach((params) => {
       assert.deepStrictEqual(reqForm, searchParams);
     });
 
+    it('returns Set-Cookie headers', async () => {
+      const resp = await fetch(`${baseUrl}/cookies/set?a=1&b=2`, { redirect: 'manual' });
+      // Response headers:
+      // set-cookie: a=1; [Secure; ]Path=/
+      // set-cookie: b=2; [Secure; ]Path=/
+      assert.strictEqual(resp.status, 302);
+      assert(/a=1; (Secure; )?Path=\/, b=2; (Secure; )?Path=\//.test(resp.headers.get('set-cookie')));
+      assert(/a=1; (Secure; )?Path=\//.test(resp.headers.plain()['set-cookie'][0]));
+      assert(/b=2; (Secure; )?Path=\//.test(resp.headers.plain()['set-cookie'][1]));
+    });
+
     if (protocol === 'https') {
       it('supports self signed certificate', async () => {
         const server = new Server(httpVersion === '2.0' ? 2 : 1, true, HELLO_WORLD);
