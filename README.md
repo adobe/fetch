@@ -37,6 +37,7 @@
   - [HTTP/2 Server Push](#http2-server-push)
   - [Force HTTP/1(.1) protocol](#force-http11-protocol)
   - [HTTP/1.1 Keep-Alive](#http11-keep-alive)
+  - [Extract Set-Cookie Header](#extract-set-cookie-header)
   - [Self-signed Certificates](#self-signed-certificates)
   - [Set cache size limit](#set-cache-size-limit)
   - [Disable caching](#disable-caching)
@@ -453,6 +454,18 @@ const { fetch } = require('@adobe/fetch').keepAlive();
 
 const resp = await fetch('https://httpbin.org/status/200');
 console.log(`Connection: ${resp.headers.get('connection')}`); // -> keep-alive
+```
+
+### Extract Set-Cookie Header
+
+Unlike browsers, you can access raw `Set-Cookie` headers manually using `Headers.plain()`. This is an `@adobe/fetch` only API.
+
+```javascript
+const { fetch } = require('@adobe/fetch');
+
+const resp = await fetch('https://httpbin.org/cookies/set?a=1&b=2');
+// returns an array of values, instead of a string of comma-separated values
+console.log(resp.headers.plain()['set-cookie']);
 ```
 
 ### Self-signed Certificates

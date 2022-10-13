@@ -61,6 +61,7 @@ describe('Headers Tests', () => {
       ['c', '4'],
       ['b', '3'],
       ['a', '1'],
+      ['d', ['5', '6']],
     ]);
     expect(headers).to.have.property('forEach');
 
@@ -73,6 +74,7 @@ describe('Headers Tests', () => {
       ['a', '1'],
       ['b', '2, 3'],
       ['c', '4'],
+      ['d', '5, 6'],
     ]);
   });
 
@@ -154,8 +156,9 @@ describe('Headers Tests', () => {
   });
 
   it('constructor should support plain object', () => {
-    const headers = new Headers({ foo: 'bar' });
+    const headers = new Headers({ foo: 'bar', 'x-cookies': ['a=1', 'b=2'] });
     expect(headers.get('foo')).to.be.equal('bar');
+    expect(headers.get('x-cookies')).to.be.equal('a=1, b=2');
   });
 
   it('get should return null if not found', () => {
@@ -181,8 +184,16 @@ describe('Headers Tests', () => {
   });
 
   it('plain() should return plain object representation', () => {
-    const hdrObj = { foo: 'bar' };
+    const hdrObj = { foo: 'bar', 'x-cookies': ['a=1', 'b=2'] };
     const headers = new Headers(hdrObj);
     expect(headers.plain()).to.be.deep.equal(hdrObj);
+  });
+
+  it('should support multi-valued headers (e.g. Set-Cookie)', () => {
+    const headers = new Headers();
+    headers.set('set-cookie', 'a=1; Path=/');
+    headers.append('set-cookie', 'b=2; Path=/');
+    expect(headers.get('set-cookie')).to.be.equal('a=1; Path=/, b=2; Path=/');
+    expect(headers.plain()['set-cookie']).to.be.deep.equal(['a=1; Path=/', 'b=2; Path=/']);
   });
 });
