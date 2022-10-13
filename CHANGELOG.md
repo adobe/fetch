@@ -1,3 +1,10 @@
+# [3.2.0](https://github.com/adobe/fetch/compare/v3.1.4...v3.2.0) (2022-10-13)
+
+
+### Features
+
+* support raw Set-Cookie headers ([#310](https://github.com/adobe/fetch/issues/310)) ([d5c80aa](https://github.com/adobe/fetch/commit/d5c80aa1fcadb033dcc46aa14c8df5380ba063a6)), closes [#309](https://github.com/adobe/fetch/issues/309)
+
 ## [3.1.4](https://github.com/adobe/fetch/compare/v3.1.3...v3.1.4) (2022-09-20)
 
 
