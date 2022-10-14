@@ -71,7 +71,7 @@ class Request extends Body {
 
     if (!headers.has('content-type')) {
       if (isPlainObject(body)) {
-        // extension: support plain js object body (JSON serialization)
+        // non-spec extension: support plain js object body (JSON serialization)
         body = JSON.stringify(body);
         headers.set('content-type', 'application/json');
       } else {
@@ -114,7 +114,7 @@ class Request extends Body {
       signal,
     };
 
-    // extension options
+    // non-spec extension options
     if (init.follow === undefined) {
       if (!req || req.follow === undefined) {
         this.follow = DEFAULT_FOLLOW;

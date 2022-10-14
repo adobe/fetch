@@ -608,8 +608,8 @@ testParams.forEach((params) => {
       // set-cookie: b=2; [Secure; ]Path=/
       assert.strictEqual(resp.status, 302);
       assert(/a=1; (Secure; )?Path=\/, b=2; (Secure; )?Path=\//.test(resp.headers.get('set-cookie')));
-      assert(/a=1; (Secure; )?Path=\//.test(resp.headers.plain()['set-cookie'][0]));
-      assert(/b=2; (Secure; )?Path=\//.test(resp.headers.plain()['set-cookie'][1]));
+      assert(/a=1; (Secure; )?Path=\//.test(resp.headers.raw()['set-cookie'][0]));
+      assert(/b=2; (Secure; )?Path=\//.test(resp.headers.raw()['set-cookie'][1]));
     });
 
     if (protocol === 'https') {

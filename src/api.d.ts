@@ -144,7 +144,7 @@ export class Response extends Body {
   readonly decoded: boolean;
   headers: Headers;
 
-  // extensions
+  // non-spec extensions
   /**
    * A boolean specifying whether the response was retrieved from the cache.
    */
@@ -262,7 +262,7 @@ export interface RequestOptions {
 	 */
   signal?: AbortSignal;
 
-  // extensions
+  // non-spec extensions
   /**
    * A boolean specifying support of gzip/deflate/brotli content encoding.
    * @default true

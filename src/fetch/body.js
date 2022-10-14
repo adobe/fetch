@@ -123,7 +123,7 @@ class Body {
 
   /**
    * Consume the body and return a promise that will resolve to a Node.js Buffer.
-   * (extension)
+   * (non-spec extension)
    *
    * @return {Promise<Buffer>}
    */

@@ -74,8 +74,8 @@ class Headers {
     };
 
     if (init instanceof Headers) {
-      init.forEach((value, name) => {
-        this.append(name, value);
+      init[INTERNALS].map.forEach((value, name) => {
+        this[INTERNALS].map.set(name, Array.isArray(value) ? [...value] : value);
       });
     } else if (Array.isArray(init)) {
       init.forEach(([name, value]) => {
@@ -177,11 +177,27 @@ class Headers {
 
   /**
    * Returns the headers as a plain object.
-   * (extension)
+   * (non-spec extension)
    *
-   * @return {object}
+   * @returns {Record<string, string>}
    */
   plain() {
+    return [...this.keys()].reduce((result, key) => {
+      // eslint-disable-next-line no-param-reassign
+      result[key] = this.get(key);
+      return result;
+    }, {});
+  }
+
+  /**
+   * Returns the internal/raw representation of the
+   * headers, i.e. the value of an multi-valued header
+   * (added with <code>append()</code>) is an array of strings.
+   * (non-spec extension)
+   *
+   * @returns {Record<string, string|string[]>}
+   */
+  raw() {
     return Object.fromEntries(this[INTERNALS].map);
   }
 }
