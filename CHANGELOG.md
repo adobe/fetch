@@ -1,3 +1,10 @@
+## [3.2.1](https://github.com/adobe/fetch/compare/v3.2.0...v3.2.1) (2022-10-14)
+
+
+### Bug Fixes
+
+* regression regarding Headers.plain(); introduced Headers.raw() ([#312](https://github.com/adobe/fetch/issues/312)) ([2a05a77](https://github.com/adobe/fetch/commit/2a05a774e37cdf1d126e4c4a3a2bf856aa1b39b9))
+
 # [3.2.0](https://github.com/adobe/fetch/compare/v3.1.4...v3.2.0) (2022-10-13)
 
 
