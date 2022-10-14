@@ -55,7 +55,7 @@ class Response extends Body {
 
     if (respBody !== null && !headers.has('content-type')) {
       if (isPlainObject(respBody)) {
-        // extension: support plain js object body (JSON serialization)
+        // non-spec extension: support plain js object body (JSON serialization)
         respBody = JSON.stringify(respBody);
         headers.set('content-type', 'application/json');
       } else {
@@ -104,12 +104,12 @@ class Response extends Body {
     return this[INTERNALS].headers;
   }
 
-  // extension
+  // non-spec extension
   get httpVersion() {
     return this[INTERNALS].httpVersion;
   }
 
-  // extension
+  // non-spec extension
   get decoded() {
     return this[INTERNALS].decoded;
   }

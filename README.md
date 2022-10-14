@@ -66,7 +66,7 @@
 * The following `fetch()` options are ignored due to the nature of Node.js and since `@adobe/fetch` doesn't have the concept of web pages: `mode`, `referrer`, `referrerPolicy`, `integrity` and `credentials`.
 * The `fetch()` option `keepalive` is not supported. But you can use the `h1.keepAlive` context option, as demonstrated [here](#http11-keep-alive).
 
-`@adobe/fetch` also supports the following extensions:
+`@adobe/fetch` also supports the following non-spec extensions:
 
 * `Response.buffer()` returns a Node.js `Buffer`.
 * `Response.url` contains the final url when following redirects.
@@ -76,6 +76,7 @@
 * The `Response` object has an extra property `fromCache` which determines whether the response was retrieved from cache.
 * The `Response` object has an extra property `decoded` which determines whether the response body was automatically decoded (see Fetch option `decode` below).
 * `Response.headers.plain()` returns the headers as a plain object.
+* `Response.headers.raw()` returns the internal/raw representation of the headers where e.g. the `Set-Cokkie` header is represented with an array of strings value.
 * The Fetch option `follow` allows to limit the number of redirects to follow (default: `20`).
 * The Fetch option `compress` enables transparent gzip/deflate/br content encoding (default: `true`).
 * The Fetch option `decode` enables transparent gzip/deflate/br content decoding (default: `true`).
@@ -113,7 +114,7 @@ Apart from the standard Fetch API
 * `Headers`
 * `Body`
 
-`@adobe/fetch` exposes the following extensions:
+`@adobe/fetch` exposes the following non-spec extensions:
 
 * `context()` - creates a new customized API context
 * `reset()` - resets the current API context, i.e. closes pending sessions/sockets, clears internal caches, etc ...
@@ -268,7 +269,7 @@ interface Http2Options {
 
 ### Specify a timeout for a `fetch` operation
 
-Using `timeoutSignal(ms)` extension:
+Using `timeoutSignal(ms)` non-spec extension:
 
 ```javascript
   const { fetch, timeoutSignal, AbortError } = require('@adobe/fetch');
@@ -458,14 +459,14 @@ console.log(`Connection: ${resp.headers.get('connection')}`); // -> keep-alive
 
 ### Extract Set-Cookie Header
 
-Unlike browsers, you can access raw `Set-Cookie` headers manually using `Headers.plain()`. This is an `@adobe/fetch` only API.
+Unlike browsers, you can access raw `Set-Cookie` headers manually using `Headers.raw()`. This is an `@adobe/fetch` only API.
 
 ```javascript
 const { fetch } = require('@adobe/fetch');
 
 const resp = await fetch('https://httpbin.org/cookies/set?a=1&b=2');
 // returns an array of values, instead of a string of comma-separated values
-console.log(resp.headers.plain()['set-cookie']);
+console.log(resp.headers.raw()['set-cookie']);
 ```
 
 ### Self-signed Certificates

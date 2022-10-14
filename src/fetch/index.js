@@ -404,7 +404,7 @@ class FetchContext {
       AbortController,
       AbortSignal,
 
-      // extensions
+      // non-spec extensions
 
       FetchBaseError,
       FetchError,
