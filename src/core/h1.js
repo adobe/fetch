@@ -105,6 +105,7 @@ const h1Request = async (ctx, url, options) => {
   if (socket) {
     // we've got a socket from initial protocol negotiation via ALPN
     delete opts.socket;
+    /* istanbul ignore next */
     if (!socket.assigned) {
       socket.assigned = true;
       // reuse socket for actual request

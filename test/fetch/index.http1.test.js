@@ -166,6 +166,17 @@ testParams.forEach((params) => {
       }
     });
 
+    it(`negotiates protocol (${name})`, async () => {
+      const { fetch, reset } = context({ alpnProtocols: [ALPN_HTTP1_0, ALPN_HTTP1_1] });
+      try {
+        const resp = await fetch(`${protocol}://httpbin.org/status/200`);
+        assert.strictEqual(resp.status, 200);
+        assert(['1.0', '1.1'].includes(resp.httpVersion));
+      } finally {
+        await reset();
+      }
+    });
+
     it(`concurrent HTTP/1.1 requests to same origin (${name})`, async function test() {
       this.timeout(5000);
 
