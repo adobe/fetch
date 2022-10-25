@@ -1,3 +1,10 @@
+# [3.3.0](https://github.com/adobe/fetch/compare/v3.2.1...v3.3.0) (2022-10-25)
+
+
+### Features
+
+* don't use ALPN when enforcing HTTP/1.X ([#316](https://github.com/adobe/fetch/issues/316)) ([e2fcc05](https://github.com/adobe/fetch/commit/e2fcc05f9aa5fa8d703d1a10ae7f7d19621ee894))
+
 ## [3.2.1](https://github.com/adobe/fetch/compare/v3.2.0...v3.2.1) (2022-10-14)
 
 
