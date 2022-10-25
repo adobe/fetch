@@ -145,6 +145,14 @@ const determineProtocol = async (ctx, url, signal) => {
       throw new TypeError(`unsupported protocol: ${url.protocol}`);
   }
 
+  if (ctx.alpnProtocols.length === 1
+    && (ctx.alpnProtocols[0] === ALPN_HTTP1_1 || ctx.alpnProtocols[0] === ALPN_HTTP1_0)) {
+    // shortcut: forced HTTP/1.X, default to HTTP/1.1 (no need to use ALPN to negotiate protocol)
+    protocol = ALPN_HTTP1_1;
+    ctx.alpnCache.set(origin, protocol);
+    return { protocol };
+  }
+
   // negotioate via ALPN
   const {
     options: {
