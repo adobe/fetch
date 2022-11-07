@@ -210,9 +210,7 @@ testParams.forEach((params) => {
       assert(body.destroyed);
     });
 
-    it('timeoutSignal works (slow response)', async function test() {
-      this.timeout(5000);
-
+    it('timeoutSignal works (slow response)', async () => {
       const signal = timeoutSignal(500);
 
       const method = 'POST';
@@ -232,9 +230,7 @@ testParams.forEach((params) => {
       assert(body.destroyed);
     });
 
-    it('AbortController works (slow response)', async function test() {
-      this.timeout(5000);
-
+    it('AbortController works (slow response)', async () => {
       const controller = new AbortController();
       setTimeout(() => controller.abort(), 1000);
       const { signal } = controller;
@@ -272,9 +268,7 @@ testParams.forEach((params) => {
       }
     });
 
-    it('AbortController works (dripping response)', async function test() {
-      this.timeout(5000);
-
+    it('AbortController works (dripping response)', async () => {
       const FETCH_TIMEOUT = 1000; // ms
       const DRIPPING_DURATION = 2; // seconds
       // doesn't support POST method

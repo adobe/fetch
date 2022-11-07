@@ -273,7 +273,7 @@ const request = async (ctx, url, options) => {
     req.once('error', (err) => {
       // error occured during the request
       session.off('error', onSessionError);
-      /* istanbul ignore else */
+      /* istanbul ignore next */
       if (signal) {
         signal.removeEventListener('abort', onAbortSignal);
       }
