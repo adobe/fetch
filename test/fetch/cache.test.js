@@ -185,9 +185,7 @@ describe('Cache Tests', () => {
     await ctx.reset();
   });
 
-  it('fetch supports max-age directive', async function test() {
-    this.timeout(5000);
-
+  it('fetch supports max-age directive', async () => {
     // max-age=3 seconds
     const url = 'https://httpbin.org/cache/3';
     // send request
@@ -341,9 +339,7 @@ describe('Cache Tests', () => {
     assert.deepStrictEqual(JSON.parse(await resp.text()), json);
   });
 
-  it('fetch supports HTTP/2 server push', async function test() {
-    this.timeout(5000);
-
+  it('fetch supports HTTP/2 server push', async () => {
     // returns a promise which resolves with the url of the pushed resource
     const receivedPush = () => new Promise((resolve) => {
       // eslint-disable-next-line no-unused-vars
@@ -379,9 +375,7 @@ describe('Cache Tests', () => {
     }
   });
 
-  it('test redundant server push', async function test() {
-    this.timeout(5000);
-
+  it('test redundant server push', async () => {
     let pushedResponse;
     const receivedPush = () => new Promise((resolve) => {
       onPush((url, response) => {

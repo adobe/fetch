@@ -190,9 +190,7 @@ describe('Core Tests', () => {
     assert((ts1 - ts0) < 10);
   });
 
-  it('AbortController works (slow response)', async function test() {
-    this.timeout(5000);
-
+  it('AbortController works (slow response)', async () => {
     const controller = new AbortController();
     setTimeout(() => controller.abort(), 1000);
     const { signal } = controller;
@@ -564,9 +562,7 @@ describe('Core Tests', () => {
     }
   });
 
-  it('HTTP/2 server push can be rejected', async function test() {
-    this.timeout(5000);
-
+  it('HTTP/2 server push can be rejected', async () => {
     const pushPromiseHandler = (url, headers, reject) => {
       // we're not interested, cancel push promise
       reject();
