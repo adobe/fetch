@@ -10,7 +10,7 @@
     "prepare": "husky install"
   },
   "mocha": {
-    "timeout": "5000",
+    "timeout": "10000",
     "recursive": "true",
     "reporter": "mocha-multi-reporters",
     "reporter-options": "configFile=.mocha-multi.json"
