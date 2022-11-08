@@ -12,7 +12,7 @@
 
 'use strict';
 
-const fs = require('fs');
+const { readFile } = require('fs').promises;
 const http = require('http');
 const https = require('https');
 const http2 = require('http2');
@@ -74,7 +74,7 @@ class Server {
       const createServer = async (handler) => {
         let options = {};
         if (this.secure) {
-          const keys = JSON.parse(fs.readFileSync(`${__dirname}/keys.json`));
+          const keys = JSON.parse(await readFile(`${__dirname}/keys.json`));
           options = { ...keys };
         }
         // merge with user-provided options
