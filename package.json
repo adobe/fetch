@@ -73,7 +73,6 @@
     "nock": "13.2.9",
     "nyc": "15.1.0",
     "parse-cache-control": "1.0.1",
-    "pem": "1.14.6",
     "semantic-release": "19.0.5",
     "sinon": "14.0.1",
     "stream-buffers": "3.0.2"
