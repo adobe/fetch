@@ -12,14 +12,10 @@
 
 'use strict';
 
+const { readFile } = require('fs').promises;
 const http = require('http');
 const https = require('https');
 const http2 = require('http2');
-const util = require('util');
-
-const pem = require('pem');
-
-const createCertificate = util.promisify(pem.createCertificate);
 
 const WOKEUP = 'woke up!';
 const sleep = (ms) => new Promise((resolve) => {
@@ -78,11 +74,8 @@ class Server {
       const createServer = async (handler) => {
         let options = {};
         if (this.secure) {
-          const keys = await createCertificate({ selfSigned: true });
-          options = {
-            key: keys.serviceKey,
-            cert: keys.certificate,
-          };
+          const keys = JSON.parse(await readFile(`${__dirname}/keys.json`));
+          options = { ...keys };
         }
         // merge with user-provided options
         options = { ...options, ...this.options };
