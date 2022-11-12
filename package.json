@@ -57,7 +57,7 @@
   "devDependencies": {
     "@semantic-release/changelog": "6.0.1",
     "@semantic-release/git": "10.0.1",
-    "chai": "4.3.6",
+    "chai": "4.3.7",
     "chai-as-promised": "7.1.1",
     "chai-bytes": "0.1.2",
     "chai-iterator": "3.0.2",
@@ -66,7 +66,7 @@
     "eslint-plugin-header": "3.1.1",
     "eslint-plugin-import": "2.26.0",
     "formdata-node": "4.4.1",
-    "husky": "8.0.1",
+    "husky": "8.0.2",
     "lint-staged": "13.0.3",
     "mocha": "10.1.0",
     "mocha-multi-reporters": "1.5.1",
@@ -74,7 +74,7 @@
     "nyc": "15.1.0",
     "parse-cache-control": "1.0.1",
     "semantic-release": "19.0.5",
-    "sinon": "14.0.1",
+    "sinon": "14.0.2",
     "stream-buffers": "3.0.2"
   },
   "lint-staged": {
