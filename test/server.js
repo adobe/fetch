@@ -65,6 +65,12 @@ class Server {
             }
             break;
 
+          case '/redirect-to':
+            await sleep(+(searchParams.get('delay') || 0));
+            res.writeHead(searchParams.get('status_code') || 302, { Location: searchParams.get('url') });
+            res.end(this.helloMsg);
+            break;
+
           default:
             res.writeHead(404);
             res.end('Not found');

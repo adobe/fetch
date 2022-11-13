@@ -30,7 +30,7 @@ describe('Redirect-specific Fetch Tests', () => {
     try {
       // redirected request works
       let location = `${server.origin}/hello`;
-      let url = `https://httpbingo.org/redirect-to?url=${encodeURIComponent(location)}&status_code=302`;
+      let url = `${server.origin}/redirect-to?url=${encodeURIComponent(location)}&status_code=302`;
       const resp = await ctx.fetch(url, { cache: 'no-store' });
       assert.strictEqual(resp.status, 200);
       assert.strictEqual(resp.httpVersion, '1.1');
@@ -38,7 +38,7 @@ describe('Redirect-specific Fetch Tests', () => {
 
       // redirected request is aborted
       location = `${server.origin}/abort`;
-      url = `https://httpbingo.org/redirect-to?url=${encodeURIComponent(location)}&status_code=302`;
+      url = `${server.origin}/redirect-to?url=${encodeURIComponent(location)}&status_code=302`;
       await assert.rejects(async () => ctx.fetch(url, { cache: 'no-store' }), { name: 'FetchError', code: 'ECONNRESET' });
     } finally {
       await ctx.reset();
@@ -57,7 +57,7 @@ describe('Redirect-specific Fetch Tests', () => {
     try {
       // redirected request works
       let location = `${server.origin}/hello`;
-      let url = `https://httpbingo.org/redirect-to?url=${encodeURIComponent(location)}&status_code=302`;
+      let url = `${server.origin}/redirect-to?url=${encodeURIComponent(location)}&status_code=302`;
       const resp = await ctx.fetch(url, { cache: 'no-store' });
       assert.strictEqual(resp.status, 200);
       assert.strictEqual(resp.httpVersion, '2.0');
@@ -65,7 +65,7 @@ describe('Redirect-specific Fetch Tests', () => {
 
       // redirected request is aborted
       location = `${server.origin}/abort`;
-      url = `https://httpbingo.org/redirect-to?url=${encodeURIComponent(location)}&status_code=302`;
+      url = `${server.origin}/redirect-to?url=${encodeURIComponent(location)}&status_code=302`;
       await assert.rejects(async () => ctx.fetch(url, { cache: 'no-store' }), { name: 'FetchError', code: 'ERR_HTTP2_SESSION_ERROR' });
     } finally {
       await ctx.reset();
