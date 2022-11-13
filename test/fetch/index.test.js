@@ -367,7 +367,7 @@ testParams.forEach((params) => {
     });
 
     it('supports redirect (default)', async () => {
-      const url = `${protocol}://httpbingo.org/redirect-to?url=${protocol}%3A%2F%2Fhttpbin.org%2Fstatus%2F200&status_code=307`;
+      const url = `${protocol}://httpbingo.org/redirect-to?url=${protocol}%3A%2F%2Fhttpbingo.org%2Fstatus%2F200&status_code=307`;
       // const url = `${protocol}://httpstat.us/307`; // sometimes very slooow/unreliable
       let resp = await fetch(url, { cache: 'no-store' });
       assert.strictEqual(resp.status, 200);
@@ -381,7 +381,7 @@ testParams.forEach((params) => {
     });
 
     it('supports redirect: follow', async () => {
-      const url = `${protocol}://httpbingo.org/redirect-to?url=${protocol}%3A%2F%2Fhttpbin.org%2Fstatus%2F200&status_code=307`;
+      const url = `${protocol}://httpbingo.org/redirect-to?url=${protocol}%3A%2F%2Fhttpbingo.org%2Fstatus%2F200&status_code=307`;
       // const url = `${protocol}://httpstat.us/307`; // sometimes very slooow/unreliable
       const resp = await fetch(url, { redirect: 'follow', cache: 'no-store' });
       assert.strictEqual(resp.status, 200);
@@ -463,24 +463,23 @@ testParams.forEach((params) => {
     });
 
     it('follows redirect code 303 with GET', async () => {
-      const url = `${protocol}://httpbingo.org/redirect-to?url=${protocol}%3A%2F%2Fhttpbin.org%2Fanything&status_code=303`;
+      const url = `${protocol}://httpbingo.org/redirect-to?url=${protocol}%3A%2F%2Fhttpbingo.org%2Fanything&status_code=303`;
       const method = 'POST';
       const body = 'foo bar';
       const resp = await fetch(url, { method, body, cache: 'no-store' });
       assert.strictEqual(resp.status, 200);
       assert.strictEqual(resp.httpVersion, httpVersion);
       assert.strictEqual(resp.redirected, true);
-      assert.strictEqual(resp.headers.get('content-type'), 'application/json');
+      assert.strictEqual(resp.headers.get('content-type'), 'application/json; encoding=utf-8');
       const jsonResponseBody = await resp.json();
       assert(jsonResponseBody !== null && typeof jsonResponseBody === 'object');
-      assert.strictEqual(jsonResponseBody.method, 'GET');
       assert.strictEqual(jsonResponseBody.data, '');
     });
 
     it('follows redirected POST with json body', async () => {
       const method = 'POST';
       const body = { foo: 'bar' };
-      const url = `${protocol}://httpbingo.org/redirect-to?url=${protocol}%3A%2F%2Fhttpbin.org%2Fstatus%2F200&status_code=307`;
+      const url = `${protocol}://httpbingo.org/redirect-to?url=${protocol}%3A%2F%2Fhttpbingo.org%2Fstatus%2F200&status_code=307`;
       // const url = `${protocol}://httpstat.us/307`; // sometimes very slooow
       const resp = await fetch(url, { method, body, cache: 'no-store' });
       assert.strictEqual(resp.status, 200);
