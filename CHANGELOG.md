@@ -1,3 +1,10 @@
+## [3.3.1](https://github.com/adobe/fetch/compare/v3.3.0...v3.3.1) (2022-12-25)
+
+
+### Bug Fixes
+
+* **typings:** export ALPNProtocol as "const enum" ([#332](https://github.com/adobe/fetch/issues/332)) ([7b36000](https://github.com/adobe/fetch/commit/7b360002b3c811f2182537873d9ce393f4425f6e))
+
 # [3.3.0](https://github.com/adobe/fetch/compare/v3.2.1...v3.3.0) (2022-10-25)
 
 
