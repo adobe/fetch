@@ -10,7 +10,7 @@
  * governing permissions and limitations under the License.
  */
 
-export enum ALPNProtocol {
+export const enum ALPNProtocol {
   ALPN_HTTP2 = 'h2',
   ALPN_HTTP2C = 'h2c',
   ALPN_HTTP1_1 = 'http/1.1',
