@@ -12,19 +12,18 @@
 
 /* eslint-env mocha */
 
-'use strict';
+import assert from 'assert';
+import { finished } from 'stream';
+import { promisify } from 'util';
 
-const assert = require('assert');
-const { finished } = require('stream');
-const { promisify } = require('util');
+import { WritableStreamBuffer } from 'stream-buffers';
 
-const { WritableStreamBuffer } = require('stream-buffers');
+import { isReadableStream } from '../utils.js';
+import Server from '../server.js';
+import core from '../../src/core/index.js';
 
+const { request, reset } = core;
 const streamFinished = promisify(finished);
-
-const { isReadableStream } = require('../utils');
-const { Server } = require('../server');
-const { request, reset } = require('../../src/core');
 
 const readStream = async (stream) => {
   const out = new WritableStreamBuffer();

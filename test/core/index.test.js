@@ -11,21 +11,26 @@
  */
 
 /* eslint-env mocha */
+/* eslint-disable no-underscore-dangle */
 
-'use strict';
+import assert from 'assert';
+import fs from 'fs';
+import { finished } from 'stream';
+import { fileURLToPath } from 'url';
+import { promisify } from 'util';
 
-const assert = require('assert');
-const fs = require('fs');
-const { finished } = require('stream');
-const { promisify } = require('util');
+import { FormData } from 'formdata-node';
+import { WritableStreamBuffer } from 'stream-buffers';
 
-const { FormData } = require('formdata-node');
-const { WritableStreamBuffer } = require('stream-buffers');
+import { isReadableStream } from '../utils.js';
+import { AbortController } from '../../src/fetch/abort.js';
+import { RequestAbortedError } from '../../src/core/errors.js';
+import core from '../../src/core/index.js';
 
-const { isReadableStream } = require('../utils');
-const { AbortController } = require('../../src/fetch/abort');
-const { context, ALPN_HTTP1_1 } = require('../../src/core');
-const { RequestAbortedError } = require('../../src/core/errors');
+const { context, ALPN_HTTP1_1 } = core;
+
+// Workaround for ES6 which doesn't support the NodeJS global __filename
+const __filename = fileURLToPath(import.meta.url);
 
 const WOKEUP = 'woke up!';
 const sleep = (ms) => new Promise((resolve) => {

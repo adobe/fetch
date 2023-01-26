@@ -14,13 +14,11 @@
 /* eslint-disable guard-for-in */
 /* eslint-disable no-restricted-syntax */
 
-'use strict';
+import assert from 'assert';
 
-const assert = require('assert');
+import sinon from 'sinon';
 
-const sinon = require('sinon');
-
-const { AbortController, AbortSignal } = require('../../src/fetch');
+import { AbortController, AbortSignal } from '../../src/fetch/abort.js';
 
 describe('AbortController Tests', () => {
   let controller;

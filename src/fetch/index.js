@@ -10,27 +10,27 @@
  * governing permissions and limitations under the License.
  */
 
-'use strict';
+import { EventEmitter } from 'events';
+import { Readable } from 'stream';
 
-const { EventEmitter } = require('events');
-const { Readable } = require('stream');
+import debugFactory from 'debug';
+import LRU from 'lru-cache';
 
-const debug = require('debug')('adobe/fetch');
-const LRU = require('lru-cache');
-
-const { Body } = require('./body');
-const { Headers } = require('./headers');
-const { Request } = require('./request');
-const { Response } = require('./response');
-const { FetchBaseError, FetchError, AbortError } = require('./errors');
-const { AbortController, AbortSignal, TimeoutSignal } = require('./abort');
-const CachePolicy = require('./policy');
-const { cacheableResponse } = require('./cacheableResponse');
-const { sizeof } = require('../common/utils');
-const { isFormData } = require('../common/formData');
-
+import { Body } from './body.js';
+import Headers from './headers.js';
+import Request from './request.js';
+import Response from './response.js';
+import { FetchBaseError, FetchError, AbortError } from './errors.js';
+import { AbortController, AbortSignal, TimeoutSignal } from './abort.js';
+import CachePolicy from './policy.js';
+import cacheableResponse from './cacheableResponse.js';
+import { sizeof } from '../common/utils.js';
+import { isFormData } from '../common/formData.js';
 // core abstraction layer
-const { context, RequestAbortedError } = require('../core');
+import core from '../core/index.js';
+
+const { context, RequestAbortedError } = core;
+const debug = debugFactory('helix-fetch');
 
 const CACHEABLE_METHODS = ['GET', 'HEAD'];
 const DEFAULT_MAX_CACHE_ITEMS = 500;
@@ -49,7 +49,7 @@ const PUSH_EVENT = 'push';
 const fetch = async (ctx, url, options) => {
   const { request } = ctx.context;
 
-  const req = url instanceof Request && typeof options === 'undefined' ? url : /* istanbul ignore next */ new Request(url, options);
+  const req = url instanceof Request && typeof options === 'undefined' ? url : /* c8 ignore next */ new Request(url, options);
 
   // extract options
   const {
@@ -61,7 +61,6 @@ const fetch = async (ctx, url, options) => {
   if (signal && signal.aborted) {
     const err = new AbortError('The operation was aborted.');
     // cleanup request
-    /* istanbul ignore else */
     if (req.init.body instanceof Readable) {
       req.init.body.destroy(err);
     }
@@ -88,7 +87,7 @@ const fetch = async (ctx, url, options) => {
     if (initBody instanceof Readable) {
       initBody.destroy(err);
     }
-    /* istanbul ignore next */
+    /* c8 ignore next 3 */
     if (err instanceof TypeError) {
       throw err;
     }
@@ -105,7 +104,6 @@ const fetch = async (ctx, url, options) => {
 
     const err = new AbortError('The operation was aborted.');
     // cleanup request
-    /* istanbul ignore else */
     if (req.init.body instanceof Readable) {
       req.init.body.destroy(err);
     }
@@ -195,7 +193,7 @@ const fetch = async (ctx, url, options) => {
         return fetch(ctx, new Request(locationURL, requestOptions));
       }
 
-      /* istanbul ignore next */
+      /* c8 ignore next */
       default:
         // fall through
     }
@@ -580,4 +578,4 @@ class FetchContext {
   }
 }
 
-module.exports = new FetchContext().api();
+export default new FetchContext().api();

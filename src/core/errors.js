@@ -10,8 +10,6 @@
  * governing permissions and limitations under the License.
  */
 
-'use strict';
-
 /**
  * Error thrown if a request is aborted via an AbortSignal.
  */
@@ -25,4 +23,5 @@ class RequestAbortedError extends Error {
   }
 }
 
-module.exports = { RequestAbortedError };
+// eslint-disable-next-line import/prefer-default-export
+export { RequestAbortedError };

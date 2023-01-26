@@ -10,12 +10,10 @@
  * governing permissions and limitations under the License.
  */
 
-'use strict';
-
-const { readFile } = require('fs').promises;
-const http = require('http');
-const https = require('https');
-const http2 = require('http2');
+import http from 'http';
+import https from 'https';
+import http2 from 'http2';
+import { readFile } from 'fs/promises';
 
 const WOKEUP = 'woke up!';
 const sleep = (ms) => new Promise((resolve) => {
@@ -194,4 +192,4 @@ class Server {
   }
 }
 
-module.exports = { Server };
+export default Server;

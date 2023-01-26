@@ -12,8 +12,6 @@
 
 /* eslint-disable max-classes-per-file */
 
-'use strict';
-
 class FetchBaseError extends Error {
   constructor(message, type) {
     super(message);
@@ -58,4 +56,4 @@ class AbortError extends FetchBaseError {
   }
 }
 
-module.exports = { FetchBaseError, FetchError, AbortError };
+export { FetchBaseError, FetchError, AbortError };

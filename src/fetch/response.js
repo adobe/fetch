@@ -10,13 +10,10 @@
  * governing permissions and limitations under the License.
  */
 
-'use strict';
-
-const { Body, cloneStream, guessContentType } = require('./body');
-const { Headers } = require('./headers');
-
-const { isPlainObject } = require('../common/utils');
-const { isFormData, FormDataSerializer } = require('../common/formData');
+import { Body, cloneStream, guessContentType } from './body.js';
+import Headers from './headers.js';
+import { isPlainObject } from '../common/utils.js';
+import { isFormData, FormDataSerializer } from '../common/formData.js';
 
 const INTERNALS = Symbol('Response internals');
 
@@ -40,12 +37,10 @@ class Response extends Body {
 
     if (isFormData(respBody)) {
       // spec-compliant FormData
-      /* istanbul ignore else */
       if (!headers.has('content-type')) {
         const fd = new FormDataSerializer(respBody);
         respBody = fd.stream();
         headers.set('content-type', fd.contentType());
-        /* istanbul ignore else */
         if (!headers.has('transfer-encoding')
           && !headers.has('content-length')) {
           headers.set('content-length', fd.length());
@@ -164,6 +159,4 @@ Object.defineProperties(Response.prototype, {
   clone: { enumerable: true },
 });
 
-module.exports = {
-  Response,
-};
+export default Response;

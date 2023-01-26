@@ -10,18 +10,18 @@
  * governing permissions and limitations under the License.
  */
 
-'use strict';
+import http from 'http';
 
-const { validateHeaderName, validateHeaderValue } = require('http');
+import { isPlainObject } from '../common/utils.js';
 
-const { isPlainObject } = require('../common/utils');
+const { validateHeaderName, validateHeaderValue } = http;
 
 const INTERNALS = Symbol('Headers internals');
 
 const normalizeName = (name) => {
   const nm = typeof name !== 'string' ? String(name) : name;
 
-  /* istanbul ignore next */
+  /* c8 ignore next 3 */
   if (typeof validateHeaderName === 'function') {
     // since node 14.3.0
     validateHeaderName(nm);
@@ -40,10 +40,11 @@ const normalizeName = (name) => {
 const normalizeValue = (value, name) => {
   const val = typeof value !== 'string' ? String(value) : value;
 
-  /* istanbul ignore next */
+  /* c8 ignore next 3 */
   if (typeof validateHeaderValue === 'function') {
     // since node 14.3.0
     validateHeaderValue(name, val);
+  /* c8 ignore next 8 */
   } else {
     // eslint-disable-next-line no-lonely-if
     if (/[^\t\u0020-\u007E\u0080-\u00FF]/.test(val)) {
@@ -88,7 +89,7 @@ class Headers {
           this.append(name, value);
         }
       });
-    } else /* istanbul ignore else  */ if (isPlainObject(init)) {
+    } else if (isPlainObject(init)) {
       for (const [name, value] of Object.entries(init)) {
         if (Array.isArray(value)) {
           // special case for Set-Cookie header which can have an array of values
@@ -224,6 +225,4 @@ Object.defineProperties(
   }, {}),
 );
 
-module.exports = {
-  Headers,
-};
+export default Headers;

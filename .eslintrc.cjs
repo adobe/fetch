@@ -11,18 +11,17 @@
  */
 module.exports = {
   root: true,
+  env: {
+    node: true,
+    es6: true,
+  },
+  parserOptions: {
+    sourceType: 'module',
+    ecmaVersion: 2022,
+  },
   extends: [
     'eslint-config-airbnb-base',
   ].map(require.resolve),
-
-  env: {
-    node: true,
-    es2020: true,
-  },
-  parserOptions: {
-    sourceType: 'script',
-    ecmaVersion: 11,
-  },
   plugins: [
     'header',
   ],

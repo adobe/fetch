@@ -13,16 +13,14 @@
 /* eslint-env mocha */
 /* eslint-disable guard-for-in */
 
-'use strict';
+import { Readable } from 'stream';
 
-const { Readable } = require('stream');
+import chai from 'chai';
+import { FormData } from 'formdata-node';
 
-const { FormData } = require('formdata-node');
-const chai = require('chai').use(require('chai-bytes'));
+import { Request, AbortController } from '../../src/index.js';
 
 const { expect } = chai;
-
-const { Request, AbortController } = require('../../src/fetch');
 
 const BASE_URL = 'https://example.com/';
 

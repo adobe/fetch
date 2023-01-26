@@ -12,21 +12,15 @@
 
 /* eslint-env mocha */
 
-'use strict';
+import assert from 'assert';
+import { createHash } from 'crypto';
 
-const assert = require('assert');
-const crypto = require('crypto');
+import sinon from 'sinon';
 
-const sinon = require('sinon');
-
-const { Server } = require('../server');
-const {
-  fetch,
-  context,
-  reset,
-  onPush,
-  offPush,
-} = require('../../src/fetch');
+import Server from '../server.js';
+import {
+  fetch, context, reset, onPush, offPush,
+} from '../../src/index.js';
 
 const WOKEUP = 'woke up!';
 const sleep = (ms) => new Promise((resolve) => {
@@ -141,7 +135,7 @@ describe('HTTP/2-specific Fetch Tests', () => {
       const res = await fetch(url);
       assert.strictEqual(res.httpVersion, '2.0');
       const data = await res.text();
-      return crypto.createHash('md5').update(data).digest().toString('hex');
+      return createHash('md5').update(data).digest().toString('hex');
     };
 
     const results = await Promise.all([

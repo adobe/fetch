@@ -12,12 +12,10 @@
 
 /* eslint-env mocha */
 
-'use strict';
+import assert from 'assert';
+import { createHash } from 'crypto';
 
-const assert = require('assert');
-const crypto = require('crypto');
-
-const {
+import {
   context,
   h1,
   keepAlive,
@@ -25,7 +23,7 @@ const {
   keepAliveNoCache,
   ALPN_HTTP1_0,
   ALPN_HTTP1_1,
-} = require('../../src/fetch');
+} from '../../src/index.js';
 
 const testParams = [
   {
@@ -205,7 +203,7 @@ testParams.forEach((params) => {
         const res = await fetch(url);
         assert.strictEqual(res.httpVersion, '1.1');
         const data = await res.text();
-        return crypto.createHash('md5').update(data).digest().toString('hex');
+        return createHash('md5').update(data).digest().toString('hex');
       };
 
       let results;

@@ -12,18 +12,16 @@
 
 /* eslint-env mocha */
 
-'use strict';
+import assert from 'assert';
+import { Readable } from 'stream';
+import { promisify } from 'util';
+import zlib from 'zlib';
 
-const assert = require('assert');
-const { Readable } = require('stream');
-const { promisify } = require('util');
-const zlib = require('zlib');
+import sinon from 'sinon';
 
-const sinon = require('sinon');
-
-const {
+import {
   decodeStream, isPlainObject, sizeof, streamToBuffer,
-} = require('../../src/common/utils');
+} from '../../src/common/utils.js';
 
 const gzip = promisify(zlib.gzip);
 const deflate = promisify(zlib.deflate);
