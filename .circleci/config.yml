@@ -1,6 +1,6 @@
 version: 2.1
 executors:
-  node14:
+  node18:
     docker:
       - image: cimg/node:18.2
 
