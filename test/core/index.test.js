@@ -26,6 +26,7 @@ import { isReadableStream } from '../utils.js';
 import { AbortController } from '../../src/fetch/abort.js';
 import { RequestAbortedError } from '../../src/core/errors.js';
 import core from '../../src/core/index.js';
+import Server from '../server.js';
 
 const { context, ALPN_HTTP1_1 } = core;
 
@@ -285,12 +286,17 @@ describe('Core Tests', () => {
 
   it('supports parallel requests', async () => {
     const N = 100; // # of parallel requests
-    const TEST_URL = 'https://httpbin.org/bytes/'; // HTTP2
+
+    // start h2 server
+    const server = new Server(2, true);
+    await server.start();
+
+    const TEST_URL = `${server.origin}/bytes`;
     // generete array of 'randomized' urls
-    const urls = Array.from({ length: N }, () => Math.floor(Math.random() * N)).map((num) => `${TEST_URL}${num}`);
+    const urls = Array.from({ length: N }, () => Math.floor(Math.random() * N)).map((num) => `${TEST_URL}?count=${num}`);
 
     // custom context to isolate from side effects of other tests
-    const ctx = context();
+    const ctx = context({ rejectUnauthorized: false });
     try {
       // send requests
       const responses = await Promise.all(urls.map((url) => ctx.request(url)));
@@ -300,6 +306,7 @@ describe('Core Tests', () => {
       assert.strictEqual(ok.length, N);
     } finally {
       await ctx.reset();
+      await server.close();
     }
   });
 
