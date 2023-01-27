@@ -10,10 +10,17 @@
  * governing permissions and limitations under the License.
  */
 
+/* eslint-disable no-underscore-dangle */
+
 import http from 'http';
 import https from 'https';
 import http2 from 'http2';
 import { readFile } from 'fs/promises';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+// Workaround for ES6 which doesn't support the NodeJS global __dirname
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const WOKEUP = 'woke up!';
 const sleep = (ms) => new Promise((resolve) => {

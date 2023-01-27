@@ -97,9 +97,6 @@ const connectTLS = (url, options) => new Promise((resolve, reject) => {
     socket.off('error', onError);
     socketIdCounter += 1;
     socket.id = socketIdCounter;
-    // workaround for node >= 12.17.0 regression
-    // (see https://github.com/nodejs/node/pull/34859)
-    socket.secureConnecting = false;
     debug(`established TLS connection: #${socket.id} (${socket.servername})`);
     resolve(socket);
   });

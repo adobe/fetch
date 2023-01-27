@@ -20,40 +20,13 @@ const INTERNALS = Symbol('Headers internals');
 
 const normalizeName = (name) => {
   const nm = typeof name !== 'string' ? String(name) : name;
-
-  /* c8 ignore next 3 */
-  if (typeof validateHeaderName === 'function') {
-    // since node 14.3.0
-    validateHeaderName(nm);
-  } else {
-    // eslint-disable-next-line no-lonely-if
-    if (!/^[\^`\-\w!#$%&'*+.|~]+$/.test(nm)) {
-      const err = new TypeError(`Header name must be a valid HTTP token [${nm}]`);
-      Object.defineProperty(err, 'code', { value: 'ERR_INVALID_HTTP_TOKEN' });
-      throw err;
-    }
-  }
-
+  validateHeaderName(nm);
   return nm.toLowerCase();
 };
 
 const normalizeValue = (value, name) => {
   const val = typeof value !== 'string' ? String(value) : value;
-
-  /* c8 ignore next 3 */
-  if (typeof validateHeaderValue === 'function') {
-    // since node 14.3.0
-    validateHeaderValue(name, val);
-  /* c8 ignore next 8 */
-  } else {
-    // eslint-disable-next-line no-lonely-if
-    if (/[^\t\u0020-\u007E\u0080-\u00FF]/.test(val)) {
-      const err = new TypeError(`Invalid character in header content ["${name}"]`);
-      Object.defineProperty(err, 'code', { value: 'ERR_INVALID_CHAR' });
-      throw err;
-    }
-  }
-
+  validateHeaderValue(name, val);
   return val;
 };
 

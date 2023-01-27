@@ -18,6 +18,7 @@
 <!-- TOC -->
 - [About](#about)
 - [Features](#features)
+- [ESM/CJS support](#esmcjs-support)
 - [Installation](#installation)
 - [API](#api)
   - [Context](#context)
@@ -94,11 +95,16 @@ Note that non-standard Fetch options have been aligned with [node-fetch](https:/
 * [x] overridable User-Agent
 * [x] low-level HTTP/1.* agent/connect options support (e.g. `keepAlive`, `rejectUnauthorized`)
 
+
+## ESM/CJS support
+
+This package is native [ESM](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules) and no longer provides CommonJS exports. Use `3.x` version if you still need to use this package with CommonJS.
+
 ## Installation
 
 > **Note**:
 >
-> As of v2 Node version >= 12 is required.
+> As of v4 Node version >= 14.16 is required.
 
 ```bash
 $ npm install @adobe/fetch

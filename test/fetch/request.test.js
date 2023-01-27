@@ -16,10 +16,12 @@
 import { Readable } from 'stream';
 
 import chai from 'chai';
+import chaiBytes from 'chai-bytes';
 import { FormData } from 'formdata-node';
 
 import { Request, AbortController } from '../../src/index.js';
 
+chai.use(chaiBytes);
 const { expect } = chai;
 
 const BASE_URL = 'https://example.com/';
