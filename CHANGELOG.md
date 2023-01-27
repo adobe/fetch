@@ -3,33 +3,7 @@
 
 ### Bug Fixes
 
-* branch release ([4895d43](https://github.com/adobe/fetch/commit/4895d43cf21fda2ab81cb12c00ef5be170e9fe5b))
-* branch release ([4f1782e](https://github.com/adobe/fetch/commit/4f1782ec0710ff6e9d177a2675ba5c2ae1c62fe3))
 * bump deps ([5944f54](https://github.com/adobe/fetch/commit/5944f5408b89981f74eaa708886607361ec979ba))
-
-
-### Features
-
-* force new 3.x release ([cb7be50](https://github.com/adobe/fetch/commit/cb7be50526a682d6bf63345575537e2547c265c9))
-* trigger release ([a69772f](https://github.com/adobe/fetch/commit/a69772fe4e24aaf9efba8777819af823ecffc72b))
-* trigger release ([69468be](https://github.com/adobe/fetch/commit/69468bef3ed41b8b0fe27daffc38c0e82a389407))
-* trigger release ([791c779](https://github.com/adobe/fetch/commit/791c779f91182d680993bdb95c4727d9a1027184))
-
-# [3.4.0](https://github.com/adobe/fetch/compare/v3.3.1...v3.4.0) (2023-01-27)
-
-
-### Bug Fixes
-
-* branch release ([4895d43](https://github.com/adobe/fetch/commit/4895d43cf21fda2ab81cb12c00ef5be170e9fe5b))
-* branch release ([4f1782e](https://github.com/adobe/fetch/commit/4f1782ec0710ff6e9d177a2675ba5c2ae1c62fe3))
-* bump deps ([5944f54](https://github.com/adobe/fetch/commit/5944f5408b89981f74eaa708886607361ec979ba))
-
-
-### Features
-
-* force new 3.x release ([cb7be50](https://github.com/adobe/fetch/commit/cb7be50526a682d6bf63345575537e2547c265c9))
-* trigger release ([69468be](https://github.com/adobe/fetch/commit/69468bef3ed41b8b0fe27daffc38c0e82a389407))
-* trigger release ([791c779](https://github.com/adobe/fetch/commit/791c779f91182d680993bdb95c4727d9a1027184))
 
 ## [3.3.1](https://github.com/adobe/fetch/compare/v3.3.0...v3.3.1) (2022-12-25)
 
