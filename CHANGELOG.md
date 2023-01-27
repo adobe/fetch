@@ -1,3 +1,15 @@
+# [4.0.0](https://github.com/adobe/fetch/compare/v3.5.1...v4.0.0) (2023-01-27)
+
+
+### Bug Fixes
+
+* trigger release ([c7fdf37](https://github.com/adobe/fetch/commit/c7fdf37818c675f5ca88409de3590f624df3eba1))
+
+
+### BREAKING CHANGES
+
+* Removed CommonJS support. This package is native ESM from now on.
+
 ## [3.5.1](https://github.com/adobe/fetch/compare/v3.5.0...v3.5.1) (2023-01-27)
 
 
