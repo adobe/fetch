@@ -1,3 +1,10 @@
+## [3.5.1](https://github.com/adobe/fetch/compare/v3.5.0...v3.5.1) (2023-01-27)
+
+
+### Bug Fixes
+
+* EMS only (BREAKING) ([1f6d4c0](https://github.com/adobe/fetch/commit/1f6d4c0bc73c6bbeadca1f83376580012dff277f))
+
 # [3.5.0](https://github.com/adobe/fetch/compare/v3.4.0...v3.5.0) (2023-01-27)
 
 
