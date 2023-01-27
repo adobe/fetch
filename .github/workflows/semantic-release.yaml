@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - 'main'
+      - '3.x'
 
 jobs:
   build:
