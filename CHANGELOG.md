@@ -1,3 +1,10 @@
+# [3.5.0](https://github.com/adobe/fetch/compare/v3.4.0...v3.5.0) (2023-01-27)
+
+
+### Features
+
+* ESM only ([6e2ecc1](https://github.com/adobe/fetch/commit/6e2ecc1341c3d543522327e0bdd6ccc08a381df4))
+
 # [3.4.0](https://github.com/adobe/fetch/compare/v3.3.1...v3.4.0) (2023-01-27)
 
 
