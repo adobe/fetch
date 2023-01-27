@@ -4,6 +4,7 @@
     ":semanticCommits",
     ":autodetectPinVersions"
   ],
+  "baseBranches": ["main", "3.x"],
   "timezone": "Europe/Zurich",
   "branchPrefix": "renovate-",
   "packageRules": [
