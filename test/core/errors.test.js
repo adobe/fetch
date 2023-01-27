@@ -12,11 +12,9 @@
 
 /* eslint-env mocha */
 
-'use strict';
+import assert from 'assert';
 
-const assert = require('assert');
-
-const { RequestAbortedError } = require('../../src/core/errors');
+import { RequestAbortedError } from '../../src/core/errors.js';
 
 describe('core errors Tests', () => {
   it('RequestAbortedError', () => {

@@ -11,18 +11,21 @@
  */
 
 /* eslint-env mocha */
+/* eslint-disable no-underscore-dangle */
 
-'use strict';
+import assert from 'assert';
+import { fileURLToPath } from 'url';
 
-const assert = require('assert');
-
-const { FormData, File, Blob } = require('formdata-node');
+import { FormData, File, Blob } from 'formdata-node';
 // eslint-disable-next-line import/no-unresolved
-const { fileFromPathSync } = require('formdata-node/file-from-path');
+import { fileFromPathSync } from 'formdata-node/file-from-path';
 
-const { isReadableStream } = require('../utils');
-const { streamToBuffer } = require('../../src/common/utils');
-const { isFormData, FormDataSerializer } = require('../../src/common/formData');
+import { isReadableStream } from '../utils.js';
+import { streamToBuffer } from '../../src/common/utils.js';
+import { isFormData, FormDataSerializer } from '../../src/common/formData.js';
+
+// Workaround for ES6 which doesn't support the NodeJS global __filename
+const __filename = fileURLToPath(import.meta.url);
 
 describe('FormData Helpers Test', () => {
   it('isFormData works', () => {

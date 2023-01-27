@@ -10,22 +10,15 @@
  * governing permissions and limitations under the License.
  */
 
-'use strict';
+import { connect, constants } from 'http2';
+import { Readable } from 'stream';
 
-const {
-  // ClientHttp2Session,
-  // ClientHttp2Stream,
-  connect,
-  constants,
-  // IncomingHttpHeaders,
-  // SecureClientSessionOptions,
-} = require('http2');
-const { Readable } = require('stream');
+import debugFactory from 'debug';
 
-const debug = require('debug')('adobe/fetch:h2');
+import { RequestAbortedError } from './errors.js';
+import { decodeStream } from '../common/utils.js';
 
-const { RequestAbortedError } = require('./errors');
-const { decodeStream } = require('../common/utils');
+const debug = debugFactory('helix-fetch:h2');
 
 const { NGHTTP2_CANCEL } = constants;
 
@@ -51,7 +44,7 @@ const createResponse = (
   headers,
   clientHttp2Stream,
   decode,
-  /* istanbul ignore next */ onError = () => {},
+  /* c8 ignore next */ onError = () => {},
 ) => {
   const hdrs = { ...headers };
   const statusCode = hdrs[':status'];
@@ -101,24 +94,27 @@ const handlePush = (ctx, origin, decode, pushedStream, requestHeaders, flags) =>
     debug(`received push headers for ${origin}${path}, stream #${pushedStream.id}, headers: ${JSON.stringify(responseHeaders)}, flags: ${flgs}`);
 
     // set timeout to automatically discard pushed streams that aren't consumed for some time
-    pushedStream.setTimeout(pushedStreamIdleTimeout, /* istanbul ignore next */ () => {
+    pushedStream.setTimeout(pushedStreamIdleTimeout, () => {
+      /* c8 ignore next 2 */
       debug(`closing pushed stream #${pushedStream.id} after ${pushedStreamIdleTimeout} ms of inactivity`);
       pushedStream.close(NGHTTP2_CANCEL);
     });
 
-    /* istanbul ignore else */
     if (pushHandler) {
       pushHandler(url, requestHeaders, createResponse(responseHeaders, pushedStream, decode));
     }
   });
   // log stream errors
-  pushedStream.on('aborted', /* istanbul ignore next */ () => {
+  pushedStream.on('aborted', () => {
+    /* c8 ignore next */
     debug(`pushed stream #${pushedStream.id} aborted`);
   });
-  pushedStream.on('error', /* istanbul ignore next */ (err) => {
+  pushedStream.on('error', (err) => {
+    /* c8 ignore next */
     debug(`pushed stream #${pushedStream.id} encountered error: ${err}`);
   });
-  pushedStream.on('frameError', /* istanbul ignore next */ (type, code, id) => {
+  pushedStream.on('frameError', (type, code, id) => {
+    /* c8 ignore next */
     debug(`pushed stream #${pushedStream.id} encountered frameError: type: ${type}, code: ${code}, id: ${id}`);
   });
 };
@@ -154,7 +150,6 @@ const request = async (ctx, url, options) => {
   if (socket) {
     delete opts.socket;
   }
-  /* istanbul ignore else */
   if (headers.host) {
     headers[':authority'] = headers.host;
     delete headers.host;
@@ -199,13 +194,12 @@ const request = async (ctx, url, options) => {
       });
       session.once('close', () => {
         debug(`session ${origin} closed`);
-        /* istanbul ignore else */
         if (sessionCache[origin] === session) {
           debug(`discarding cached session ${origin}`);
           delete sessionCache[origin];
         }
       });
-      session.once('error', /* istanbul ignore next */ (err) => {
+      session.once('error', (err) => {
         debug(`session ${origin} encountered error: ${err}`);
         if (sessionCache[origin] === session) {
           // FIXME: redundant because 'close' event will follow?
@@ -213,11 +207,12 @@ const request = async (ctx, url, options) => {
           delete sessionCache[origin];
         }
       });
-      session.on('frameError', /* istanbul ignore next */ (type, code, id) => {
+      session.on('frameError', (type, code, id) => {
+        /* c8 ignore next */
         debug(`session ${origin} encountered frameError: type: ${type}, code: ${code}, id: ${id}`);
       });
-      session.once('goaway', /* istanbul ignore next */ (errorCode, lastStreamID, opaqueData) => {
-        debug(`session ${origin} received GOAWAY frame: errorCode: ${errorCode}, lastStreamID: ${lastStreamID}, opaqueData: ${opaqueData ? opaqueData.toString() : undefined}`);
+      session.once('goaway', (errorCode, lastStreamID, opaqueData) => {
+        debug(`session ${origin} received GOAWAY frame: errorCode: ${errorCode}, lastStreamID: ${lastStreamID}, opaqueData: ${opaqueData ? /* c8 ignore next */ opaqueData.toString() : undefined}`);
         // session will be closed automatically
       });
       session.on('stream', (stream, hdrs, flags) => {
@@ -225,7 +220,7 @@ const request = async (ctx, url, options) => {
       });
     } else {
       // we have a cached session
-      /* istanbul ignore next */
+      /* c8 ignore next 6 */
       // eslint-disable-next-line no-lonely-if
       if (socket && socket.id !== session.socket.id && !socket.inUse) {
         // we have no use for the passed socket
@@ -242,7 +237,6 @@ const request = async (ctx, url, options) => {
     const onAbortSignal = () => {
       signal.removeEventListener('abort', onAbortSignal);
       reject(new RequestAbortedError());
-      /* istanbul ignore else */
       if (req) {
         req.close(NGHTTP2_CANCEL);
       }
@@ -255,7 +249,8 @@ const request = async (ctx, url, options) => {
       signal.addEventListener('abort', onAbortSignal);
     }
 
-    const onSessionError = /* istanbul ignore next */ (err) => {
+    /* c8 ignore next 4 */
+    const onSessionError = (err) => {
       debug(`session ${origin} encountered error during ${opts.method} ${url.href}: ${err}`);
       reject(err);
     };
@@ -273,23 +268,23 @@ const request = async (ctx, url, options) => {
     req.once('error', (err) => {
       // error occured during the request
       session.off('error', onSessionError);
-      /* istanbul ignore next */
       if (signal) {
         signal.removeEventListener('abort', onAbortSignal);
       }
       // if (!req.aborted) {
-      /* istanbul ignore else */
       if (req.rstCode !== NGHTTP2_CANCEL) {
         debug(`${opts.method} ${url.href} failed with: ${err.message}`);
         req.close(NGHTTP2_CANCEL); // neccessary?
         reject(err);
       }
     });
-    req.once('frameError', /* istanbul ignore next */ (type, code, id) => {
+    req.once('frameError', (type, code, id) => {
+      /* c8 ignore next 2 */
       session.off('error', onSessionError);
       debug(`encountered frameError during ${opts.method} ${url.href}: type: ${type}, code: ${code}, id: ${id}`);
     });
-    req.on('push', /* istanbul ignore next */ (hdrs, flags) => {
+    req.on('push', (hdrs, flags) => {
+      /* c8 ignore next */
       debug(`received 'push' event: headers: ${JSON.stringify(hdrs)}, flags: ${flags}`);
     });
     // send request body?
@@ -304,4 +299,4 @@ const request = async (ctx, url, options) => {
   });
 };
 
-module.exports = { request, setupContext, resetContext };
+export default { request, setupContext, resetContext };

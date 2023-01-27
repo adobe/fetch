@@ -12,21 +12,15 @@
 
 /* eslint-env mocha */
 
-'use strict';
+import assert from 'assert';
+import { createHash } from 'crypto';
 
-const assert = require('assert');
-const crypto = require('crypto');
+import sinon from 'sinon';
 
-const sinon = require('sinon');
-
-const { Server } = require('../server');
-const {
-  fetch,
-  context,
-  reset,
-  onPush,
-  offPush,
-} = require('../../src/fetch');
+import Server from '../server.js';
+import {
+  fetch, context, noCache, reset, onPush, offPush,
+} from '../../src/index.js';
 
 const WOKEUP = 'woke up!';
 const sleep = (ms) => new Promise((resolve) => {
@@ -124,15 +118,21 @@ describe('HTTP/2-specific Fetch Tests', () => {
 
   it('concurrent HTTP/2 requests to same origin', async () => {
     const N = 500; // # of parallel requests
-    const TEST_URL = 'https://httpbin.org/bytes/'; // HTTP2
+    const TEST_URL = `${server.origin}/bytes`;
     // generete array of 'randomized' urls
-    const urls = Array.from({ length: N }, () => Math.floor(Math.random() * N)).map((num) => `${TEST_URL}${num}`);
-    // send requests
-    const responses = await Promise.all(urls.map((url) => fetch(url)));
-    // read bodies
-    await Promise.all(responses.map((resp) => resp.text()));
-    const ok = responses.filter((res) => res.ok && res.httpVersion === '2.0');
-    assert.strictEqual(ok.length, N);
+    const urls = Array.from({ length: N }, () => Math.floor(Math.random() * N)).map((num) => `${TEST_URL}?count=${num}`);
+
+    const ctx = noCache({ rejectUnauthorized: false });
+    try {
+      // send requests
+      const responses = await Promise.all(urls.map((url) => ctx.fetch(url)));
+      // read bodies
+      await Promise.all(responses.map((resp) => resp.text()));
+      const ok = responses.filter((res) => res.ok && res.httpVersion === '2.0');
+      assert.strictEqual(ok.length, N);
+    } finally {
+      await ctx.reset();
+    }
   });
 
   it('handles concurrent HTTP/2 requests to subdomains sharing the same IP address (using wildcard SAN cert)', async () => {
@@ -141,7 +141,7 @@ describe('HTTP/2-specific Fetch Tests', () => {
       const res = await fetch(url);
       assert.strictEqual(res.httpVersion, '2.0');
       const data = await res.text();
-      return crypto.createHash('md5').update(data).digest().toString('hex');
+      return createHash('md5').update(data).digest().toString('hex');
     };
 
     const results = await Promise.all([
@@ -160,12 +160,12 @@ describe('HTTP/2-specific Fetch Tests', () => {
     const doFetch = async (ctx, url) => ctx.fetch(url);
 
     const N = 50; // # of parallel requests
-    const contexts = Array.from({ length: N }, () => context());
-    const TEST_URL = 'https://httpbin.org/bytes/'; // HTTP2
+    const contexts = Array.from({ length: N }, () => context({ rejectUnauthorized: false }));
+    const TEST_URL = `${server.origin}/bytes`;
     // generete array of 'randomized' urls
     const args = contexts
       .map((ctx) => ({ ctx, num: Math.floor(Math.random() * N) }))
-      .map(({ ctx, num }) => ({ ctx, url: `${TEST_URL}${num}` }));
+      .map(({ ctx, num }) => ({ ctx, url: `${TEST_URL}?count=${num}` }));
     // send requests
     const responses = await Promise.all(args.map(({ ctx, url }) => doFetch(ctx, url)));
     // cleanup

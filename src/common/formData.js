@@ -10,10 +10,8 @@
  * governing permissions and limitations under the License.
  */
 
-'use strict';
-
-const { randomBytes } = require('crypto');
-const { Readable } = require('stream');
+import { randomBytes } from 'crypto';
+import { Readable } from 'stream';
 
 // Misc. helper functions for dealing with spec-compliant FormData objects
 
@@ -130,6 +128,6 @@ class FormDataSerializer {
   }
 }
 
-module.exports = {
+export {
   isFormData, FormDataSerializer,
 };

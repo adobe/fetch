@@ -10,23 +10,18 @@
  * governing permissions and limitations under the License.
  */
 
-'use strict';
-
 /* eslint-disable guard-for-in */
+import { constants as bufferConstants } from 'buffer';
+import { pipeline, PassThrough } from 'stream';
+import { promisify } from 'util';
+import {
+  createGunzip, createInflate, createBrotliDecompress, constants as zlibConstants,
+} from 'zlib';
+import debugFactory from 'debug';
 
-const { constants: { MAX_LENGTH: maxBufferLength } } = require('buffer');
-const { pipeline, PassThrough } = require('stream');
-const { promisify } = require('util');
-const {
-  createGunzip,
-  createInflate,
-  createBrotliDecompress,
-  constants: {
-    Z_SYNC_FLUSH,
-  },
-} = require('zlib');
-
-const debug = require('debug')('adobe/fetch:utils');
+const debug = debugFactory('helix-fetch:utils');
+const { MAX_LENGTH: maxBufferLength } = bufferConstants;
+const { Z_SYNC_FLUSH } = zlibConstants;
 
 const asyncPipeline = promisify(pipeline);
 
@@ -69,7 +64,7 @@ const decodeStream = (statusCode, headers, readableStream, onError) => {
     case 'br':
       return pipeline(readableStream, createBrotliDecompress(), cb);
 
-    /* istanbul ignore next */
+    /* c8 ignore next 4 */
     default:
       // dead branch since it's covered by shouldDecode already;
       // only here to make eslint stop complaining
@@ -178,7 +173,7 @@ const streamToBuffer = async (stream) => {
   const chunks = [];
 
   passThroughStream.on('data', (chunk) => {
-    /* istanbul ignore next */
+    /* c8 ignore next 3 */
     if ((length + chunk.length) > maxBufferLength) {
       throw new Error('Buffer.constants.MAX_SIZE exceeded');
     }
@@ -190,6 +185,6 @@ const streamToBuffer = async (stream) => {
   return Buffer.concat(chunks, length);
 };
 
-module.exports = {
+export {
   decodeStream, isPlainObject, sizeof, streamToBuffer,
 };

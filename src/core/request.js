@@ -10,23 +10,28 @@
  * governing permissions and limitations under the License.
  */
 
-'use strict';
+import { types } from 'util';
+import { readFileSync } from 'fs';
+import { Readable } from 'stream';
+import tls from 'tls';
 
-const { Readable } = require('stream');
-const tls = require('tls');
-const { types: { isAnyArrayBuffer } } = require('util');
+import LRU from 'lru-cache';
+import debugFactory from 'debug';
 
-const LRU = require('lru-cache');
-const debug = require('debug')('adobe/fetch:core');
+import { RequestAbortedError } from './errors.js';
+import h1 from './h1.js';
+import h2 from './h2.js';
+import lock from './lock.js';
+import { isFormData, FormDataSerializer } from '../common/formData.js';
+import { isPlainObject } from '../common/utils.js';
+// as of node v16 support for importing JSON modules is still experimental
+// import pkg from '../../package.json';
+const pkg = JSON.parse(readFileSync(new URL('../../package.json', import.meta.url)));
+const { version } = pkg;
 
-const { RequestAbortedError } = require('./errors');
-const h1 = require('./h1');
-const h2 = require('./h2');
-const lock = require('./lock');
-const { isPlainObject } = require('../common/utils');
-const { isFormData, FormDataSerializer } = require('../common/formData');
+const { isAnyArrayBuffer } = types;
 
-const { version } = require('../../package.json');
+const debug = debugFactory('helix-fetch:core');
 
 const ALPN_HTTP2 = 'h2';
 const ALPN_HTTP2C = 'h2c';
@@ -59,7 +64,6 @@ const connectTLS = (url, options) => new Promise((resolve, reject) => {
     signal.removeEventListener('abort', onAbortSignal);
     const err = new RequestAbortedError();
     reject(err);
-    /* istanbul ignore else */
     if (socket) {
       socket.destroy(err);
     }
@@ -93,9 +97,6 @@ const connectTLS = (url, options) => new Promise((resolve, reject) => {
     socket.off('error', onError);
     socketIdCounter += 1;
     socket.id = socketIdCounter;
-    // workaround for node >= 12.17.0 regression
-    // (see https://github.com/nodejs/node/pull/34859)
-    socket.secureConnecting = false;
     debug(`established TLS connection: #${socket.id} (${socket.servername})`);
     resolve(socket);
   });
@@ -173,7 +174,7 @@ const determineProtocol = async (ctx, url, signal) => {
   const socket = await connect(url, connectOptions);
   // socket.alpnProtocol contains the negotiated protocol (e.g. 'h2', 'http1.1', 'http1.0')
   protocol = socket.alpnProtocol;
-  /* istanbul ignore if */
+  /* c8 ignore next 3 */
   if (!protocol) {
     protocol = ALPN_HTTP1_1; // default fallback
   }
@@ -196,7 +197,6 @@ const request = async (ctx, uri, options) => {
   const opts = { ...DEFAULT_OPTIONS, ...(options || {}) };
 
   // sanitze method name
-  /* istanbul ignore else */
   if (typeof opts.method === 'string') {
     opts.method = opts.method.toUpperCase();
   }
@@ -207,7 +207,6 @@ const request = async (ctx, uri, options) => {
     opts.headers.host = url.host;
   }
   // User-Agent header
-  /* istanbul ignore else */
   if (ctx.userAgent) {
     if (opts.headers['user-agent'] === undefined) {
       opts.headers['user-agent'] = ctx.userAgent;
@@ -223,7 +222,6 @@ const request = async (ctx, uri, options) => {
     const fd = new FormDataSerializer(opts.body);
     contentType = fd.contentType();
     opts.body = fd.stream();
-    /* istanbul ignore else */
     if (opts.headers['transfer-encoding'] === undefined
       && opts.headers['content-length'] === undefined) {
       opts.headers['content-length'] = String(fd.length());
@@ -250,7 +248,6 @@ const request = async (ctx, uri, options) => {
         opts.body = String(opts.body);
       }
       // string or buffer body
-      /* istanbul ignore else */
       if (opts.headers['transfer-encoding'] === undefined
         && opts.headers['content-length'] === undefined) {
         opts.headers['content-length'] = String(Buffer.isBuffer(opts.body)
@@ -293,12 +290,14 @@ const request = async (ctx, uri, options) => {
       return h2.request(
         ctx,
         new URL(`http://${url.host}${url.pathname}${url.hash}${url.search}`),
-        socket ? /* istanbul ignore next */ { ...opts, socket } : opts,
+        /* c8 ignore next */
+        socket ? { ...opts, socket } : opts,
+
       );
-    /* istanbul ignore next */ case ALPN_HTTP1_0:
+    /* c8 ignore next */ case ALPN_HTTP1_0:
     case ALPN_HTTP1_1:
       return h1.request(ctx, url, socket ? { ...opts, socket } : opts);
-    /* istanbul ignore next */
+    /* c8 ignore next 4 */
     default:
       // dead branch: only here to make eslint stop complaining
       throw new TypeError(`unsupported protocol: ${protocol}`);
@@ -332,7 +331,7 @@ const setupContext = (ctx) => {
   h2.setupContext(ctx);
 };
 
-module.exports = {
+export {
   request,
   setupContext,
   resetContext,

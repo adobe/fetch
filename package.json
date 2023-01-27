@@ -2,27 +2,27 @@
   "name": "@adobe/fetch",
   "version": "3.3.1",
   "description": "Light-weight Fetch implementation transparently supporting both HTTP/1(.1) and HTTP/2",
-  "main": "src/index.js",
+  "main": "./src/index.js",
+  "module": "./src/index.js",
+  "sideEffects": false,
+  "type": "module",
   "scripts": {
-    "test": "nyc mocha",
     "lint": "eslint .",
+    "test": "c8 mocha",
+    "test-ci": "c8 mocha",
     "semantic-release": "semantic-release",
     "prepare": "husky install"
   },
   "mocha": {
-    "timeout": "10000",
+    "timeout": "5000",
     "recursive": "true",
     "reporter": "mocha-multi-reporters",
     "reporter-options": "configFile=.mocha-multi.json"
   },
   "engines": {
-    "node": ">=12.0"
+    "node": ">=14.16"
   },
   "types": "src/index.d.ts",
-  "exports": {
-    "import": "./src/index.mjs",
-    "require": "./src/index.js"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/adobe/fetch"
@@ -51,12 +51,13 @@
   ],
   "dependencies": {
     "debug": "4.3.4",
-    "http-cache-semantics": "4.1.0",
+    "http-cache-semantics": "4.1.1",
     "lru-cache": "7.14.1"
   },
   "devDependencies": {
     "@semantic-release/changelog": "6.0.2",
     "@semantic-release/git": "10.0.1",
+    "c8": "7.12.0",
     "chai": "4.3.7",
     "chai-as-promised": "7.1.1",
     "chai-bytes": "0.1.2",
@@ -65,15 +66,14 @@
     "eslint-config-airbnb-base": "15.0.0",
     "eslint-plugin-header": "3.1.1",
     "eslint-plugin-import": "2.27.5",
-    "formdata-node": "4.4.1",
+    "formdata-node": "5.0.0",
     "husky": "8.0.3",
     "lint-staged": "13.1.0",
     "mocha": "10.2.0",
     "mocha-multi-reporters": "1.5.1",
     "nock": "13.3.0",
-    "nyc": "15.1.0",
     "parse-cache-control": "1.0.1",
-    "semantic-release": "19.0.5",
+    "semantic-release": "20.1.0",
     "sinon": "15.0.1",
     "stream-buffers": "3.0.2"
   },

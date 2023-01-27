@@ -10,12 +10,18 @@
  * governing permissions and limitations under the License.
  */
 
-'use strict';
+/* eslint-disable no-underscore-dangle */
 
-const { readFile } = require('fs').promises;
-const http = require('http');
-const https = require('https');
-const http2 = require('http2');
+import http from 'http';
+import https from 'https';
+import http2 from 'http2';
+import { randomBytes } from 'crypto';
+import { readFile } from 'fs/promises';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+// Workaround for ES6 which doesn't support the NodeJS global __dirname
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const WOKEUP = 'woke up!';
 const sleep = (ms) => new Promise((resolve) => {
@@ -46,6 +52,7 @@ class Server {
     await new Promise((resolve, reject) => {
       const reqHandler = async (req, res) => {
         const { pathname, searchParams } = new URL(req.url, `https://localhost:${this.server.address().port}`);
+        let count;
         switch (pathname) {
           case '/hello':
             await sleep(+(searchParams.get('delay') || 0));
@@ -69,6 +76,16 @@ class Server {
             await sleep(+(searchParams.get('delay') || 0));
             res.writeHead(searchParams.get('status_code') || 302, { Location: searchParams.get('url') });
             res.end(this.helloMsg);
+            break;
+
+          case '/bytes':
+            await sleep(+(searchParams.get('delay') || 0));
+            count = +(searchParams.get('count') || 32);
+            res.writeHead(200, {
+              'Content-Type': 'application/octet-stream',
+              'Content-Length': `${count}`,
+            });
+            res.end(randomBytes(count));
             break;
 
           default:
@@ -194,4 +211,4 @@ class Server {
   }
 }
 
-module.exports = { Server };
+export default Server;

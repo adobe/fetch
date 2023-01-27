@@ -10,14 +10,11 @@
  * governing permissions and limitations under the License.
  */
 
-'use strict';
-
-const { AbortSignal } = require('./abort');
-const { Body, cloneStream, guessContentType } = require('./body');
-const { Headers } = require('./headers');
-
-const { isPlainObject } = require('../common/utils');
-const { isFormData, FormDataSerializer } = require('../common/formData');
+import { AbortSignal } from './abort.js';
+import { Body, cloneStream, guessContentType } from './body.js';
+import Headers from './headers.js';
+import { isPlainObject } from '../common/utils.js';
+import { isFormData, FormDataSerializer } from '../common/formData.js';
 
 const DEFAULT_FOLLOW = 20;
 
@@ -56,12 +53,10 @@ class Request extends Body {
 
     if (isFormData(body)) {
       // spec-compliant FormData
-      /* istanbul ignore else */
       if (!headers.has('content-type')) {
         const fd = new FormDataSerializer(body);
         body = fd.stream();
         headers.set('content-type', fd.contentType());
-        /* istanbul ignore else */
         if (!headers.has('transfer-encoding')
           && !headers.has('content-length')) {
           headers.set('content-length', fd.length());
@@ -199,6 +194,4 @@ Object.defineProperties(Request.prototype, {
   signal: { enumerable: true },
 });
 
-module.exports = {
-  Request,
-};
+export default Request;

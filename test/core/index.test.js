@@ -11,21 +11,27 @@
  */
 
 /* eslint-env mocha */
+/* eslint-disable no-underscore-dangle */
 
-'use strict';
+import assert from 'assert';
+import fs from 'fs';
+import { finished } from 'stream';
+import { fileURLToPath } from 'url';
+import { promisify } from 'util';
 
-const assert = require('assert');
-const fs = require('fs');
-const { finished } = require('stream');
-const { promisify } = require('util');
+import { FormData } from 'formdata-node';
+import { WritableStreamBuffer } from 'stream-buffers';
 
-const { FormData } = require('formdata-node');
-const { WritableStreamBuffer } = require('stream-buffers');
+import { isReadableStream } from '../utils.js';
+import { AbortController } from '../../src/fetch/abort.js';
+import { RequestAbortedError } from '../../src/core/errors.js';
+import core from '../../src/core/index.js';
+import Server from '../server.js';
 
-const { isReadableStream } = require('../utils');
-const { AbortController } = require('../../src/fetch/abort');
-const { context, ALPN_HTTP1_1 } = require('../../src/core');
-const { RequestAbortedError } = require('../../src/core/errors');
+const { context, ALPN_HTTP1_1 } = core;
+
+// Workaround for ES6 which doesn't support the NodeJS global __filename
+const __filename = fileURLToPath(import.meta.url);
 
 const WOKEUP = 'woke up!';
 const sleep = (ms) => new Promise((resolve) => {
@@ -280,12 +286,17 @@ describe('Core Tests', () => {
 
   it('supports parallel requests', async () => {
     const N = 100; // # of parallel requests
-    const TEST_URL = 'https://httpbin.org/bytes/'; // HTTP2
+
+    // start h2 server
+    const server = new Server(2, true);
+    await server.start();
+
+    const TEST_URL = `${server.origin}/bytes`;
     // generete array of 'randomized' urls
-    const urls = Array.from({ length: N }, () => Math.floor(Math.random() * N)).map((num) => `${TEST_URL}${num}`);
+    const urls = Array.from({ length: N }, () => Math.floor(Math.random() * N)).map((num) => `${TEST_URL}?count=${num}`);
 
     // custom context to isolate from side effects of other tests
-    const ctx = context();
+    const ctx = context({ rejectUnauthorized: false });
     try {
       // send requests
       const responses = await Promise.all(urls.map((url) => ctx.request(url)));
@@ -295,6 +306,7 @@ describe('Core Tests', () => {
       assert.strictEqual(ok.length, N);
     } finally {
       await ctx.reset();
+      await server.close();
     }
   });
 

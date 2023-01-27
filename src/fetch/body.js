@@ -10,13 +10,13 @@
  * governing permissions and limitations under the License.
  */
 
-'use strict';
+import { PassThrough, Readable } from 'stream';
+import { types } from 'util';
 
-const { PassThrough, Readable } = require('stream');
-const { types: { isAnyArrayBuffer } } = require('util');
+import { FetchError, FetchBaseError } from './errors.js';
+import { streamToBuffer } from '../common/utils.js';
 
-const { FetchError, FetchBaseError } = require('./errors');
-const { streamToBuffer } = require('../common/utils');
+const { isAnyArrayBuffer } = types;
 
 const EMPTY_BUFFER = Buffer.alloc(0);
 const INTERNALS = Symbol('Body internals');
@@ -183,7 +183,6 @@ const cloneStream = (body) => {
   const { stream } = body[INTERNALS];
   let result = stream;
 
-  /* istanbul ignore else */
   if (stream instanceof Readable) {
     result = new PassThrough();
     const clonedStream = new PassThrough();
@@ -223,7 +222,6 @@ const guessContentType = (body) => {
     return null;
   }
 
-  /* istanbul ignore else */
   if (body instanceof Readable) {
     return null;
   }
@@ -232,7 +230,7 @@ const guessContentType = (body) => {
   return 'text/plain; charset=utf-8';
 };
 
-module.exports = {
+export {
   Body,
   cloneStream,
   guessContentType,

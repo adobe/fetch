@@ -12,20 +12,19 @@
 
 /* eslint-env mocha */
 
-'use strict';
+import assert from 'assert';
+import { Readable } from 'stream';
 
-const assert = require('assert');
-const { Readable } = require('stream');
+import nock from 'nock';
+import parseCacheControl from 'parse-cache-control';
 
-const nock = require('nock');
-const parseCacheControl = require('parse-cache-control');
-
-const { isReadableStream } = require('../utils');
+import { isReadableStream } from '../utils.js';
+import fetchAPI from '../../src/fetch/index.js';
+import cacheableResponse from '../../src/fetch/cacheableResponse.js';
 
 const {
   fetch, onPush, offPush, reset, clearCache, cacheStats, context, noCache, Response, Headers,
-} = require('../../src');
-const { cacheableResponse } = require('../../src/fetch/cacheableResponse');
+} = fetchAPI;
 
 const WOKEUP = 'woke up!';
 const sleep = (ms) => new Promise((resolve) => {

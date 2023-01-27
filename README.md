@@ -18,6 +18,7 @@
 <!-- TOC -->
 - [About](#about)
 - [Features](#features)
+- [ESM/CJS support](#esmcjs-support)
 - [Installation](#installation)
 - [API](#api)
   - [Context](#context)
@@ -94,11 +95,16 @@ Note that non-standard Fetch options have been aligned with [node-fetch](https:/
 * [x] overridable User-Agent
 * [x] low-level HTTP/1.* agent/connect options support (e.g. `keepAlive`, `rejectUnauthorized`)
 
+
+## ESM/CJS support
+
+This package is native [ESM](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules) and no longer provides CommonJS exports. Use `3.x` version if you still need to use this package with CommonJS.
+
 ## Installation
 
 > **Note**:
 >
-> As of v2 Node version >= 12 is required.
+> As of v4 Node version >= 14.16 is required.
 
 ```bash
 $ npm install @adobe/fetch
@@ -229,7 +235,7 @@ interface Http2Options {
 ### Access Response Headers and other Meta data
 
 ```javascript
-  const { fetch } = require('@adobe/fetch');
+  import { fetch } from '@adobe/fetch';
 
   const resp = await fetch('https://httpbin.org/get');
   console.log(resp.ok);
@@ -243,7 +249,7 @@ interface Http2Options {
 ### Fetch JSON
 
 ```javascript
-  const { fetch } = require('@adobe/fetch');
+  import { fetch } from '@adobe/fetch';
 
   const resp = await fetch('https://httpbin.org/json');
   const jsonData = await resp.json();
@@ -252,7 +258,7 @@ interface Http2Options {
 ### Fetch text data
 
 ```javascript
-  const { fetch } = require('@adobe/fetch');
+  import { fetch } from '@adobe/fetch';
 
   const resp = await fetch('https://httpbin.org/');
   const textData = await resp.text();
@@ -261,7 +267,7 @@ interface Http2Options {
 ### Fetch binary data
 
 ```javascript
-  const { fetch } = require('@adobe/fetch');
+  import { fetch } from '@adobe/fetch';
 
   const resp = await fetch('https://httpbin.org//stream-bytes/65535');
   const imageData = await resp.buffer();
@@ -272,7 +278,7 @@ interface Http2Options {
 Using `timeoutSignal(ms)` non-spec extension:
 
 ```javascript
-  const { fetch, timeoutSignal, AbortError } = require('@adobe/fetch');
+  import { fetch, timeoutSignal, AbortError } from '@adobe/fetch';
 
   const signal = timeoutSignal(1000);
   try {
@@ -291,7 +297,7 @@ Using `timeoutSignal(ms)` non-spec extension:
 Using `AbortController`:
 
 ```javascript
-  const { fetch, AbortController, AbortError } = require('@adobe/fetch');
+  import { fetch, AbortController, AbortError } from '@adobe/fetch';
 
   const controller = new AbortController();
   const timerId = setTimeout(() => controller.abort(), 1000);
@@ -313,17 +319,17 @@ Using `AbortController`:
 ### Stream an image
 
 ```javascript
-  const fs = require('fs');
-  const { fetch } = require('@adobe/fetch');
+  import { createWriteStream } from 'fs';
+  import { fetch } from '@adobe/fetch';
 
   const resp = await fetch('https://httpbin.org/image/jpeg');
-  resp.body.pipe(fs.createWriteStream('saved-image.jpg'));
+  resp.body.pipe(createWriteStream('saved-image.jpg'));
 ```
 
 ### Post JSON
 
 ```javascript
-  const { fetch } = require('@adobe/fetch');
+  import { fetch } from '@adobe/fetch';
 
   const method = 'POST';
   const body = { foo: 'bar' };
@@ -333,11 +339,11 @@ Using `AbortController`:
 ### Post JPEG image
 
 ```javascript
-  const fs = require('fs');
-  const { fetch } = require('@adobe/fetch');
+  import { createReadStream } from 'fs';
+  import { fetch } from '@adobe/fetch';
 
   const method = 'POST';
-  const body = fs.createReadStream('some-image.jpg');
+  const body = createReadStream('some-image.jpg');
   const headers = { 'content-type': 'image/jpeg' };
   const resp = await fetch('https://httpbin.org/post', { method, body, headers });
 ```
@@ -345,10 +351,10 @@ Using `AbortController`:
 ### Post form data
 
 ```javascript
-  const { FormData, Blob, File } = require('formdata-node'); // spec-compliant implementations
-  const { fileFromPath } = require('formdata-node/file-from-path'); // helper for creating File instance from disk file
+  import { FormData, Blob, File } from 'formdata-node'; // spec-compliant implementations
+  import { fileFromPath } from 'formdata-node/file-from-path'; // helper for creating File instance from disk file
 
-  const { fetch } = require('@adobe/fetch');
+  import { fetch } from '@adobe/fetch';
 
   const method = 'POST';
   const fd = new FormData();
@@ -363,7 +369,7 @@ Using `AbortController`:
 ### GET with query parameters object
 
 ```javascript
-const { createUrl, fetch } = require('@adobe/fetch');
+import { createUrl, fetch } from '@adobe/fetch';
 
 const qs = {
   fake: 'dummy',
@@ -377,7 +383,7 @@ const resp = await fetch(createUrl('https://httpbin.org/json', qs));
 or using `URLSearchParams`:
 
 ```javascript
-const { fetch } = require('@adobe/fetch');
+import { fetch } from '@adobe/fetch';
 
 const body = new URLSearchParams({
   fake: 'dummy',
@@ -393,7 +399,7 @@ const resp = await fetch('https://httpbin.org/json', { body });
 Responses of `GET` and `HEAD` requests are by default cached, according to the rules of [RFC 7234](https://httpwg.org/specs/rfc7234.html):
 
 ```javascript
-const { fetch } = require('@adobe/fetch');
+import { fetch } from '@adobe/fetch';
 
 const url = 'https://httpbin.org/cache/60'; // -> max-age=60 (seconds)
 // send initial request, priming cache
@@ -410,7 +416,7 @@ assert(resp.fromCache);
 You can disable caching per request with the `cache: 'no-store'` option:
 
 ```javascript
-const { fetch } = require('@adobe/fetch');
+import { fetch } from '@adobe/fetch';
 
 const resp = await fetch('https://httbin.org/', { cache: 'no-store' });
 assert(resp.ok);
@@ -420,7 +426,8 @@ assert(!resp.fromCache);
 You can disable caching entirely:
 
 ```javascript
-const { fetch } = require('@adobe/fetch').noCache();
+import { noCache } from '@adobe/fetch';
+const { fetch } = noCache();
 ```
 
 ## Advanced Usage Examples
@@ -431,7 +438,7 @@ Note that pushed resources will be automatically and transparently added to the 
 You can however add a listener which will be notified on every pushed (and cached) resource.
 
 ```javascript
-  const { fetch, onPush } = require('@adobe/fetch');
+  import { fetch, onPush } from '@adobe/fetch';
 
   onPush((url, response) => console.log(`received server push: ${url} status ${response.status}`));
 
@@ -442,7 +449,8 @@ You can however add a listener which will be notified on every pushed (and cache
 ### Force HTTP/1(.1) protocol
 
 ```javascript
-  const { fetch } = require('@adobe/fetch').h1();
+  import { h1 } from '@adobe/fetch';
+  const { fetch } = h1();
 
   const resp = await fetch('https://nghttp2.org');
   console.log(`Http version: ${resp.httpVersion}`);
@@ -451,7 +459,8 @@ You can however add a listener which will be notified on every pushed (and cache
 ### HTTP/1.1 Keep-Alive
 
 ```javascript
-const { fetch } = require('@adobe/fetch').keepAlive();
+import { keepAlive } from '@adobe/fetch';
+const { fetch } = keepAlive();
 
 const resp = await fetch('https://httpbin.org/status/200');
 console.log(`Connection: ${resp.headers.get('connection')}`); // -> keep-alive
@@ -462,7 +471,7 @@ console.log(`Connection: ${resp.headers.get('connection')}`); // -> keep-alive
 Unlike browsers, you can access raw `Set-Cookie` headers manually using `Headers.raw()`. This is an `@adobe/fetch` only API.
 
 ```javascript
-const { fetch } = require('@adobe/fetch');
+import { fetch } from '@adobe/fetch';
 
 const resp = await fetch('https://httpbin.org/cookies/set?a=1&b=2');
 // returns an array of values, instead of a string of comma-separated values
@@ -472,7 +481,8 @@ console.log(resp.headers.raw()['set-cookie']);
 ### Self-signed Certificates
 
 ```javascript
-const { fetch } = require('@adobe/fetch').context({ rejectUnauthorized: false });
+import { context } from '@adobe/fetch';
+const { fetch } = context({ rejectUnauthorized: false });
 
 const resp = await fetch('https://localhost:8443/');  // a server using a self-signed certificate
 ```
@@ -480,7 +490,8 @@ const resp = await fetch('https://localhost:8443/');  // a server using a self-s
 ### Set cache size limit
 
 ```javascript
-  const { fetch, cacheStats } = require('@adobe/fetch').context({
+  import { context } from '@adobe/fetch';
+  const { fetch } = context({
     maxCacheSize: 100 * 1024, // 100kb (Default: 100mb)
   });
 
@@ -492,7 +503,8 @@ const resp = await fetch('https://localhost:8443/');  // a server using a self-s
 ### Disable caching
 
 ```javascript
-  const { fetch } = require('@adobe/fetch').noCache();
+  import { noCache } from '@adobe/fetch';
+  const { fetch } = noCache();
 
   let resp = await fetch('https://httpbin.org/cache/60'); // -> max-age=60 (seconds)
   // re-fetch
@@ -503,7 +515,8 @@ const resp = await fetch('https://localhost:8443/');  // a server using a self-s
 ### Set a custom user agent
 
 ```javascript
-  const { fetch } = require('@adobe/fetch').context({
+  import { context } from '@adobe/fetch';
+  const { fetch } = context({
     userAgent: 'custom-fetch'
   });
 
