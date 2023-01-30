@@ -1,3 +1,10 @@
+## [4.0.1](https://github.com/adobe/fetch/compare/v4.0.0...v4.0.1) (2023-01-30)
+
+
+### Bug Fixes
+
+* load package.json via import ([#347](https://github.com/adobe/fetch/issues/347)) ([5fe17c9](https://github.com/adobe/fetch/commit/5fe17c9d5be84515fee0e38c59c637d4523ba47b))
+
 # [4.0.0](https://github.com/adobe/fetch/compare/v3.5.1...v4.0.0) (2023-01-27)
 
 
