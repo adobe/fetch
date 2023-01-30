@@ -11,7 +11,6 @@
  */
 
 import { types } from 'util';
-import { readFileSync } from 'fs';
 import { Readable } from 'stream';
 import tls from 'tls';
 
@@ -24,9 +23,8 @@ import h2 from './h2.js';
 import lock from './lock.js';
 import { isFormData, FormDataSerializer } from '../common/formData.js';
 import { isPlainObject } from '../common/utils.js';
-// as of node v16 support for importing JSON modules is still experimental
-// import pkg from '../../package.json';
-const pkg = JSON.parse(readFileSync(new URL('../../package.json', import.meta.url)));
+import pkg from '../package.cjs';
+
 const { version } = pkg;
 
 const { isAnyArrayBuffer } = types;
