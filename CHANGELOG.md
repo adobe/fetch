@@ -1,3 +1,10 @@
+# [3.6.0](https://github.com/adobe/fetch/compare/v3.5.1...v3.6.0) (2023-01-27)
+
+
+### Bug Fixes
+
+* bump deps ([5944f54](https://github.com/adobe/fetch/commit/5944f5408b89981f74eaa708886607361ec979ba))
+
 ## [3.3.1](https://github.com/adobe/fetch/compare/v3.3.0...v3.3.1) (2022-12-25)
 
 
