@@ -4,9 +4,14 @@
     ":semanticCommits",
     ":autodetectPinVersions"
   ],
+  "baseBranches": ["main", "3.x"],
   "timezone": "Europe/Zurich",
   "branchPrefix": "renovate-",
   "packageRules": [
+    {
+      "matchPackageNames": ["formdata-node"],
+      "allowedVersions": "<5"
+    },
     {
       "packageNames": ["circleci/node"],
       "allowedVersions": "<15"
