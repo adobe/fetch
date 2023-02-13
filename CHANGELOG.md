@@ -1,3 +1,10 @@
+## [4.0.2](https://github.com/adobe/fetch/compare/v4.0.1...v4.0.2) (2023-02-13)
+
+
+### Bug Fixes
+
+* loading of package.json via createRequire ([#352](https://github.com/adobe/fetch/issues/352)) ([bddafe0](https://github.com/adobe/fetch/commit/bddafe043d6679ed28909a41871d0e1c7273bee3))
+
 ## [4.0.1](https://github.com/adobe/fetch/compare/v4.0.0...v4.0.1) (2023-01-30)
 
 
