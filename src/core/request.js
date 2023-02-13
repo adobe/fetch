@@ -10,6 +10,7 @@
  * governing permissions and limitations under the License.
  */
 
+import { createRequire } from 'node:module';
 import { types } from 'util';
 import { Readable } from 'stream';
 import tls from 'tls';
@@ -23,7 +24,9 @@ import h2 from './h2.js';
 import lock from './lock.js';
 import { isFormData, FormDataSerializer } from '../common/formData.js';
 import { isPlainObject } from '../common/utils.js';
-import pkg from '../package.cjs';
+
+const require = createRequire(import.meta.url);
+const pkg = require('../../package.json');
 
 const { version } = pkg;
 
