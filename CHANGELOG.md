@@ -1,3 +1,10 @@
+## [4.0.3](https://github.com/adobe/fetch/compare/v4.0.2...v4.0.3) (2023-02-14)
+
+
+### Bug Fixes
+
+* regression of PR [#352](https://github.com/adobe/fetch/issues/352) ([#353](https://github.com/adobe/fetch/issues/353)) ([c554f1e](https://github.com/adobe/fetch/commit/c554f1e21e0274ead95988301a1fae326d72c54d))
+
 ## [4.0.2](https://github.com/adobe/fetch/compare/v4.0.1...v4.0.2) (2023-02-13)
 
 
