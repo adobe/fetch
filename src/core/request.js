@@ -10,7 +10,7 @@
  * governing permissions and limitations under the License.
  */
 
-import { createRequire } from 'node:module';
+import { createRequire } from 'module';
 import { types } from 'util';
 import { Readable } from 'stream';
 import tls from 'tls';
