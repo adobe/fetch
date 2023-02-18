@@ -52,7 +52,7 @@
   "dependencies": {
     "debug": "4.3.4",
     "http-cache-semantics": "4.1.1",
-    "lru-cache": "7.14.1"
+    "lru-cache": "7.16.1"
   },
   "devDependencies": {
     "@semantic-release/changelog": "6.0.2",
@@ -67,7 +67,7 @@
     "eslint-plugin-import": "2.27.5",
     "formdata-node": "4.4.1",
     "husky": "8.0.3",
-    "lint-staged": "13.1.1",
+    "lint-staged": "13.1.2",
     "mocha": "10.2.0",
     "mocha-multi-reporters": "1.5.1",
     "nock": "13.3.0",
