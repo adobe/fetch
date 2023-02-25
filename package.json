@@ -52,7 +52,7 @@
   "dependencies": {
     "debug": "4.3.4",
     "http-cache-semantics": "4.1.1",
-    "lru-cache": "7.16.1"
+    "lru-cache": "7.17.0"
   },
   "devDependencies": {
     "@semantic-release/changelog": "6.0.2",
