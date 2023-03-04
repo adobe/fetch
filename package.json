@@ -52,7 +52,7 @@
   "dependencies": {
     "debug": "4.3.4",
     "http-cache-semantics": "4.1.1",
-    "lru-cache": "7.17.0"
+    "lru-cache": "7.18.1"
   },
   "devDependencies": {
     "@semantic-release/changelog": "6.0.2",
@@ -62,7 +62,7 @@
     "chai-as-promised": "7.1.1",
     "chai-bytes": "0.1.2",
     "chai-iterator": "3.0.2",
-    "eslint": "8.34.0",
+    "eslint": "8.35.0",
     "eslint-config-airbnb-base": "15.0.0",
     "eslint-plugin-header": "3.1.1",
     "eslint-plugin-import": "2.27.5",
@@ -73,7 +73,7 @@
     "mocha-multi-reporters": "1.5.1",
     "nock": "13.3.0",
     "parse-cache-control": "1.0.1",
-    "semantic-release": "20.1.0",
+    "semantic-release": "20.1.1",
     "sinon": "15.0.1",
     "stream-buffers": "3.0.2"
   },
