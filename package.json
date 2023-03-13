@@ -52,7 +52,7 @@
   "dependencies": {
     "debug": "4.3.4",
     "http-cache-semantics": "4.1.1",
-    "lru-cache": "7.18.3"
+    "lru-cache": "8.0.0"
   },
   "devDependencies": {
     "@semantic-release/changelog": "6.0.2",
@@ -65,7 +65,7 @@
     "eslint-config-airbnb-base": "15.0.0",
     "eslint-plugin-header": "3.1.1",
     "eslint-plugin-import": "2.27.5",
-    "formdata-node": "4.4.1",
+    "formdata-node": "5.0.0",
     "husky": "8.0.3",
     "lint-staged": "13.2.0",
     "mocha": "10.2.0",
