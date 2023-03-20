@@ -10,7 +10,7 @@
   "packageRules": [
     {
       "matchPackageNames": ["formdata-node"],
-      "allowedVersions": "<5"
+      "allowedVersions": "<5.0.0"
     },
     {
       "packageNames": ["circleci/node"],
