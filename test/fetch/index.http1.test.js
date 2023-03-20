@@ -16,7 +16,7 @@
 
 const assert = require('assert');
 const { createHash } = require('crypto');
-const Server = require('../server');
+const { Server } = require('../server');
 
 const {
   context,

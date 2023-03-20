@@ -26,7 +26,7 @@ const { isReadableStream } = require('../utils');
 const { AbortController } = require('../../src/fetch/abort');
 const { context, ALPN_HTTP1_1 } = require('../../src/core');
 const { RequestAbortedError } = require('../../src/core/errors');
-const Server = require('../server');
+const { Server } = require('../server');
 
 const WOKEUP = 'woke up!';
 const sleep = (ms) => new Promise((resolve) => {
@@ -279,7 +279,7 @@ describe('Core Tests', () => {
     }
   });
 
-  it('supports parallel requests', async () => {
+  it.only('supports parallel requests', async () => {
     const N = 100; // # of parallel requests
 
     // start h2 server
