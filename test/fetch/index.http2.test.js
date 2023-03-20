@@ -167,12 +167,12 @@ describe('HTTP/2-specific Fetch Tests', () => {
     const doFetch = async (ctx, url) => ctx.fetch(url);
 
     const N = 50; // # of parallel requests
-    const contexts = Array.from({ length: N }, () => context());
-    const TEST_URL = 'https://httpbin.org/bytes/'; // HTTP2
+    const contexts = Array.from({ length: N }, () => context({ rejectUnauthorized: false }));
+    const TEST_URL = `${server.origin}/bytes`;
     // generete array of 'randomized' urls
     const args = contexts
       .map((ctx) => ({ ctx, num: Math.floor(Math.random() * N) }))
-      .map(({ ctx, num }) => ({ ctx, url: `${TEST_URL}${num}` }));
+      .map(({ ctx, num }) => ({ ctx, url: `${TEST_URL}?count=${num}` }));
     // send requests
     const responses = await Promise.all(args.map(({ ctx, url }) => doFetch(ctx, url)));
     // cleanup
