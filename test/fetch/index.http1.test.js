@@ -15,7 +15,8 @@
 'use strict';
 
 const assert = require('assert');
-const crypto = require('crypto');
+const { createHash } = require('crypto');
+const { Server } = require('../server');
 
 const {
   context,
@@ -45,6 +46,18 @@ testParams.forEach((params) => {
   } = params;
 
   describe(`HTTP/1.x-specific Fetch Tests (${name})`, () => {
+    let server;
+
+    before(async () => {
+      // start HTTP/1.1 server
+      server = new Server(1, protocol === 'https');
+      await server.start();
+    });
+
+    after(async () => {
+      await server.close();
+    });
+
     it(`forcing HTTP/1.1 using context option works' (${name})`, async () => {
       const { fetch, reset } = context({ alpnProtocols: [ALPN_HTTP1_1] });
       try {
@@ -178,12 +191,11 @@ testParams.forEach((params) => {
     });
 
     it(`concurrent HTTP/1.1 requests to same origin (${name})`, async () => {
-      const { fetch, reset } = context({ alpnProtocols: [ALPN_HTTP1_1] });
+      const { fetch, reset } = h1NoCache(protocol === 'https' ? { rejectUnauthorized: false } : {});
       const N = 200; // # of parallel requests
-      // httpbingo.org seems to be more stable than httpbin.org
-      const TEST_URL = `${protocol}://httpbin.org/bytes/`;
+      const TEST_URL = `${server.origin}/bytes`;
       // generete array of 'randomized' urls
-      const urls = Array.from({ length: N }, () => Math.floor(Math.random() * N)).map((num) => `${TEST_URL}${num}`);
+      const urls = Array.from({ length: N }, () => Math.floor(Math.random() * N)).map((num) => `${TEST_URL}?count=${num}`);
 
       let responses;
       try {
@@ -205,7 +217,7 @@ testParams.forEach((params) => {
         const res = await fetch(url);
         assert.strictEqual(res.httpVersion, '1.1');
         const data = await res.text();
-        return crypto.createHash('md5').update(data).digest().toString('hex');
+        return createHash('md5').update(data).digest().toString('hex');
       };
 
       let results;
@@ -224,23 +236,23 @@ testParams.forEach((params) => {
       assert.notStrictEqual(results[0], results[2]);
       assert.notStrictEqual(results[1], results[2]);
     });
-  });
 
-  it(`concurrent HTTP/1.1 requests to same origin using different contexts (${name})`, async () => {
-    const doFetch = async (ctx, url) => ctx.fetch(url);
+    it(`concurrent HTTP/1.1 requests to same origin using different contexts (${name})`, async () => {
+      const doFetch = async (ctx, url) => ctx.fetch(url);
 
-    const N = 50; // # of parallel requests
-    const contexts = Array.from({ length: N }, () => context({ alpnProtocols: [ALPN_HTTP1_1] }));
-    const TEST_URL = `${protocol}://httpbin.org/bytes/`;
-    // generete array of 'randomized' urls
-    const args = contexts
-      .map((ctx) => ({ ctx, num: Math.floor(Math.random() * N) }))
-      .map(({ ctx, num }) => ({ ctx, url: `${TEST_URL}${num}` }));
-    // send requests
-    const responses = await Promise.all(args.map(({ ctx, url }) => doFetch(ctx, url)));
-    // cleanup
-    await Promise.all(contexts.map((ctx) => ctx.reset()));
-    const ok = responses.filter((res) => res.ok && res.httpVersion === '1.1');
-    assert.strictEqual(ok.length, N);
+      const N = 50; // # of parallel requests
+      const contexts = Array.from({ length: N }, () => h1NoCache(protocol === 'https' ? { rejectUnauthorized: false } : {}));
+      const TEST_URL = `${server.origin}/bytes`;
+      // generete array of 'randomized' urls
+      const args = contexts
+        .map((ctx) => ({ ctx, num: Math.floor(Math.random() * N) }))
+        .map(({ ctx, num }) => ({ ctx, url: `${TEST_URL}?count=${num}` }));
+      // send requests
+      const responses = await Promise.all(args.map(({ ctx, url }) => doFetch(ctx, url)));
+      // cleanup
+      await Promise.all(contexts.map((ctx) => ctx.reset()));
+      const ok = responses.filter((res) => res.ok && res.httpVersion === '1.1');
+      assert.strictEqual(ok.length, N);
+    });
   });
 });
