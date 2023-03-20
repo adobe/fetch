@@ -279,7 +279,7 @@ describe('Core Tests', () => {
     }
   });
 
-  it.only('supports parallel requests', async () => {
+  it('supports parallel requests', async () => {
     const N = 100; // # of parallel requests
 
     // start h2 server
