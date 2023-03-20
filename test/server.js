@@ -13,6 +13,7 @@
 'use strict';
 
 const { readFile } = require('fs').promises;
+const { randomBytes } = require('crypto');
 const http = require('http');
 const https = require('https');
 const http2 = require('http2');
@@ -46,6 +47,7 @@ class Server {
     await new Promise((resolve, reject) => {
       const reqHandler = async (req, res) => {
         const { pathname, searchParams } = new URL(req.url, `https://localhost:${this.server.address().port}`);
+        let count;
         switch (pathname) {
           case '/hello':
             await sleep(+(searchParams.get('delay') || 0));
@@ -69,6 +71,16 @@ class Server {
             await sleep(+(searchParams.get('delay') || 0));
             res.writeHead(searchParams.get('status_code') || 302, { Location: searchParams.get('url') });
             res.end(this.helloMsg);
+            break;
+
+          case '/bytes':
+            await sleep(+(searchParams.get('delay') || 0));
+            count = +(searchParams.get('count') || 32);
+            res.writeHead(200, {
+              'Content-Type': 'application/octet-stream',
+              'Content-Length': `${count}`,
+            });
+            res.end(randomBytes(count));
             break;
 
           default:
