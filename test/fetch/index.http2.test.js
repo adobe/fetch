@@ -23,6 +23,7 @@ const { Server } = require('../server');
 const {
   fetch,
   context,
+  noCache,
   reset,
   onPush,
   offPush,
@@ -124,15 +125,21 @@ describe('HTTP/2-specific Fetch Tests', () => {
 
   it('concurrent HTTP/2 requests to same origin', async () => {
     const N = 500; // # of parallel requests
-    const TEST_URL = 'https://httpbin.org/bytes/'; // HTTP2
+    const TEST_URL = `${server.origin}/bytes`;
     // generete array of 'randomized' urls
-    const urls = Array.from({ length: N }, () => Math.floor(Math.random() * N)).map((num) => `${TEST_URL}${num}`);
-    // send requests
-    const responses = await Promise.all(urls.map((url) => fetch(url)));
-    // read bodies
-    await Promise.all(responses.map((resp) => resp.text()));
-    const ok = responses.filter((res) => res.ok && res.httpVersion === '2.0');
-    assert.strictEqual(ok.length, N);
+    const urls = Array.from({ length: N }, () => Math.floor(Math.random() * N)).map((num) => `${TEST_URL}?count=${num}`);
+
+    const ctx = noCache({ rejectUnauthorized: false });
+    try {
+      // send requests
+      const responses = await Promise.all(urls.map((url) => ctx.fetch(url)));
+      // read bodies
+      await Promise.all(responses.map((resp) => resp.text()));
+      const ok = responses.filter((res) => res.ok && res.httpVersion === '2.0');
+      assert.strictEqual(ok.length, N);
+    } finally {
+      await ctx.reset();
+    }
   });
 
   it('handles concurrent HTTP/2 requests to subdomains sharing the same IP address (using wildcard SAN cert)', async () => {
