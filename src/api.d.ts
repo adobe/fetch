@@ -298,7 +298,7 @@ export type SystemError = {
 };
 
 export class FetchError extends FetchBaseError {
-  code: number;
+  code: string;
   erroredSysCall?: SystemError;
 }
 
