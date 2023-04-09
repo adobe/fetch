@@ -105,6 +105,7 @@ export class Headers implements Iterable<[string, string]> {
   has(name: string): boolean;
   set(name: string, value: string): void;
 
+  raw(): Record<string, string[]>;
   entries(): Iterator<[string, string]>;
   keys(): Iterator<string>;
   values(): Iterator<string>;
