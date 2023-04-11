@@ -16,7 +16,7 @@ const { EventEmitter } = require('events');
 const { Readable } = require('stream');
 
 const debug = require('debug')('adobe/fetch');
-const LRU = require('lru-cache');
+const { LRUCache } = require('lru-cache');
 
 const { Body } = require('./body');
 const { Headers } = require('./headers');
@@ -321,13 +321,13 @@ class FetchContext {
     let maxSize = typeof maxCacheSize === 'number' && maxCacheSize >= 0 ? maxCacheSize : DEFAULT_MAX_CACHE_SIZE;
     let max = DEFAULT_MAX_CACHE_ITEMS;
     if (maxSize === 0) {
-      // we need to set a dummy value as LRU would translate a 0 to Infinity
+      // we need to set a dummy value as LRUCache would translate a 0 to Infinity
       maxSize = 1;
       // no need to allocate memory if cache is disabled
       max = 1;
     }
     const sizeCalculation = ({ response }, _) => sizeof(response);
-    this.cache = new LRU({ max, maxSize, sizeCalculation });
+    this.cache = new LRUCache({ max, maxSize, sizeCalculation });
     // event emitter
     this.eventEmitter = new EventEmitter();
 
