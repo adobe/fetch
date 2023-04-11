@@ -14,7 +14,7 @@ import { EventEmitter } from 'events';
 import { Readable } from 'stream';
 
 import debugFactory from 'debug';
-import LRU from 'lru-cache';
+import { LRUCache } from 'lru-cache';
 
 import { Body } from './body.js';
 import Headers from './headers.js';
@@ -319,13 +319,13 @@ class FetchContext {
     let maxSize = typeof maxCacheSize === 'number' && maxCacheSize >= 0 ? maxCacheSize : DEFAULT_MAX_CACHE_SIZE;
     let max = DEFAULT_MAX_CACHE_ITEMS;
     if (maxSize === 0) {
-      // we need to set a dummy value as LRU would translate a 0 to Infinity
+      // we need to set a dummy value as LRUCache would translate a 0 to Infinity
       maxSize = 1;
       // no need to allocate memory if cache is disabled
       max = 1;
     }
     const sizeCalculation = ({ response }, _) => sizeof(response);
-    this.cache = new LRU({ max, maxSize, sizeCalculation });
+    this.cache = new LRUCache({ max, maxSize, sizeCalculation });
     // event emitter
     this.eventEmitter = new EventEmitter();
 

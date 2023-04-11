@@ -15,7 +15,7 @@ import { types } from 'util';
 import { Readable } from 'stream';
 import tls from 'tls';
 
-import LRU from 'lru-cache';
+import { LRUCache } from 'lru-cache';
 import debugFactory from 'debug';
 
 import { RequestAbortedError } from './errors.js';
@@ -324,7 +324,7 @@ const setupContext = (ctx) => {
   } = ctx;
 
   ctx.alpnProtocols = alpnProtocols;
-  ctx.alpnCache = new LRU({ max: alpnCacheSize, ttl: alpnCacheTTL });
+  ctx.alpnCache = new LRUCache({ max: alpnCacheSize, ttl: alpnCacheTTL });
 
   ctx.userAgent = userAgent;
 
