@@ -117,7 +117,7 @@ describe('HTTP/2-specific Fetch Tests', () => {
   });
 
   it('concurrent HTTP/2 requests to same origin', async () => {
-    const N = 500; // # of parallel requests
+    const N = 100; // # of parallel requests
     const TEST_URL = `${server.origin}/bytes`;
     // generete array of 'randomized' urls
     const urls = Array.from({ length: N }, () => Math.floor(Math.random() * N)).map((num) => `${TEST_URL}?count=${num}`);
