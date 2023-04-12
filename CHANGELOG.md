@@ -1,3 +1,10 @@
+## [4.0.7](https://github.com/adobe/fetch/compare/v4.0.6...v4.0.7) (2023-04-12)
+
+
+### Bug Fixes
+
+* **deps:** update dependency lru-cache to v9 ([#391](https://github.com/adobe/fetch/issues/391)) ([43f7ae4](https://github.com/adobe/fetch/commit/43f7ae491a7ebe0b9de1a3ea5332173daf0bcfd4))
+
 ## [4.0.6](https://github.com/adobe/fetch/compare/v4.0.5...v4.0.6) (2023-03-20)
 
 
