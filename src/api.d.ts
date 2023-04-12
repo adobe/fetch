@@ -105,6 +105,8 @@ export class Headers implements Iterable<[string, string]> {
   has(name: string): boolean;
   set(name: string, value: string): void;
 
+  raw(): Record<string, string | string[]>;
+
   entries(): Iterator<[string, string]>;
   keys(): Iterator<string>;
   values(): Iterator<string>;
@@ -298,8 +300,9 @@ export type SystemError = {
 };
 
 export class FetchError extends FetchBaseError {
-  code: number;
-  erroredSysCall?: SystemError;
+  code: string;
+  errno?: number;
+  erroredSysCall?: string;
 }
 
 export class AbortError extends FetchBaseError {
