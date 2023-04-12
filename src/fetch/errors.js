@@ -43,8 +43,8 @@ class FetchError extends FetchBaseError {
   constructor(message, type, systemError) {
     super(message, type);
     if (systemError) {
-      // eslint-disable-next-line no-multi-assign
-      this.code = this.errno = systemError.code;
+      this.code = systemError.code;
+      this.errno = systemError.errno;
       this.erroredSysCall = systemError.syscall;
     }
   }
