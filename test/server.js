@@ -19,6 +19,9 @@ import { randomBytes } from 'crypto';
 import { readFile } from 'fs/promises';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { promisify } from 'util';
+
+const randomBuffer = promisify(randomBytes);
 
 // Workaround for ES6 which doesn't support the NodeJS global __dirname
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -85,7 +88,7 @@ class Server {
               'Content-Type': 'application/octet-stream',
               'Content-Length': `${count}`,
             });
-            res.end(randomBytes(count));
+            res.end(await randomBuffer(count));
             break;
 
           default:
