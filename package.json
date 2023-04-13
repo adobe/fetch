@@ -1,6 +1,6 @@
 {
   "name": "@adobe/fetch",
-  "version": "4.0.7",
+  "version": "4.0.8",
   "description": "Light-weight Fetch implementation transparently supporting both HTTP/1(.1) and HTTP/2",
   "main": "./src/index.js",
   "module": "./src/index.js",

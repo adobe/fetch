@@ -1,3 +1,11 @@
+## [4.0.8](https://github.com/adobe/fetch/compare/v4.0.7...v4.0.8) (2023-04-13)
+
+
+### Bug Fixes
+
+* flaky test ([c3c1447](https://github.com/adobe/fetch/commit/c3c14473daec41af64c80d22447f4cd52c34341a))
+* TypeScript declarations ([#392](https://github.com/adobe/fetch/issues/392)) ([503bb69](https://github.com/adobe/fetch/commit/503bb69329768cbe7b3fff4cfc19f5a30364e26b))
+
 ## [4.0.7](https://github.com/adobe/fetch/compare/v4.0.6...v4.0.7) (2023-04-12)
 
 
