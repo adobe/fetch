@@ -116,21 +116,27 @@ describe('HTTP/2-specific Fetch Tests', () => {
     }
   });
 
-  it('concurrent HTTP/2 requests to same origin', async () => {
+  it.only('concurrent HTTP/2 requests to same origin', async () => {
     const N = 50; // # of parallel requests
     const TEST_URL = `${server.origin}/bytes`;
     // generete array of 'randomized' urls
     const urls = Array.from({ length: N }, () => Math.floor(Math.random() * N)).map((num) => `${TEST_URL}?count=${num}`);
 
+    console.log(urls);
+
     const ctx = noCache({ rejectUnauthorized: false });
     try {
       // send requests
+      console.log('sending requests');
       const responses = await Promise.all(urls.map((url) => ctx.fetch(url)));
       // read bodies
+      console.log('reading bodies');
       await Promise.all(responses.map((resp) => resp.text()));
+      console.log('filtering responses');
       const ok = responses.filter((res) => res.ok && res.httpVersion === '2.0');
       assert.strictEqual(ok.length, N);
     } finally {
+      console.log('finally resetting context');
       await ctx.reset();
     }
   });
