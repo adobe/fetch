@@ -158,7 +158,7 @@ class Server {
     const { port } = this;
     // eslint-disable-next-line no-nested-ternary
     const proto = this.secure ? 'https' : (this.httpMajorVersion === 2 ? 'http2' : 'http');
-    return `${proto}://localhost:${port}`;
+    return `${proto}://127.0.0.1:${port}`;
   }
 
   async shutDown(force = false) {
