@@ -131,7 +131,7 @@ describe('HTTP/2-specific Fetch Tests', () => {
       const responses = await Promise.all(urls.map((url) => ctx.fetch(url)));
       // read bodies
       console.log('reading bodies');
-      await Promise.all(responses.map((resp) => resp.text()));
+      await Promise.all(responses.map((resp) => resp.arrayBuffer()));
       console.log('filtering responses');
       const ok = responses.filter((res) => res.ok && res.httpVersion === '2.0');
       assert.strictEqual(ok.length, N);

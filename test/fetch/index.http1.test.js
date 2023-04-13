@@ -200,7 +200,7 @@ testParams.forEach((params) => {
         // send requests
         responses = await Promise.all(urls.map((url) => fetch(url)));
         // read bodies
-        await Promise.all(responses.map((resp) => resp.text()));
+        await Promise.all(responses.map((resp) => resp.arrayBuffer()));
       } finally {
         await reset();
       }
