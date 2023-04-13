@@ -88,7 +88,8 @@ class Server {
               'Content-Type': 'application/octet-stream',
               'Content-Length': `${count}`,
             });
-            res.end(await randomBuffer(count));
+            res.write(await randomBuffer(count));
+            res.end();
             break;
 
           default:
