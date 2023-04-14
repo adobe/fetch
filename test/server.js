@@ -20,7 +20,7 @@ import { readFile } from 'fs/promises';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
-const randomBuffer = (size) => Buffer.alloc(size);
+// const randomBuffer = (size) => Buffer.alloc(size);
 /*
 const randomBuffer = (size) => new Promise((resolve, reject) => {
   randomBytes(size, (err, buf) => {
@@ -96,9 +96,10 @@ class Server {
             count = +(searchParams.get('count') || 32);
             res.writeHead(200, {
               'Content-Type': 'application/octet-stream',
-              // 'Content-Length': `${count}`,
+              'Content-Length': `${count}`,
             });
-            res.end(await randomBuffer(count));
+            // res.end(await randomBuffer(count));
+            res.end(Buffer.alloc(count));
             break;
 
           default:
