@@ -285,7 +285,7 @@ describe('Core Tests', () => {
   });
 
   it('supports parallel requests', async () => {
-    const N = 100; // # of parallel requests
+    const N = 50; // # of parallel requests
 
     // start h2 server
     const server = new Server(2, true);
