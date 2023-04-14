@@ -15,24 +15,11 @@
 import http from 'http';
 import https from 'https';
 import http2 from 'http2';
-// import { randomBytes } from 'crypto';
+import { randomBytes } from 'crypto';
 import { readFile } from 'fs/promises';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
-// const randomBuffer = (size) => Buffer.alloc(size);
-/*
-const randomBuffer = (size) => new Promise((resolve, reject) => {
-  randomBytes(size, (err, buf) => {
-    if (err) {
-      // eslint-disable-next-line no-console
-      console.log(`randomBytes failed: ${err}`);
-      reject(err);
-    }
-    resolve(buf);
-  });
-});
-*/
 // Workaround for ES6 which doesn't support the NodeJS global __dirname
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -98,8 +85,7 @@ class Server {
               'Content-Type': 'application/octet-stream',
               'Content-Length': `${count}`,
             });
-            // res.end(await randomBuffer(count));
-            res.end(Buffer.alloc(count));
+            res.end(randomBytes(count));
             break;
 
           default:
