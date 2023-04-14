@@ -96,7 +96,7 @@ class Server {
             count = +(searchParams.get('count') || 32);
             res.writeHead(200, {
               'Content-Type': 'application/octet-stream',
-              'Content-Length': `${count}`,
+              // 'Content-Length': `${count}`,
             });
             res.end(await randomBuffer(count));
             break;
