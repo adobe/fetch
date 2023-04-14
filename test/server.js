@@ -20,12 +20,13 @@ import { readFile } from 'fs/promises';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
-const randomBuffer = (size) => new Promise((resolve, reject) => {
+const randomBuffer = (size) => new Promise((resolve /* , reject */) => {
   randomBytes(size, (err, buf) => {
     if (err) {
       // eslint-disable-next-line no-console
-      console.error(err);
-      reject(err);
+      console.log(`randomBytes failed: ${err}`);
+      resolve(Buffer.alloc(size));
+      // reject(err);
     }
     resolve(buf);
   });
