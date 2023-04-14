@@ -124,8 +124,6 @@ describe('HTTP/2-specific Fetch Tests', () => {
     // generete array of 'randomized' urls
     const urls = Array.from({ length: N }, () => Math.floor(Math.random() * N)).map((num) => `${TEST_URL}?count=${num}`);
 
-    console.log(urls);
-
     const ctx = noCache({ rejectUnauthorized: false });
     try {
       // send requests

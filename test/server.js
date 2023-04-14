@@ -20,7 +20,16 @@ import { readFile } from 'fs/promises';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
-const RANDOM_BUFFER = randomBytes(32);
+const randomBuffer = (size) => new Promise((resolve, reject) => {
+  randomBytes(size, (err, buf) => {
+    if (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+      reject(err);
+    }
+    resolve(buf);
+  });
+});
 
 // Workaround for ES6 which doesn't support the NodeJS global __dirname
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -83,13 +92,11 @@ class Server {
           case '/bytes':
             await sleep(+(searchParams.get('delay') || 0));
             count = +(searchParams.get('count') || 32);
-            count = RANDOM_BUFFER.length;
             res.writeHead(200, {
               'Content-Type': 'application/octet-stream',
               'Content-Length': `${count}`,
             });
-            res.end(RANDOM_BUFFER);
-            // res.end(randomBytes(count));
+            res.end(await randomBuffer(count));
             break;
 
           default:
