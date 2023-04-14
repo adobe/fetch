@@ -11,10 +11,10 @@
  */
 
 /* eslint-disable no-underscore-dangle */
-
 import http from 'http';
 import https from 'https';
 import http2 from 'http2';
+import { fork } from 'child_process';
 import { randomBytes } from 'crypto';
 import { readFile } from 'fs/promises';
 import { dirname } from 'path';
@@ -208,6 +208,26 @@ class Server {
     const { port } = this;
     await this.destroy();
     return this.start(port);
+  }
+
+  static async launch(httpMajorVersion = 2, secure = true, helloMsg = HELLO_WORLD, options = {}) {
+    const childProcess = fork(`${__dirname}/runServer.js`);
+    return new Promise((resolve, reject) => {
+      childProcess.send(
+        {
+          httpMajorVersion, secure, helloMsg, options,
+        },
+        (err) => {
+          if (err) {
+            reject(err);
+          }
+        },
+      );
+      childProcess.on('message', (msg) => {
+        const { pid, port, origin } = msg;
+        resolve({ pid, port, origin });
+      });
+    });
   }
 }
 
