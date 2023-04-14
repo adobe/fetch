@@ -15,7 +15,5 @@ jobs:
           node-version: '18.x'
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
-        with:
-          limit-access-to-actor: true
       - run: npm install
       - run: npm test
