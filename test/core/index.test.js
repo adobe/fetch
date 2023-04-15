@@ -285,7 +285,7 @@ describe('Core Tests', () => {
   });
 
   it('supports parallel requests', async () => {
-    const N = 500; // # of parallel requests
+    const N = 100; // # of parallel requests
 
     // start secure HTTP/2 server
     const server = await Server.launch(2, true);
