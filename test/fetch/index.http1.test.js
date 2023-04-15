@@ -48,12 +48,11 @@ testParams.forEach((params) => {
 
     before(async () => {
       // start HTTP/1.1 server
-      server = new Server(1, protocol === 'https');
-      await server.start();
+      server = await Server.launch(1, protocol === 'https');
     });
 
     after(async () => {
-      await server.close();
+      process.kill(server.pid);
     });
 
     it(`forcing HTTP/1.1 using context option works' (${name})`, async () => {
@@ -200,7 +199,7 @@ testParams.forEach((params) => {
         // send requests
         responses = await Promise.all(urls.map((url) => fetch(url)));
         // read bodies
-        await Promise.all(responses.map((resp) => resp.text()));
+        await Promise.all(responses.map((resp) => resp.arrayBuffer()));
       } finally {
         await reset();
       }
