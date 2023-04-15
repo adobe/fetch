@@ -282,9 +282,8 @@ describe('Core Tests', () => {
   it('supports parallel requests', async () => {
     const N = 100; // # of parallel requests
 
-    // start h2 server
-    const server = new Server(2, true);
-    await server.start();
+    // start secure HTTP/2 server
+    const server = await Server.launch(2, true);
 
     const TEST_URL = `${server.origin}/bytes`;
     // generete array of 'randomized' urls
@@ -301,7 +300,7 @@ describe('Core Tests', () => {
       assert.strictEqual(ok.length, N);
     } finally {
       await ctx.reset();
-      await server.close();
+      process.kill(server.pid);
     }
   });
 

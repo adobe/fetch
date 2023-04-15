@@ -14,6 +14,7 @@
 
 const { readFile } = require('fs').promises;
 const { randomBytes } = require('crypto');
+const { fork } = require('child_process');
 const http = require('http');
 const https = require('https');
 const http2 = require('http2');
@@ -203,6 +204,27 @@ class Server {
     const { port } = this;
     await this.destroy();
     return this.start(port);
+  }
+
+  // eslint-disable-next-line max-len
+  static async launch(httpMajorVersion = 2, secure = true, helloMsg = HELLO_WORLD, port = 0, options = {}) {
+    const childProcess = fork(`${__dirname}/runServer.js`);
+    return new Promise((resolve, reject) => {
+      childProcess.send(
+        {
+          httpMajorVersion, secure, helloMsg, port, options,
+        },
+        (err) => {
+          if (err) {
+            reject(err);
+          }
+        },
+      );
+      childProcess.on('message', (msg) => {
+        // const { pid, port, origin } = msg;
+        resolve(msg);
+      });
+    });
   }
 }
 

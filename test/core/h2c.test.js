@@ -39,13 +39,12 @@ describe('unencrypted HTTP/2 (h2c)-specific Core Tests', () => {
 
   before(async () => {
     // start unencrypted HTTP/2 (h2c) server
-    server = new Server(2, false, HELLO_WORLD);
-    await server.start();
+    server = await Server.launch(2, false, HELLO_WORLD);
   });
 
   after(async () => {
     await reset();
-    await server.close();
+    process.kill(server.pid);
   });
 
   it('supports unencrypted HTTP/2 (h2c)', async () => {

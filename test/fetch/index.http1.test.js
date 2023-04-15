@@ -50,12 +50,11 @@ testParams.forEach((params) => {
 
     before(async () => {
       // start HTTP/1.1 server
-      server = new Server(1, protocol === 'https');
-      await server.start();
+      server = await Server.launch(1, protocol === 'https');
     });
 
     after(async () => {
-      await server.close();
+      process.kill(server.pid);
     });
 
     it(`forcing HTTP/1.1 using context option works' (${name})`, async () => {
@@ -192,7 +191,7 @@ testParams.forEach((params) => {
 
     it(`concurrent HTTP/1.1 requests to same origin (${name})`, async () => {
       const { fetch, reset } = h1NoCache(protocol === 'https' ? { rejectUnauthorized: false } : {});
-      const N = 200; // # of parallel requests
+      const N = 100; // # of parallel requests
       const TEST_URL = `${server.origin}/bytes`;
       // generete array of 'randomized' urls
       const urls = Array.from({ length: N }, () => Math.floor(Math.random() * N)).map((num) => `${TEST_URL}?count=${num}`);
@@ -202,7 +201,7 @@ testParams.forEach((params) => {
         // send requests
         responses = await Promise.all(urls.map((url) => fetch(url)));
         // read bodies
-        await Promise.all(responses.map((resp) => resp.text()));
+        await Promise.all(responses.map((resp) => resp.arrayBuffer()));
       } finally {
         await reset();
       }

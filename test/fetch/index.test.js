@@ -607,8 +607,7 @@ testParams.forEach((params) => {
 
     if (protocol === 'https') {
       it('supports self signed certificate', async () => {
-        const server = new Server(httpVersion === '2.0' ? 2 : 1, true, HELLO_WORLD);
-        await server.start();
+        const server = await Server.launch(httpVersion === '2.0' ? 2 : 1, true, HELLO_WORLD);
 
         // self signed certificates are rejected by default
         assert.rejects(() => defaultFetchContext.fetch(`${server.origin}/hello`, { cache: 'no-store' }));
@@ -629,7 +628,7 @@ testParams.forEach((params) => {
           assert.strictEqual(body, HELLO_WORLD);
         } finally {
           await ctx.reset();
-          await server.close();
+          process.kill(server.pid);
         }
       });
     }
