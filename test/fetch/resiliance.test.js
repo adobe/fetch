@@ -22,8 +22,7 @@ const HELLO_MSG = 'Hello, World!';
 describe('Fetch Resiliance Tests', () => {
   it('handles server restart', async () => {
     // start server
-    const server = new Server(2, true, HELLO_MSG);
-    await server.start();
+    let server = await Server.launch(2, true, HELLO_MSG);
 
     const ctx = context({ rejectUnauthorized: false });
     try {
@@ -34,7 +33,8 @@ describe('Fetch Resiliance Tests', () => {
       assert.strictEqual(body, HELLO_MSG);
 
       // restart server
-      await server.restart();
+      process.kill(server.pid);
+      server = await Server.launch(2, true, HELLO_MSG, server.port);
 
       resp = await ctx.fetch(`${server.origin}/hello`);
       assert.strictEqual(resp.status, 200);
@@ -43,14 +43,13 @@ describe('Fetch Resiliance Tests', () => {
       assert.strictEqual(body, HELLO_MSG);
     } finally {
       await ctx.reset();
-      await server.close();
+      process.kill(server.pid);
     }
   });
 
   it('handles server protocol downgrade', async () => {
     // start h2 server
-    let server = new Server(2, true, HELLO_MSG);
-    await server.start();
+    let server = await Server.launch(2, true, HELLO_MSG);
 
     const ctx = context({ rejectUnauthorized: false });
     try {
@@ -60,12 +59,10 @@ describe('Fetch Resiliance Tests', () => {
       let body = await resp.text();
       assert.strictEqual(body, HELLO_MSG);
 
-      const { port } = server;
       // stop h2 server
-      await server.close();
+      process.kill(server.pid);
       // start h1 server
-      server = new Server(1, true, HELLO_MSG);
-      await server.start(port);
+      server = await Server.launch(1, true, HELLO_MSG, server.port);
       // expect FetchError: Protocol error
       await assert.rejects(ctx.fetch(`${server.origin}/hello`), { name: 'FetchError', message: 'Protocol error' });
       // the fetch context should have recovered by now, next request should succeed
@@ -76,14 +73,13 @@ describe('Fetch Resiliance Tests', () => {
       assert.strictEqual(body, HELLO_MSG);
     } finally {
       await ctx.reset();
-      await server.close();
+      process.kill(server.pid);
     }
   });
 
   it('handles aborted request', async () => {
     // start server
-    const server = new Server(2, true, HELLO_MSG);
-    await server.start();
+    const server = await Server.launch(2, true, HELLO_MSG);
 
     const ctx = context({ rejectUnauthorized: false });
     try {
@@ -104,7 +100,7 @@ describe('Fetch Resiliance Tests', () => {
       assert.strictEqual(body, HELLO_MSG);
     } finally {
       await ctx.reset();
-      await server.close();
+      process.kill(server.pid);
     }
   });
 });
