@@ -1,3 +1,13 @@
+## [4.0.9](https://github.com/adobe/fetch/compare/v4.0.8...v4.0.9) (2023-04-15)
+
+
+### Bug Fixes
+
+* flaky test ([9d3f33f](https://github.com/adobe/fetch/commit/9d3f33f0e92d919bb4d8d1359b8e3e284a385634))
+* flaky test ([b7e6253](https://github.com/adobe/fetch/commit/b7e62537964cdbbd0f7778ce5452c8da336a2543))
+* flaky test ([ba3adaf](https://github.com/adobe/fetch/commit/ba3adafe4c56c9968f5dd21bca98860cf4f098e2))
+* flaky tests ([#396](https://github.com/adobe/fetch/issues/396)) ([e5c728c](https://github.com/adobe/fetch/commit/e5c728c36f5d0111708da9f2858c80eb9da29b23))
+
 ## [4.0.8](https://github.com/adobe/fetch/compare/v4.0.7...v4.0.8) (2023-04-13)
 
 
