@@ -22,8 +22,7 @@ const { context } = require('../../src/fetch');
 describe('Redirect-specific Fetch Tests', () => {
   it('connection error in redirected http/1.1 location is handled correctly', async () => {
     // start http/1.1 server
-    const server = new Server(1);
-    await server.start();
+    const server = await Server.launch(1);
 
     const ctx = context({ rejectUnauthorized: false });
 
@@ -43,14 +42,13 @@ describe('Redirect-specific Fetch Tests', () => {
     } finally {
       await ctx.reset();
       // shutdown server
-      await server.close();
+      process.kill(server.pid);
     }
   });
 
   it('connection error in redirected http/2 location is handled correctly', async () => {
     // start http/2 server
-    const server = new Server(2);
-    await server.start();
+    const server = await Server.launch(2);
 
     const ctx = context({ rejectUnauthorized: false });
 
@@ -70,7 +68,7 @@ describe('Redirect-specific Fetch Tests', () => {
     } finally {
       await ctx.reset();
       // shutdown server
-      await server.close();
+      process.kill(server.pid);
     }
   });
 });
