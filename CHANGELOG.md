@@ -1,3 +1,10 @@
+## [3.6.3](https://github.com/adobe/fetch/compare/v3.6.2...v3.6.3) (2023-04-24)
+
+
+### Bug Fixes
+
+* TypeScript declarations ([#393](https://github.com/adobe/fetch/issues/393)) ([6f214a7](https://github.com/adobe/fetch/commit/6f214a79b62af38f1c6ca4282debe37860bb2046))
+
 ## [3.6.2](https://github.com/adobe/fetch/compare/v3.6.1...v3.6.2) (2023-04-11)
 
 
