@@ -18,6 +18,12 @@ const { fork } = require('child_process');
 const http = require('http');
 const https = require('https');
 const http2 = require('http2');
+const { promisify } = require('util');
+const zlib = require('zlib');
+
+const gzip = promisify(zlib.gzip);
+const deflate = promisify(zlib.deflate);
+const brotliCompress = promisify(zlib.brotliCompress);
 
 const WOKEUP = 'woke up!';
 const sleep = (ms) => new Promise((resolve) => {
@@ -25,6 +31,22 @@ const sleep = (ms) => new Promise((resolve) => {
 });
 
 const HELLO_WORLD = 'Hello, World!';
+
+const writeChunked = (buf, out, chunkSize) => {
+  let off = 0;
+  let processed = 0;
+
+  while (processed < buf.length) {
+    out.write(buf.subarray(off, off + chunkSize));
+    off += chunkSize;
+    processed += chunkSize;
+  }
+};
+
+// remove h2 headers (e.g. :path)
+const sanitizeHeaders = (obj) => Object.fromEntries(Object.entries(obj)
+  .map(([key, val]) => [key === ':authority' ? 'host' : key, val])
+  .filter(([key, _]) => !key.startsWith(':')));
 
 class Server {
   constructor(httpMajorVersion = 2, secure = true, helloMsg = HELLO_WORLD, options = {}) {
@@ -49,11 +71,98 @@ class Server {
       const reqHandler = async (req, res) => {
         const { pathname, searchParams } = new URL(req.url, `https://localhost:${this.server.address().port}`);
         let count;
+        const data = [];
+
         switch (pathname) {
+          case '/status/200':
+          case '/status/201':
+          case '/status/202':
+          case '/status/203':
+          case '/status/204':
+          case '/status/308':
+          case '/status/500':
+            await sleep(+(searchParams.get('delay') || 0));
+            res.writeHead(+pathname.split('/')[2]);
+            res.end();
+            break;
+
           case '/hello':
             await sleep(+(searchParams.get('delay') || 0));
-            res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+            res.writeHead(+(searchParams.get('status_code') || 200), { 'Content-Type': 'text/plain; charset=utf-8' });
             res.end(this.helloMsg);
+            break;
+
+          case '/cache':
+            await sleep(+(searchParams.get('delay') || 0));
+            res.writeHead(
+              +(searchParams.get('status_code') || 200),
+              {
+                'Content-Type': 'text/plain; charset=utf-8',
+                'Cache-Control': `public, max-age=${searchParams.get('max_age')}`,
+              },
+            );
+            res.end(this.helloMsg);
+            break;
+
+          case '/cookies/set':
+            res.statusCode = 200;
+            searchParams.sort();
+            res.setHeader('Set-Cookie', searchParams.toString().split('&'));
+            res.end();
+            break;
+
+          case '/inspect':
+            await sleep(+(searchParams.get('delay') || 0));
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            req.on('data', (chunk) => {
+              data.push(chunk);
+            });
+            req.on('end', () => {
+              const buf = Buffer.concat(data);
+              res.end(JSON.stringify({
+                method: req.method,
+                url: req.url,
+                headers: sanitizeHeaders(req.headers),
+                body: buf.toString(),
+                base64Body: buf.toString('base64'),
+              }));
+            });
+            break;
+
+          case '/gzip':
+            await sleep(+(searchParams.get('delay') || 0));
+            res.writeHead(
+              200,
+              {
+                'Content-Type': 'text/plain; charset=utf-8',
+                'Content-Encoding': 'gzip',
+              },
+            );
+            res.end(await gzip(this.helloMsg));
+            break;
+
+          case '/deflate':
+            await sleep(+(searchParams.get('delay') || 0));
+            res.writeHead(
+              200,
+              {
+                'Content-Type': 'text/plain; charset=utf-8',
+                'Content-Encoding': 'deflate',
+              },
+            );
+            res.end(await deflate(this.helloMsg));
+            break;
+
+          case '/brotli':
+            await sleep(+(searchParams.get('delay') || 0));
+            res.writeHead(
+              200,
+              {
+                'Content-Type': 'text/plain; charset=utf-8',
+                'Content-Encoding': 'br',
+              },
+            );
+            res.end(await brotliCompress(this.helloMsg));
             break;
 
           case '/abort':
@@ -70,8 +179,23 @@ class Server {
 
           case '/redirect-to':
             await sleep(+(searchParams.get('delay') || 0));
-            res.writeHead(searchParams.get('status_code') || 302, { Location: searchParams.get('url') });
-            res.end(this.helloMsg);
+            res.writeHead(+(searchParams.get('status_code') || 302), { Location: searchParams.get('url') });
+            res.end();
+            break;
+
+          case '/redirect/1':
+          case '/redirect/2':
+          case '/redirect/3':
+          case '/redirect/4':
+          case '/redirect/5':
+            await sleep(+(searchParams.get('delay') || 0));
+            count = +pathname.split('/')[2];
+            if (count > 1) {
+              res.writeHead(302, { Location: `/redirect/${count - 1}` });
+            } else {
+              res.writeHead(302, { Location: '/hello' });
+            }
+            res.end();
             break;
 
           case '/bytes':
@@ -82,6 +206,16 @@ class Server {
               'Content-Length': `${count}`,
             });
             res.end(randomBytes(count));
+            break;
+
+          case '/stream-bytes':
+            await sleep(+(searchParams.get('delay') || 0));
+            count = +(searchParams.get('count') || 32);
+            res.writeHead(200, {
+              'Content-Type': 'application/octet-stream',
+            });
+            writeChunked(randomBytes(count), res, 128);
+            res.end();
             break;
 
           default:

@@ -10,9 +10,10 @@
  * governing permissions and limitations under the License.
  */
 
-/* eslint-disable no-underscore-dangle */
-
 'use strict';
+
+/* eslint-disable no-underscore-dangle */
+const { parse, getBoundary } = require('parse-multipart-data');
 
 // misc. test helpers
 
@@ -23,4 +24,14 @@ const isReadableStream = (val) => val !== null
   && typeof val._read === 'function'
   && typeof val._readableState === 'object';
 
-module.exports = { isReadableStream };
+const parseMultiPartFormData = (contentType, body) => {
+  const boundary = getBoundary(contentType);
+  const parts = parse(body, boundary);
+  const form = {};
+  for (const { name, data } of parts) {
+    form[name] = data.toString();
+  }
+  return form;
+};
+
+module.exports = { isReadableStream, parseMultiPartFormData };

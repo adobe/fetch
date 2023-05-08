@@ -54,7 +54,7 @@ describe('HTTP/2-specific Fetch Tests', () => {
 
   it('supports self signed certificate', async () => {
     // self signed certificates are rejected by default
-    assert.rejects(() => fetch(`${server.origin}/hello`));
+    await assert.rejects(() => fetch(`${server.origin}/hello`));
 
     const ctx = context({ rejectUnauthorized: false });
     try {

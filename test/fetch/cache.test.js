@@ -26,6 +26,9 @@ const {
   fetch, onPush, offPush, reset, clearCache, cacheStats, context, noCache, Response, Headers,
 } = require('../../src');
 const { cacheableResponse } = require('../../src/fetch/cacheableResponse');
+const { Server } = require('../server');
+
+const HELLO_WORLD = 'Hello, World!';
 
 const WOKEUP = 'woke up!';
 const sleep = (ms) => new Promise((resolve) => {
@@ -62,6 +65,16 @@ describe('CacheableResponse Tests', () => {
 });
 
 describe('Cache Tests', () => {
+  let server;
+
+  before(async () => {
+    server = await Server.launch(1, false, HELLO_WORLD);
+  });
+
+  after(async () => {
+    process.kill(server.pid);
+  });
+
   afterEach(async () => {
     // clear client cache
     clearCache();
@@ -70,7 +83,7 @@ describe('Cache Tests', () => {
   });
 
   it('fetch supports caching', async () => {
-    const url = 'https://httpbin.org/cache/60'; // -> max-age=60 (seconds)
+    const url = `${server.origin}/cache?max_age=60`; // -> max-age=60 (seconds)
     // send initial request, priming cache
     let resp = await fetch(url);
     assert.strictEqual(resp.status, 200);
@@ -98,7 +111,7 @@ describe('Cache Tests', () => {
   });
 
   it('clearCache works', async () => {
-    const url = 'https://httpbin.org/cache/60'; // -> max-age=60 (seconds)
+    const url = `${server.origin}/cache?max_age=60`; // -> max-age=60 (seconds)
     // send initial request, priming cache
     let resp = await fetch(url);
     assert.strictEqual(resp.status, 200);
@@ -130,7 +143,7 @@ describe('Cache Tests', () => {
     const ctx = context({ maxCacheSize });
 
     const sizes = [34 * 1024, 35 * 1024, 36 * 1024]; // sizes add up to >100kb
-    const urls = sizes.map((size) => `http://httpbin.org/bytes/${size}`);
+    const urls = sizes.map((size) => `${server.origin}/bytes?count=${size}`);
     // prime cache with multiple requests that together hit the cache size limit of 100kb
     const resps = await Promise.all(urls.map((url) => ctx.fetch(url)));
     assert.strictEqual(resps.filter((resp) => resp.status === 200).length, urls.length);
@@ -147,7 +160,7 @@ describe('Cache Tests', () => {
     // custom context with cache size limit 0
     const ctx = context({ maxCacheSize: 0 });
 
-    const url = 'https://httpbin.org/cache/60'; // -> max-age=60 (seconds)
+    const url = `${server.origin}/cache?max_age=60`; // -> max-age=60 (seconds)
     // send initial request
     let resp = await ctx.fetch(url);
     assert.strictEqual(resp.status, 200);
@@ -168,7 +181,7 @@ describe('Cache Tests', () => {
     // custom context with cache size limit 0
     const ctx = noCache();
 
-    const url = 'https://httpbin.org/cache/60'; // -> max-age=60 (seconds)
+    const url = `${server.origin}/cache?max_age=60`; // -> max-age=60 (seconds)
     // send initial request
     let resp = await ctx.fetch(url);
     assert.strictEqual(resp.status, 200);
@@ -187,7 +200,7 @@ describe('Cache Tests', () => {
 
   it('fetch supports max-age directive', async () => {
     // max-age=3 seconds
-    const url = 'https://httpbin.org/cache/3';
+    const url = `${server.origin}/cache?max_age=3`;
     // send request
     let resp = await fetch(url);
     assert.strictEqual(resp.status, 200);
@@ -210,7 +223,7 @@ describe('Cache Tests', () => {
   });
 
   it('fetch supports max-age=0', async () => {
-    const url = 'https://httpbin.org/cache/0';
+    const url = `${server.origin}/cache?max_age=0`; // -> max-age=0 (seconds)
     let resp = await fetch(url);
     assert.strictEqual(resp.status, 200);
     const cc = parseCacheControl(resp.headers.get('cache-control'));
@@ -223,17 +236,17 @@ describe('Cache Tests', () => {
 
   it('fetch supports no-store directive', async () => {
     // send request with no-store directive
-    const resp = await fetch('https://httpbin.org/image/jpeg', { headers: { 'cache-control': 'no-store' } });
+    const resp = await fetch(`${server.origin}/bytes?count=512`, { headers: { 'cache-control': 'no-store' } });
     assert.strictEqual(resp.status, 200);
     assert(!resp.fromCache);
   });
 
   it('buffer() et al work on un-cached response', async () => {
     // send initial request with no-store directive
-    let resp = await fetch('https://httpbin.org/image/jpeg', { cache: 'no-store' });
+    let resp = await fetch(`${server.origin}/bytes?count=512`, { cache: 'no-store' });
     assert.strictEqual(resp.status, 200);
     // re-send request
-    resp = await fetch('https://httpbin.org/image/jpeg', { cache: 'no-store' });
+    resp = await fetch(`${server.origin}/bytes?count=512`, { cache: 'no-store' });
     assert.strictEqual(resp.status, 200);
     // make sure it's not delivered from cache
     assert(!resp.fromCache);
@@ -246,7 +259,7 @@ describe('Cache Tests', () => {
   });
 
   it('body (stream) works on un-cached response', async () => {
-    const url = 'https://httpbin.org/image/jpeg';
+    const url = `${server.origin}/bytes?count=512`;
     // send initial request with no-store directive
     let resp = await fetch(url, { cache: 'no-store' });
     assert.strictEqual(resp.status, 200);
@@ -261,7 +274,7 @@ describe('Cache Tests', () => {
   });
 
   it('text() works on un-cached response', async () => {
-    const url = 'https://httpbin.org/get';
+    const url = `${server.origin}/hello`;
     // send initial request with no-store directive
     let resp = await fetch(url, { cache: 'no-store' });
     assert.strictEqual(resp.status, 200);
@@ -276,7 +289,7 @@ describe('Cache Tests', () => {
   });
 
   it('arrayBuffer() works on un-cached response', async () => {
-    const url = 'https://httpbin.org/get';
+    const url = `${server.origin}/bytes?count=64`;
     // send initial request with no-store directive
     let resp = await fetch(url, { cache: 'no-store' });
     assert.strictEqual(resp.status, 200);
@@ -284,6 +297,7 @@ describe('Cache Tests', () => {
     resp = await fetch(url, { cache: 'no-store' });
     assert.strictEqual(resp.status, 200);
     const contentLength = +resp.headers.get('content-length');
+    assert.strictEqual(contentLength, 64);
     // make sure it's not delivered from cache
     assert(!resp.fromCache);
 
@@ -294,7 +308,7 @@ describe('Cache Tests', () => {
   });
 
   it('json() works on un-cached response', async () => {
-    const url = 'https://httpbin.org/get';
+    const url = `${server.origin}/inspect`;
     // send initial request with no-store directive
     let resp = await fetch(url, { cache: 'no-store' });
     assert.strictEqual(resp.status, 200);
@@ -307,11 +321,12 @@ describe('Cache Tests', () => {
     // json()
     assert.strictEqual(resp.headers.plain()['content-type'], 'application/json');
     const json = await resp.json();
-    assert.strictEqual(json.url, url);
+    const { pathname, search } = new URL(url);
+    assert.strictEqual(json.url, `${pathname}${search}`);
   });
 
   it('body accessor methods work on cached response', async () => {
-    const url = 'https://httpbin.org/cache/60';
+    const url = `${server.origin}/cache?max_age=60`; // -> max-age=60 (seconds)
     // send initial request, priming cache
     let resp = await fetch(url);
     assert.strictEqual(resp.status, 200);
@@ -321,22 +336,20 @@ describe('Cache Tests', () => {
     // make sure it's delivered from cache
     assert(resp.fromCache);
 
+    const expectedContentLength = Buffer.from(HELLO_WORLD).length;
     const buf = await resp.buffer();
     assert(Buffer.isBuffer(buf));
-    const contentLength = +resp.headers.get('content-length');
-    assert.strictEqual(buf.length, contentLength);
+    assert.strictEqual(buf.length, expectedContentLength);
 
     const arrBuf = await resp.arrayBuffer();
     assert(arrBuf instanceof ArrayBuffer);
-    assert.strictEqual(arrBuf.byteLength, contentLength);
+    assert.strictEqual(arrBuf.byteLength, expectedContentLength);
 
     assert(isReadableStream(resp.body));
 
-    assert.strictEqual(resp.headers.plain()['content-type'], 'application/json');
-    const json = await resp.json();
-    assert.strictEqual(json.url, url);
-
-    assert.deepStrictEqual(JSON.parse(await resp.text()), json);
+    assert.strictEqual(resp.headers.plain()['content-type'], 'text/plain; charset=utf-8');
+    const text = await resp.text();
+    assert.strictEqual(text, HELLO_WORLD);
   });
 
   it('fetch supports HTTP/2 server push', async () => {
@@ -415,7 +428,7 @@ describe('Cache Tests', () => {
   });
 
   it('resp.headers is wrapped on cached response', async () => {
-    const resp = await fetch('https://httpbin.org/put', {
+    const resp = await fetch(`${server.origin}/inspect`, {
       method: 'PUT',
       body: JSON.stringify({ foo: 'bar' }),
       headers: {

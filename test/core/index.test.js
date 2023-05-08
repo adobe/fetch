@@ -22,11 +22,13 @@ const { promisify } = require('util');
 const { FormData } = require('formdata-node');
 const { WritableStreamBuffer } = require('stream-buffers');
 
-const { isReadableStream } = require('../utils');
+const { isReadableStream, parseMultiPartFormData } = require('../utils');
 const { AbortController } = require('../../src/fetch/abort');
 const { context, ALPN_HTTP1_1 } = require('../../src/core');
 const { RequestAbortedError } = require('../../src/core/errors');
 const { Server } = require('../server');
+
+const HELLO_WORLD = 'Hello, World!';
 
 const WOKEUP = 'woke up!';
 const sleep = (ms) => new Promise((resolve) => {
@@ -43,44 +45,54 @@ const readStream = async (stream) => {
 
 describe('Core Tests', () => {
   let defaultCtx;
+  let server;
 
   before(async () => {
-    defaultCtx = context();
+    defaultCtx = context({ rejectUnauthorized: false });
+    server = await Server.launch(2, true, HELLO_WORLD);
   });
 
   after(async () => {
     await defaultCtx.reset();
+    process.kill(server.pid);
   });
 
   it('supports HTTP/1(.1)', async () => {
-    const resp = await defaultCtx.request('http://httpbin.org/status/200');
-    assert.strictEqual(resp.statusCode, 200);
-    assert.strictEqual(resp.httpVersionMajor, 1);
+    // start HTTP/1.1 server
+    const h1Server = await Server.launch(1);
+
+    try {
+      const resp = await defaultCtx.request(`${h1Server.origin}/status/200`);
+      assert.strictEqual(resp.statusCode, 200);
+      assert.strictEqual(resp.httpVersionMajor, 1);
+    } finally {
+      process.kill(h1Server.pid);
+    }
   });
 
   it('supports HTTP/2', async () => {
-    let resp = await defaultCtx.request('https://www.nghttp2.org/httpbin/status/200');
+    let resp = await defaultCtx.request(`${server.origin}/status/200`);
     assert.strictEqual(resp.statusCode, 200);
     assert.strictEqual(resp.httpVersionMajor, 2);
 
-    resp = await defaultCtx.request('https://www.nghttp2.org/httpbin/status/201');
-    assert.strictEqual(resp.statusCode, 201);
+    resp = await defaultCtx.request(`${server.origin}/status/204`);
+    assert.strictEqual(resp.statusCode, 204);
     assert.strictEqual(resp.httpVersionMajor, 2);
   });
 
   it('throws on unsupported protocol', async () => {
-    await assert.rejects(defaultCtx.request('ftp://httpbin.org/'), 'TypeError');
+    await assert.rejects(defaultCtx.request('ftp://example.com/'), 'TypeError');
   });
 
   it('unsupported method', async () => {
-    const resp = await defaultCtx.request('https://httpbin.org/status/200', { method: 'BOMB' });
+    const resp = await defaultCtx.request('https://fetch.spec.whatwg.org/', { method: 'BOMB' });
     assert.strictEqual(resp.statusCode, 405);
   });
 
   it('supports binary response body (Stream)', async () => {
-    const dataLen = 64 * 1024; // httpbin.org/stream-bytes/{n} has a limit of 100kb ...
+    const dataLen = 128 * 1024;
     const contentType = 'application/octet-stream';
-    const resp = await defaultCtx.request(`https://httpbin.org/stream-bytes/${dataLen}`, {
+    const resp = await defaultCtx.request(`${server.origin}/stream-bytes?count=${dataLen}`, {
       headers: { accept: contentType },
     });
     assert.strictEqual(resp.statusCode, 200);
@@ -128,19 +140,19 @@ describe('Core Tests', () => {
   it('does not overwrite accept-encoding header', async () => {
     const acceptEncoding = 'deflate';
     const headers = { 'accept-encoding': acceptEncoding };
-    const resp = await defaultCtx.request('https://httpbin.org/headers', { headers });
+    const resp = await defaultCtx.request(`${server.origin}/inspect`, { headers });
     assert.strictEqual(resp.statusCode, 200);
     assert.strictEqual(resp.headers['content-type'], 'application/json');
 
     const buf = await readStream(resp.readable);
     const json = JSON.parse(buf);
-    assert.strictEqual(json.headers['Accept-Encoding'], acceptEncoding);
+    assert.strictEqual(json.headers['accept-encoding'], acceptEncoding);
   });
 
   it('creating custom context works', async () => {
-    const customCtx = context();
+    const customCtx = context({ rejectUnauthorized: false });
     try {
-      const resp = await customCtx.request('https://httpbin.org/status/200');
+      const resp = await customCtx.request(`${server.origin}/status/200`);
       assert.strictEqual(resp.statusCode, 200);
     } finally {
       await customCtx.reset();
@@ -158,7 +170,7 @@ describe('Core Tests', () => {
 
     const ts0 = Date.now();
     try {
-      await defaultCtx.request('https://httpbin.org/status/200', { signal });
+      await defaultCtx.request(`${server.origin}/status/200`, { signal });
       assert.fail();
     } catch (err) {
       assert(err instanceof RequestAbortedError);
@@ -176,11 +188,11 @@ describe('Core Tests', () => {
     await sleep(10);
     assert(signal.aborted);
 
-    const customCtx = context();
+    const customCtx = context({ rejectUnauthorized: false });
 
     const ts0 = Date.now();
     try {
-      await customCtx.request('https://httpbin.org/status/200', { signal });
+      await customCtx.request(`${server.origin}/status/200`, { signal });
       assert.fail();
     } catch (err) {
       assert(err instanceof RequestAbortedError);
@@ -199,7 +211,7 @@ describe('Core Tests', () => {
     const ts0 = Date.now();
     try {
       // the server responds with a 2 second delay, fetch is aborted after 1 second.
-      await defaultCtx.request('https://httpbin.org/delay/2', { signal });
+      await defaultCtx.request(`${server.origin}/status/200?delay=2000`, { signal });
       assert.fail();
     } catch (err) {
       assert(err instanceof RequestAbortedError);
@@ -228,16 +240,17 @@ describe('Core Tests', () => {
   it('overriding user-agent works (context)', async () => {
     const customUserAgent = 'custom-agent';
     const customCtx = context({
+      rejectUnauthorized: false,
       userAgent: customUserAgent,
     });
     try {
-      const resp = await customCtx.request('https://httpbin.org/user-agent');
+      const resp = await customCtx.request(`${server.origin}/inspect`);
       assert.strictEqual(resp.statusCode, 200);
       assert.strictEqual(resp.headers['content-type'], 'application/json');
 
       const buf = await readStream(resp.readable);
       const json = JSON.parse(buf);
-      assert.strictEqual(json['user-agent'], customUserAgent);
+      assert.strictEqual(json.headers['user-agent'], customUserAgent);
     } finally {
       await customCtx.reset();
     }
@@ -248,13 +261,13 @@ describe('Core Tests', () => {
     const opts = {
       headers: { 'user-agent': customUserAgent },
     };
-    const resp = await defaultCtx.request('https://httpbin.org/user-agent', opts);
+    const resp = await defaultCtx.request(`${server.origin}/inspect`, opts);
     assert.strictEqual(resp.statusCode, 200);
     assert.strictEqual(resp.headers['content-type'], 'application/json');
 
     const buf = await readStream(resp.readable);
     const json = JSON.parse(buf);
-    assert.strictEqual(json['user-agent'], customUserAgent);
+    assert.strictEqual(json.headers['user-agent'], customUserAgent);
   });
 
   it('forcing HTTP/1.1 works', async () => {
@@ -283,9 +296,9 @@ describe('Core Tests', () => {
     const N = 100; // # of parallel requests
 
     // start secure HTTP/2 server
-    const server = await Server.launch(2, true);
+    const testServer = await Server.launch(2, true);
 
-    const TEST_URL = `${server.origin}/bytes`;
+    const TEST_URL = `${testServer.origin}/bytes`;
     // generete array of 'randomized' urls
     const urls = Array.from({ length: N }, () => Math.floor(Math.random() * N)).map((num) => `${TEST_URL}?count=${num}`);
 
@@ -300,23 +313,23 @@ describe('Core Tests', () => {
       assert.strictEqual(ok.length, N);
     } finally {
       await ctx.reset();
-      process.kill(server.pid);
+      process.kill(testServer.pid);
     }
   });
 
   it('supports json POST', async () => {
     const method = 'POST';
     const body = { foo: 'bar' };
-    const resp = await defaultCtx.request('https://httpbin.org/post', { method, body });
+    const resp = await defaultCtx.request(`${server.origin}/inspect`, { method, body });
     assert.strictEqual(resp.statusCode, 200);
     assert.strictEqual(resp.headers['content-type'], 'application/json');
     const buf = await readStream(resp.readable);
-    const jsonResponseBody = JSON.parse(buf);
-    assert(typeof jsonResponseBody === 'object');
-    const { json, headers } = jsonResponseBody;
-    assert.strictEqual(headers['Content-Type'], 'application/json');
-    assert.strictEqual(+headers['Content-Length'], JSON.stringify(body).length);
-    assert.deepStrictEqual(json, body);
+    const json = JSON.parse(buf);
+    assert(typeof json === 'object');
+    assert.strictEqual(json.method, method);
+    assert.strictEqual(json.headers['content-type'], 'application/json');
+    assert.strictEqual(+json.headers['content-length'], JSON.stringify(body).length);
+    assert.deepStrictEqual(JSON.parse(json.body), body);
   });
 
   it('supports json POST (override content-type)', async () => {
@@ -324,52 +337,52 @@ describe('Core Tests', () => {
     const body = { foo: 'bar' };
     const contentType = 'application/x-javascript';
     const headers = { 'content-type': contentType };
-    const resp = await defaultCtx.request('https://httpbin.org/post', { method, body, headers });
+    const resp = await defaultCtx.request(`${server.origin}/inspect`, { method, body, headers });
     assert.strictEqual(resp.statusCode, 200);
     assert.strictEqual(resp.headers['content-type'], 'application/json');
     const buf = await readStream(resp.readable);
-    const jsonResponseBody = JSON.parse(buf);
-    assert(typeof jsonResponseBody === 'object');
-    const { json, headers: reqHeaders } = jsonResponseBody;
-    assert.strictEqual(reqHeaders['Content-Type'], contentType);
-    assert.strictEqual(+reqHeaders['Content-Length'], JSON.stringify(body).length);
-    assert.deepStrictEqual(json, body);
+    const json = JSON.parse(buf);
+    assert(typeof json === 'object');
+    assert.strictEqual(json.method, method);
+    assert.strictEqual(json.headers['content-type'], contentType);
+    assert.strictEqual(+json.headers['content-length'], JSON.stringify(body).length);
+    assert.deepStrictEqual(JSON.parse(json.body), body);
   });
 
   it('supports text body', async () => {
     const method = 'POST';
     const body = 'Hello, World!';
-    const resp = await defaultCtx.request('https://httpbin.org/post', { method, body });
+    const resp = await defaultCtx.request(`${server.origin}/inspect`, { method, body });
     assert.strictEqual(resp.statusCode, 200);
     assert.strictEqual(resp.headers['content-type'], 'application/json');
     const buf = await readStream(resp.readable);
-    const jsonResponseBody = JSON.parse(buf);
-    assert(typeof jsonResponseBody === 'object');
-    const { data, headers } = jsonResponseBody;
-    assert.strictEqual(headers['Content-Type'], 'text/plain; charset=utf-8');
-    assert.strictEqual(+headers['Content-Length'], body.length);
-    assert.strictEqual(data, body);
+    const json = JSON.parse(buf);
+    assert(typeof json === 'object');
+    assert.strictEqual(json.method, method);
+    assert.strictEqual(json.headers['content-type'], 'text/plain; charset=utf-8');
+    assert.strictEqual(+json.headers['content-length'], body.length);
+    assert.strictEqual(json.body, body);
   });
 
   it('supports text multibyte body', async () => {
     const method = 'POST';
     const body = 'こんにちは';
-    const resp = await defaultCtx.request('https://httpbin.org/post', { method, body });
+    const resp = await defaultCtx.request(`${server.origin}/inspect`, { method, body });
     assert.strictEqual(resp.statusCode, 200);
     assert.strictEqual(resp.headers['content-type'], 'application/json');
     const buf = await readStream(resp.readable);
-    const jsonResponseBody = JSON.parse(buf);
-    assert(typeof jsonResponseBody === 'object');
-    const { data, headers } = jsonResponseBody;
-    assert.strictEqual(headers['Content-Type'], 'text/plain; charset=utf-8');
-    assert.strictEqual(+headers['Content-Length'], Buffer.from(body, 'utf-8').length);
-    assert.strictEqual(data, body);
+    const json = JSON.parse(buf);
+    assert(typeof json === 'object');
+    assert.strictEqual(json.method, method);
+    assert.strictEqual(json.headers['content-type'], 'text/plain; charset=utf-8');
+    assert.strictEqual(+json.headers['content-length'], Buffer.from(body, 'utf-8').length);
+    assert.strictEqual(json.body, body);
   });
 
   it('supports buffer body', async () => {
     const method = 'POST';
     const body = Buffer.from(new Uint8Array([0xfe, 0xff, 0x41]));
-    const resp = await defaultCtx.request('https://httpbin.org/post', {
+    const resp = await defaultCtx.request(`${server.origin}/inspect`, {
       method,
       body,
       headers: {
@@ -379,13 +392,13 @@ describe('Core Tests', () => {
     assert.strictEqual(resp.statusCode, 200);
     assert.strictEqual(resp.headers['content-type'], 'application/json');
     const buf = await readStream(resp.readable);
-    const jsonResponseBody = JSON.parse(buf);
-    assert(typeof jsonResponseBody === 'object');
-    const { data, headers } = jsonResponseBody;
-    assert.strictEqual(headers['Content-Type'], 'application/octet-stream');
-    assert.strictEqual(+headers['Content-Length'], body.length);
+    const json = JSON.parse(buf);
+    assert(typeof json === 'object');
+    assert.strictEqual(json.method, method);
+    assert.strictEqual(json.headers['content-type'], 'application/octet-stream');
+    assert.strictEqual(+json.headers['content-length'], body.length);
     assert.deepStrictEqual(
-      Buffer.from(data.substring('data:application/octet-stream;base64,'.length), 'base64'),
+      Buffer.from(json.base64Body, 'base64'),
       body,
     );
   });
@@ -393,7 +406,7 @@ describe('Core Tests', () => {
   it('supports arrayBuffer body', async () => {
     const method = 'POST';
     const body = new Uint8Array([0xfe, 0xff, 0x41]).buffer; // ArrayBuffer instance
-    const resp = await defaultCtx.request('https://httpbin.org/post', {
+    const resp = await defaultCtx.request(`${server.origin}/inspect`, {
       method,
       body,
       headers: {
@@ -403,13 +416,13 @@ describe('Core Tests', () => {
     assert.strictEqual(resp.statusCode, 200);
     assert.strictEqual(resp.headers['content-type'], 'application/json');
     const buf = await readStream(resp.readable);
-    const jsonResponseBody = JSON.parse(buf);
-    assert(typeof jsonResponseBody === 'object');
-    const { data, headers } = jsonResponseBody;
-    assert.strictEqual(headers['Content-Type'], 'application/octet-stream');
-    assert.strictEqual(+headers['Content-Length'], body.byteLength);
+    const json = JSON.parse(buf);
+    assert(typeof json === 'object');
+    assert.strictEqual(json.method, method);
+    assert.strictEqual(json.headers['content-type'], 'application/octet-stream');
+    assert.strictEqual(+json.headers['content-length'], body.byteLength);
     assert.deepStrictEqual(
-      Buffer.from(data.substring('data:application/octet-stream;base64,'.length), 'base64'),
+      Buffer.from(json.base64Body, 'base64'),
       Buffer.from(new Uint8Array(body)),
     );
   });
@@ -419,44 +432,44 @@ describe('Core Tests', () => {
     const body = '<h1>Hello, World!</h1>';
     const contentType = 'text/html; charset=utf-8';
     const headers = { 'content-type': contentType };
-    const resp = await defaultCtx.request('https://httpbin.org/post', { method, body, headers });
+    const resp = await defaultCtx.request(`${server.origin}/inspect`, { method, body, headers });
     assert.strictEqual(resp.statusCode, 200);
     assert.strictEqual(resp.headers['content-type'], 'application/json');
     const buf = await readStream(resp.readable);
-    const jsonResponseBody = JSON.parse(buf);
-    assert(typeof jsonResponseBody === 'object');
-    const { data, headers: reqHeaders } = jsonResponseBody;
-    assert.strictEqual(reqHeaders['Content-Type'], contentType);
-    assert.strictEqual(+reqHeaders['Content-Length'], body.length);
-    assert.strictEqual(data, body);
+    const json = JSON.parse(buf);
+    assert(typeof json === 'object');
+    assert.strictEqual(json.method, method);
+    assert.strictEqual(json.headers['content-type'], contentType);
+    assert.strictEqual(+json.headers['content-length'], body.length);
+    assert.strictEqual(json.body, body);
   });
 
   it('supports stream body', async () => {
     const method = 'POST';
     const body = fs.createReadStream(__filename);
-    const resp = await defaultCtx.request('https://httpbingo.org/post', { method, body });
+    const resp = await defaultCtx.request(`${server.origin}/inspect`, { method, body });
     assert.strictEqual(resp.statusCode, 200);
-    assert.strictEqual(resp.headers['content-type'], 'application/json; encoding=utf-8');
+    assert.strictEqual(resp.headers['content-type'], 'application/json');
     const buf = await readStream(resp.readable);
-    const jsonResponseBody = JSON.parse(buf);
-    assert(typeof jsonResponseBody === 'object');
-    const { data, headers } = jsonResponseBody;
-    assert.strictEqual(data, fs.readFileSync(__filename).toString());
-    assert.strictEqual(headers['Content-Length'], undefined);
+    const json = JSON.parse(buf);
+    assert(typeof json === 'object');
+    assert.strictEqual(json.method, method);
+    assert.strictEqual(json.headers['content-length'], undefined);
+    assert.strictEqual(json.body, fs.readFileSync(__filename).toString());
   });
 
   it('coerces arbitrary body to string', async () => {
     const method = 'POST';
     const body = Number(313);
-    const resp = await defaultCtx.request('https://httpbingo.org/post', { method, body });
+    const resp = await defaultCtx.request(`${server.origin}/inspect`, { method, body });
     assert.strictEqual(resp.statusCode, 200);
-    assert.strictEqual(resp.headers['content-type'], 'application/json; encoding=utf-8');
+    assert.strictEqual(resp.headers['content-type'], 'application/json');
     const buf = await readStream(resp.readable);
-    const jsonResponseBody = JSON.parse(buf);
-    assert(typeof jsonResponseBody === 'object');
-    const { data, headers } = jsonResponseBody;
-    assert.strictEqual(data, String(body));
-    assert.strictEqual(+headers['Content-Length'], String(body).length);
+    const json = JSON.parse(buf);
+    assert(typeof json === 'object');
+    assert.strictEqual(json.method, method);
+    assert.strictEqual(+json.headers['content-length'], String(body).length);
+    assert.strictEqual(json.body, String(body));
   });
 
   it('supports URLSearchParams body', async () => {
@@ -466,16 +479,16 @@ describe('Core Tests', () => {
     };
     const method = 'POST';
     const body = new URLSearchParams(params);
-    const resp = await defaultCtx.request('https://httpbin.org/post', { method, body });
+    const resp = await defaultCtx.request(`${server.origin}/inspect`, { method, body });
     assert.strictEqual(resp.statusCode, 200);
     assert.strictEqual(resp.headers['content-type'], 'application/json');
     const buf = await readStream(resp.readable);
-    const jsonResponseBody = JSON.parse(buf);
-    assert(typeof jsonResponseBody === 'object');
-    const { form, headers } = jsonResponseBody;
-    assert.strictEqual(headers['Content-Type'], 'application/x-www-form-urlencoded; charset=utf-8');
-    assert.strictEqual(+headers['Content-Length'], body.toString().length);
-    assert.deepStrictEqual(form, params);
+    const json = JSON.parse(buf);
+    assert(typeof json === 'object');
+    assert.strictEqual(json.method, method);
+    assert.strictEqual(json.headers['content-type'], 'application/x-www-form-urlencoded; charset=utf-8');
+    assert.strictEqual(+json.headers['content-length'], body.toString().length);
+    assert.strictEqual(json.body, body.toString());
   });
 
   it('supports spec-compliant FormData body', async () => {
@@ -487,56 +500,55 @@ describe('Core Tests', () => {
     const form = new FormData();
     Object.entries(searchParams).forEach(([k, v]) => form.append(k, v));
 
-    const resp = await defaultCtx.request('https://httpbin.org/post', { method, body: form });
+    const resp = await defaultCtx.request(`${server.origin}/inspect`, { method, body: form });
     assert.strictEqual(resp.statusCode, 200);
     assert.strictEqual(resp.headers['content-type'], 'application/json');
     const buf = await readStream(resp.readable);
-    const jsonResponseBody = JSON.parse(buf);
-    assert(typeof jsonResponseBody === 'object');
-    const { form: reqForm, headers } = jsonResponseBody;
-    assert(headers['Content-Type'].startsWith('multipart/form-data; boundary='));
-    assert.deepStrictEqual(reqForm, searchParams);
+    const json = JSON.parse(buf);
+    assert(typeof json === 'object');
+    assert.strictEqual(json.method, method);
+    assert(json.headers['content-type'].startsWith('multipart/form-data; boundary='));
+    const reqForm = parseMultiPartFormData(json.headers['content-type'], Buffer.from(json.base64Body, 'base64'));
+    assert.deepStrictEqual(searchParams, reqForm);
   });
 
   it('supports POST without body', async () => {
     const method = 'POST';
-    const resp = await defaultCtx.request('https://httpbin.org/post', { method });
+    const resp = await defaultCtx.request(`${server.origin}/inspect`, { method });
     assert.strictEqual(resp.statusCode, 200);
     assert.strictEqual(resp.headers['content-type'], 'application/json');
     const buf = await readStream(resp.readable);
-    const jsonResponseBody = JSON.parse(buf);
-    assert(typeof jsonResponseBody === 'object');
-    assert.strictEqual(+jsonResponseBody.headers['Content-Length'], 0);
+    const json = JSON.parse(buf);
+    assert(typeof json === 'object');
+    assert.strictEqual(json.method, method);
+    assert.strictEqual(+json.headers['content-length'], 0);
   });
 
   it('supports gzip content encoding', async () => {
-    const resp = await defaultCtx.request('https://httpbin.org/gzip');
+    const resp = await defaultCtx.request(`${server.origin}/gzip`);
     assert.strictEqual(resp.statusCode, 200);
-    assert.strictEqual(resp.headers['content-type'], 'application/json');
+    assert(resp.headers['content-type'].startsWith('text/plain'));
+    assert.strictEqual(resp.headers['content-encoding'], 'gzip');
     const buf = await readStream(resp.readable);
-    const jsonResponseBody = JSON.parse(buf);
-    assert(typeof jsonResponseBody === 'object');
-    assert.strictEqual(jsonResponseBody.gzipped, true);
+    assert.strictEqual(buf.toString(), HELLO_WORLD);
   });
 
   it('supports deflate content encoding', async () => {
-    const resp = await defaultCtx.request('https://httpbin.org/deflate');
+    const resp = await defaultCtx.request(`${server.origin}/deflate`);
     assert.strictEqual(resp.statusCode, 200);
-    assert.strictEqual(resp.headers['content-type'], 'application/json');
+    assert(resp.headers['content-type'].startsWith('text/plain'));
+    assert.strictEqual(resp.headers['content-encoding'], 'deflate');
     const buf = await readStream(resp.readable);
-    const jsonResponseBody = JSON.parse(buf);
-    assert(typeof jsonResponseBody === 'object');
-    assert.strictEqual(jsonResponseBody.deflated, true);
+    assert.strictEqual(buf.toString(), HELLO_WORLD);
   });
 
   it('supports brotli content encoding', async () => {
-    const resp = await defaultCtx.request('https://httpbin.org/brotli');
+    const resp = await defaultCtx.request(`${server.origin}/brotli`);
     assert.strictEqual(resp.statusCode, 200);
-    assert.strictEqual(resp.headers['content-type'], 'application/json');
+    assert(resp.headers['content-type'].startsWith('text/plain'));
+    assert.strictEqual(resp.headers['content-encoding'], 'br');
     const buf = await readStream(resp.readable);
-    const jsonResponseBody = JSON.parse(buf);
-    assert(typeof jsonResponseBody === 'object');
-    assert.strictEqual(jsonResponseBody.brotli, true);
+    assert.strictEqual(buf.toString(), HELLO_WORLD);
   });
 
   it('supports HTTP/2 server push', async () => {
@@ -636,9 +648,9 @@ describe('Core Tests', () => {
 
   it('supports timeout for idle HTTP/2 session', async () => {
     // automatically close idle session after 100ms
-    const customCtx = context({ h2: { idleSessionTimeout: 100 } });
+    const customCtx = context({ h2: { idleSessionTimeout: 100, rejectUnauthorized: false } });
     try {
-      const resp = await customCtx.request('https://www.nghttp2.org/httpbin/status/200');
+      const resp = await customCtx.request(`${server.origin}/status/200`);
       assert.strictEqual(resp.statusCode, 200);
       assert.strictEqual(resp.httpVersionMajor, 2);
       // verify response stream is ready to be consumed
