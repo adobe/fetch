@@ -22,7 +22,7 @@ const { promisify } = require('util');
 const { FormData } = require('formdata-node');
 const { WritableStreamBuffer } = require('stream-buffers');
 
-const { isReadableStream } = require('../utils');
+const { isReadableStream, parseMultiPartFormData } = require('../utils');
 const { Server } = require('../server');
 const defaultFetchContext = require('../../src/fetch');
 
@@ -75,33 +75,39 @@ testParams.forEach((params) => {
       reset,
     },
   } = params;
-  const baseUrl = `${protocol}://${httpVersion === '2.0' ? 'www.nghttp2.org/httpbin' : 'httpbin.org'}`;
 
   describe(`Fetch Tests: ${name}`, () => {
+    let server;
+
+    before(async () => {
+      server = await Server.launch(httpVersion === '2.0' ? 2 : 1, protocol === 'https', HELLO_WORLD);
+    });
+
     after(async () => {
       await reset();
+      process.kill(server.pid);
     });
 
     it('rejects on non-string method option', async () => {
-      assert.rejects(() => fetch(`${baseUrl}/status/200`, { method: true }));
+      await assert.rejects(() => fetch(`${server.origin}/status/200`, { method: true }));
     });
 
     it('return ok for 2xx status codes', async () => {
-      const resp = await fetch(`${baseUrl}/status/204`);
+      const resp = await fetch(`${server.origin}/status/204`);
       assert.strictEqual(resp.status, 204);
       assert.strictEqual(resp.ok, true);
       assert.strictEqual(resp.httpVersion, httpVersion);
     });
 
     it('returns !ok non-2xx status codes', async () => {
-      const resp = await fetch(`${baseUrl}/status/500`);
+      const resp = await fetch(`${server.origin}/status/500`);
       assert.strictEqual(resp.status, 500);
       assert.strictEqual(resp.ok, false);
       assert.strictEqual(resp.httpVersion, httpVersion);
     });
 
     it('supports json response body', async () => {
-      const resp = await fetch(`${baseUrl}/json`);
+      const resp = await fetch(`${server.origin}/inspect`);
       assert.strictEqual(resp.status, 200);
       assert.strictEqual(resp.httpVersion, httpVersion);
       assert.strictEqual(resp.headers.get('content-type'), 'application/json');
@@ -110,9 +116,9 @@ testParams.forEach((params) => {
     });
 
     it('supports binary response body (ArrayBuffer)', async () => {
-      const dataLen = 64 * 1024; // httpbin.org/stream-bytes/{n} has a limit of 100kb ...
+      const dataLen = 100 * 1024;
       const contentType = 'application/octet-stream';
-      const resp = await fetch(`${baseUrl}/stream-bytes/${dataLen}`, {
+      const resp = await fetch(`${server.origin}/stream-bytes?count=${dataLen}`, {
         headers: { accept: contentType },
       });
       assert.strictEqual(resp.status, 200);
@@ -124,9 +130,9 @@ testParams.forEach((params) => {
     });
 
     it('supports binary response body (Stream)', async () => {
-      const dataLen = 64 * 1024; // httpbin.org/stream-bytes/{n} has a limit of 100kb ...
+      const dataLen = 100 * 1024;
       const contentType = 'application/octet-stream';
-      const resp = await fetch(`${baseUrl}/stream-bytes/${dataLen}`, {
+      const resp = await fetch(`${server.origin}/stream-bytes?count=${dataLen}`, {
         headers: { accept: contentType },
       });
       assert.strictEqual(resp.status, 200);
@@ -145,46 +151,46 @@ testParams.forEach((params) => {
     it('supports json POST', async () => {
       const method = 'POST';
       const body = { foo: 'bar' };
-      const resp = await fetch(`${baseUrl}/post`, { method, body });
+      const resp = await fetch(`${server.origin}/inspect`, { method, body });
       assert.strictEqual(resp.status, 200);
       assert.strictEqual(resp.httpVersion, httpVersion);
       assert.strictEqual(resp.headers.get('content-type'), 'application/json');
-      const jsonResponseBody = await resp.json();
-      assert(jsonResponseBody !== null && typeof jsonResponseBody === 'object');
-      const { json, headers } = jsonResponseBody;
-      assert.strictEqual(headers['Content-Type'], 'application/json');
-      assert.strictEqual(+headers['Content-Length'], JSON.stringify(body).length);
-      assert.deepStrictEqual(json, body);
+      const json = await resp.json();
+      assert(json !== null && typeof json === 'object');
+      assert.strictEqual(json.method, method);
+      assert.strictEqual(json.headers['content-type'], 'application/json');
+      assert.strictEqual(+json.headers['content-length'], JSON.stringify(body).length);
+      assert.deepStrictEqual(JSON.parse(json.body), body);
     });
 
     it('supports json PATCH', async () => {
       const method = 'PATCH';
       const body = { foo: 'bar' };
-      const resp = await fetch(`${baseUrl}/patch`, { method, body });
+      const resp = await fetch(`${server.origin}/inspect`, { method, body });
       assert.strictEqual(resp.status, 200);
       assert.strictEqual(resp.httpVersion, httpVersion);
       assert.strictEqual(resp.headers.get('content-type'), 'application/json');
-      const jsonResponseBody = await resp.json();
-      assert(jsonResponseBody !== null && typeof jsonResponseBody === 'object');
-      const { json, headers } = jsonResponseBody;
-      assert.strictEqual(headers['Content-Type'], 'application/json');
-      assert.strictEqual(+headers['Content-Length'], JSON.stringify(body).length);
-      assert.deepStrictEqual(json, body);
+      const json = await resp.json();
+      assert(json !== null && typeof json === 'object');
+      assert.strictEqual(json.method, method);
+      assert.strictEqual(json.headers['content-type'], 'application/json');
+      assert.strictEqual(+json.headers['content-length'], JSON.stringify(body).length);
+      assert.deepStrictEqual(JSON.parse(json.body), body);
     });
 
     it('sanitizes lowercase method names', async () => {
       const method = 'post';
       const body = { foo: 'bar' };
-      const resp = await fetch(`${baseUrl}/post`, { method, body });
+      const resp = await fetch(`${server.origin}/inspect`, { method, body });
       assert.strictEqual(resp.status, 200);
       assert.strictEqual(resp.httpVersion, httpVersion);
       assert.strictEqual(resp.headers.get('content-type'), 'application/json');
-      const jsonResponseBody = await resp.json();
-      assert(jsonResponseBody !== null && typeof jsonResponseBody === 'object');
-      const { json, headers } = jsonResponseBody;
-      assert.strictEqual(headers['Content-Type'], 'application/json');
-      assert.strictEqual(+headers['Content-Length'], JSON.stringify(body).length);
-      assert.deepStrictEqual(json, body);
+      const json = await resp.json();
+      assert(json !== null && typeof json === 'object');
+      assert.strictEqual(json.method, method.toUpperCase());
+      assert.strictEqual(json.headers['content-type'], 'application/json');
+      assert.strictEqual(+json.headers['content-length'], JSON.stringify(body).length);
+      assert.deepStrictEqual(JSON.parse(json.body), body);
     });
 
     it('AbortController works (premature abort)', async () => {
@@ -199,7 +205,7 @@ testParams.forEach((params) => {
 
       const ts0 = Date.now();
       try {
-        await fetch(`${baseUrl}/status/200`, { signal, method, body });
+        await fetch(`${server.origin}/status/200`, { signal, method, body });
         assert.fail();
       } catch (err) {
         assert(err instanceof AbortError);
@@ -219,7 +225,7 @@ testParams.forEach((params) => {
       const ts0 = Date.now();
       try {
         // the server responds with a 2 second delay, fetch is aborted after 0.5 seconds.
-        await fetch(`${baseUrl}/delay/2`, { signal, method, body });
+        await fetch(`${server.origin}/hello?delay=2000`, { signal, method, body });
         assert.fail();
       } catch (err) {
         assert(err instanceof AbortError);
@@ -241,7 +247,7 @@ testParams.forEach((params) => {
       const ts0 = Date.now();
       try {
         // the server responds with a 2 second delay, fetch is aborted after 1 second.
-        await fetch(`${baseUrl}/delay/2`, { signal, method, body });
+        await fetch(`${server.origin}/hello?delay=2000`, { signal, method, body });
         assert.fail();
       } catch (err) {
         assert(err instanceof AbortError);
@@ -261,7 +267,7 @@ testParams.forEach((params) => {
       const body = 'Hello, World!';
 
       try {
-        await fetch(`${baseUrl}/post`, { signal, method, body });
+        await fetch(`${server.origin}/inspect`, { signal, method, body });
         assert.fail();
       } catch (err) {
         assert(err instanceof AbortError);
@@ -271,9 +277,6 @@ testParams.forEach((params) => {
     it('AbortController works (dripping response)', async () => {
       const FETCH_TIMEOUT = 1000; // ms
       const DRIPPING_DURATION = 2; // seconds
-      // doesn't support POST method
-      // const TEST_URL =
-      //  `${baseUrl}/drip?duration=${DRIPPING_DURATION}&numbytes=10&code=200&delay=0`;
       const TEST_URL = `${protocol}://httpbingo.org/drip?duration=${DRIPPING_DURATION}&numbytes=10&code=200&delay=0`;
 
       const controller = new AbortController();
@@ -318,24 +321,25 @@ testParams.forEach((params) => {
       const customUserAgent = 'custom-fetch';
       const ctx = context({
         userAgent: customUserAgent,
+        rejectUnauthorized: false,
       });
-      const resp = await ctx.fetch(`${baseUrl}/user-agent`);
+      const resp = await ctx.fetch(`${server.origin}/inspect`);
       assert.strictEqual(resp.status, 200);
       assert.strictEqual(resp.headers.get('content-type'), 'application/json');
       const json = await resp.json();
-      assert.strictEqual(json['user-agent'], customUserAgent);
+      assert.strictEqual(json.headers['user-agent'], customUserAgent);
       await ctx.reset();
     });
 
     it('creating custom fetch context works', async () => {
-      const ctx = context();
-      const resp = await ctx.fetch(`${baseUrl}/status/200`);
+      const ctx = context({ rejectUnauthorized: false });
+      const resp = await ctx.fetch(`${server.origin}/status/200`);
       assert.strictEqual(resp.status, 200);
       await ctx.reset();
     });
 
     it('headers.plain() works', async () => {
-      const resp = await fetch(`${baseUrl}/put`, {
+      const resp = await fetch(`${server.origin}/inspect`, {
         method: 'PUT',
         body: JSON.stringify({ foo: 'bar' }),
         headers: {
@@ -352,23 +356,17 @@ testParams.forEach((params) => {
 
     it('can override host header', async () => {
       const host = 'foobar.com';
-      const resp = await fetch(`${baseUrl}/headers`, { headers: { host } });
+      const resp = await fetch(`${server.origin}/inspect`, { headers: { host } });
       assert.strictEqual(resp.status, 200);
       assert.strictEqual(resp.httpVersion, httpVersion);
       assert.strictEqual(resp.headers.get('content-type'), 'application/json');
       const json = await resp.json();
-      let hostHeaderValue;
-      Object.keys(json.headers || {}).forEach((nm) => {
-        if (nm.toLowerCase() === 'host') {
-          hostHeaderValue = json.headers[nm];
-        }
-      });
-      assert.strictEqual(hostHeaderValue, host);
+      assert.strictEqual(json.headers.host, host);
     });
 
     it('supports redirect (default)', async () => {
-      const url = `${protocol}://httpbingo.org/redirect-to?url=${protocol}%3A%2F%2Fhttpbingo.org%2Fstatus%2F200&status_code=307`;
-      // const url = `${protocol}://httpstat.us/307`; // sometimes very slooow/unreliable
+      const location = `${server.origin}/status/200`;
+      const url = `${server.origin}/redirect-to?url=${encodeURIComponent(location)}&status_code=307`;
       let resp = await fetch(url, { cache: 'no-store' });
       assert.strictEqual(resp.status, 200);
       assert.strictEqual(resp.redirected, true);
@@ -381,109 +379,112 @@ testParams.forEach((params) => {
     });
 
     it('supports redirect: follow', async () => {
-      const url = `${protocol}://httpbingo.org/redirect-to?url=${protocol}%3A%2F%2Fhttpbingo.org%2Fstatus%2F200&status_code=307`;
-      // const url = `${protocol}://httpstat.us/307`; // sometimes very slooow/unreliable
+      const location = `${server.origin}/status/200`;
+      const url = `${server.origin}/redirect-to?url=${encodeURIComponent(location)}&status_code=307`;
       const resp = await fetch(url, { redirect: 'follow', cache: 'no-store' });
       assert.strictEqual(resp.status, 200);
       assert.strictEqual(resp.redirected, true);
     });
 
     it('supports redirect: manual', async () => {
+      const location = `${server.origin}/status/200`;
       const resp = await fetch(
-        // `${protocol}://httpstat.us/307`, // unreliable server (frequent 503s)
-        `${protocol}://httpbin.org/status/307`,
+        `${server.origin}/redirect-to?url=${encodeURIComponent(location)}&status_code=307`,
         { redirect: 'manual', cache: 'no-store' },
       );
       assert.strictEqual(resp.status, 307);
-      assert.strictEqual(
-        resp.headers.get('location'),
-        // 'https://httpstat.us/',
-        '/redirect/1',
-      );
+      assert.strictEqual(resp.headers.get('location'), location);
       assert.strictEqual(resp.redirected, false);
     });
 
     it('supports redirect: manual with path location', async () => {
+      const location = '/redirect/here';
       const resp = await fetch(
-        `${protocol}://httpbingo.org/redirect-to?url=/foo.html&status_code=307`,
+        `${server.origin}/redirect-to?url=${encodeURIComponent(location)}&status_code=307`,
         { redirect: 'manual', cache: 'no-store' },
       );
       assert.strictEqual(resp.status, 307);
-      assert.strictEqual(resp.headers.get('location'), '/foo.html');
+      assert.strictEqual(resp.headers.get('location'), location);
       assert.strictEqual(resp.redirected, false);
     });
 
     it('supports follow option (max-redirect limit)', async () => {
-      // 5 relative redirects, follows: 4
-      assert.rejects(() => fetch(`${protocol}://httpbingo.org/relative-redirect/5`, { follow: 4 }), FetchError);
+      // 5 redirects, follows: 4
+      await assert.rejects(() => fetch(`${server.origin}/redirect/5`, { follow: 4 }), FetchError);
     });
 
     it('supports follow: 0', async () => {
-      assert.rejects(() => fetch(
-        // `${protocol}://httpstat.us/307`, // unreliable server (frequent 503s)
-        `${protocol}://httpbin.org/status/307`,
+      const location = `${server.origin}/status/200`;
+      await assert.rejects(() => fetch(
+        `${server.origin}/redirect-to?url=${encodeURIComponent(location)}&status_code=307`,
         { follow: 0 },
       ), FetchError);
       // same with a signal (code coverage)
       const controller = new AbortController();
       const { signal } = controller;
-      assert.rejects(() => fetch(
-        // `${protocol}://httpstat.us/307`, // unreliable server (frequent 503s)
-        `${protocol}://httpbin.org/status/307`,
+      await assert.rejects(() => fetch(
+        `${server.origin}/redirect-to?url=${encodeURIComponent(location)}&status_code=307`,
         { follow: 0, signal },
       ), FetchError);
     });
 
     it('supports redirect: error', async () => {
-      assert.rejects(() => fetch(
-        // `${protocol}://httpstat.us/307`, // unreliable server (frequent 503s)
-        `${protocol}://httpbin.org/status/307`,
+      const location = `${server.origin}/status/200`;
+      await assert.rejects(() => fetch(
+        `${server.origin}/redirect-to?url=${encodeURIComponent(location)}&status_code=307`,
         { redirect: 'error' },
       ), FetchError);
       // same with a signal (code coverage)
       const controller = new AbortController();
       const { signal } = controller;
-      assert.rejects(() => fetch(
-        // `${protocol}://httpstat.us/307`, // unreliable server (frequent 503s)
-        `${protocol}://httpbin.org/status/307`,
+      await assert.rejects(() => fetch(
+        `${server.origin}/redirect-to?url=${encodeURIComponent(location)}&status_code=307`,
         { redirect: 'error', signal },
       ), FetchError);
     });
 
     it('supports multiple redirects', async () => {
-      const resp = await fetch(`${protocol}://httpbingo.org/relative-redirect/5`, { cache: 'no-store' });
+      const resp = await fetch(`${server.origin}/redirect/5`, { cache: 'no-store' });
       assert.strictEqual(resp.status, 200);
       assert.strictEqual(resp.redirected, true);
     });
 
     it('supports redirect without location header', async () => {
-      const resp = await fetch(`${baseUrl}/status/308`, { cache: 'no-store' });
+      const resp = await fetch(`${server.origin}/status/308`, { cache: 'no-store' });
       assert.strictEqual(resp.status, 308);
       assert.strictEqual(resp.redirected, false);
+      assert(!resp.headers.has('location'));
     });
 
     it('follows redirect code 303 with GET', async () => {
-      const url = `${protocol}://httpbingo.org/redirect-to?url=${protocol}%3A%2F%2Fhttpbingo.org%2Fanything&status_code=303`;
+      const location = '/inspect';
+      const url = `${server.origin}/redirect-to?url=${encodeURIComponent(location)}&status_code=303`;
       const method = 'POST';
       const body = 'foo bar';
       const resp = await fetch(url, { method, body, cache: 'no-store' });
       assert.strictEqual(resp.status, 200);
       assert.strictEqual(resp.httpVersion, httpVersion);
       assert.strictEqual(resp.redirected, true);
-      assert.strictEqual(resp.headers.get('content-type'), 'application/json; encoding=utf-8');
-      const jsonResponseBody = await resp.json();
-      assert(jsonResponseBody !== null && typeof jsonResponseBody === 'object');
-      assert.strictEqual(jsonResponseBody.data, '');
+      assert.strictEqual(resp.headers.get('content-type'), 'application/json');
+      const json = await resp.json();
+      assert(json !== null && typeof json === 'object');
+      assert.strictEqual(json.body, '');
+      assert.strictEqual(json.method, 'GET');
     });
 
     it('follows redirected POST with json body', async () => {
+      const location = '/inspect';
+      const url = `${server.origin}/redirect-to?url=${encodeURIComponent(location)}&status_code=307`;
       const method = 'POST';
       const body = { foo: 'bar' };
-      const url = `${protocol}://httpbingo.org/redirect-to?url=${protocol}%3A%2F%2Fhttpbingo.org%2Fstatus%2F200&status_code=307`;
-      // const url = `${protocol}://httpstat.us/307`; // sometimes very slooow
       const resp = await fetch(url, { method, body, cache: 'no-store' });
       assert.strictEqual(resp.status, 200);
       assert.strictEqual(resp.redirected, true);
+      assert.strictEqual(resp.headers.get('content-type'), 'application/json');
+      const json = await resp.json();
+      assert(json !== null && typeof json === 'object');
+      assert.deepStrictEqual(JSON.parse(json.body), body);
+      assert.strictEqual(json.method, 'POST');
     });
 
     it('supports gzip/deflate/br content decoding (default)', async () => {
@@ -510,18 +511,16 @@ testParams.forEach((params) => {
     it('fails non-GET redirect if body is a readable stream', async () => {
       const method = 'POST';
       const body = stream.Readable.from('foo bar');
-      assert.rejects(() => fetch(
-        // `${protocol}://httpstat.us/307`, // unreliable server (frequent 503s)
-        `${protocol}://httpbin.org/status/307`,
+      const location = `${server.origin}/status/200`;
+      await assert.rejects(() => fetch(
+        `${server.origin}/redirect-to?url=${encodeURIComponent(location)}&status_code=307`,
         { method, body },
       ), FetchError);
-      assert(!body.destroyed);
       // same with a signal (code coverage)
       const controller = new AbortController();
       const { signal } = controller;
-      assert.rejects(() => fetch(
-        // `${protocol}://httpstat.us/307`, // unreliable server (frequent 503s)
-        `${protocol}://httpbin.org/status/307`,
+      await assert.rejects(() => fetch(
+        `${server.origin}/redirect-to?url=${encodeURIComponent(location)}&status_code=307`,
         { method, body, signal },
       ), FetchError);
     });
@@ -529,30 +528,28 @@ testParams.forEach((params) => {
     it('supports text body', async () => {
       const method = 'POST';
       const body = 'Hello, World!';
-      const resp = await fetch(`${baseUrl}/post`, { method, body });
+      const resp = await fetch(`${server.origin}/inspect`, { method, body });
       assert.strictEqual(resp.status, 200);
       assert.strictEqual(resp.httpVersion, httpVersion);
       assert.strictEqual(resp.headers.get('content-type'), 'application/json');
-      const jsonResponseBody = await resp.json();
-      assert(jsonResponseBody !== null && typeof jsonResponseBody === 'object');
-      const { data, headers } = jsonResponseBody;
-      assert.strictEqual(+headers['Content-Length'], body.length);
-      assert.strictEqual(headers['Content-Type'], 'text/plain; charset=utf-8');
-      assert.strictEqual(data, body);
+      const json = await resp.json();
+      assert(json !== null && typeof json === 'object');
+      assert.strictEqual(+json.headers['content-length'], body.length);
+      assert.strictEqual(json.headers['content-type'], 'text/plain; charset=utf-8');
+      assert.strictEqual(json.body, body);
     });
 
     it('supports stream body', async () => {
       const method = 'POST';
       const body = fs.createReadStream(__filename);
-      const resp = await fetch(`${baseUrl}/post`, { method, body });
+      const resp = await fetch(`${server.origin}/inspect`, { method, body });
       assert.strictEqual(resp.status, 200);
       assert.strictEqual(resp.httpVersion, httpVersion);
       assert.strictEqual(resp.headers.get('content-type'), 'application/json');
-      const jsonResponseBody = await resp.json();
-      assert(jsonResponseBody !== null && typeof jsonResponseBody === 'object');
-      const { data, headers } = jsonResponseBody;
-      assert.strictEqual(data, fs.readFileSync(__filename).toString());
-      assert.strictEqual(headers['Content-Length'], undefined);
+      const json = await resp.json();
+      assert(json !== null && typeof json === 'object');
+      assert.strictEqual(json.body, fs.readFileSync(__filename).toString());
+      assert.strictEqual(json.headers['content-length'], undefined);
     });
 
     it('supports URLSearchParams body', async () => {
@@ -562,16 +559,16 @@ testParams.forEach((params) => {
       };
       const method = 'POST';
       const body = new URLSearchParams(searchParams);
-      const resp = await fetch(`${baseUrl}/post`, { method, body });
+      const resp = await fetch(`${server.origin}/inspect`, { method, body });
       assert.strictEqual(resp.status, 200);
       assert.strictEqual(resp.httpVersion, httpVersion);
       assert.strictEqual(resp.headers.get('content-type'), 'application/json');
-      const jsonResponseBody = await resp.json();
-      assert(jsonResponseBody !== null && typeof jsonResponseBody === 'object');
-      const { form, headers } = jsonResponseBody;
-      assert.strictEqual(headers['Content-Type'], 'application/x-www-form-urlencoded; charset=utf-8');
-      assert.strictEqual(+headers['Content-Length'], body.toString().length);
-      assert.deepStrictEqual(form, searchParams);
+      const json = await resp.json();
+      assert(typeof json === 'object');
+      assert.strictEqual(json.method, method);
+      assert.strictEqual(json.headers['content-type'], 'application/x-www-form-urlencoded; charset=utf-8');
+      assert.strictEqual(+json.headers['content-length'], body.toString().length);
+      assert.strictEqual(json.body, body.toString());
     });
 
     it('supports spec-compliant FormData body', async () => {
@@ -583,34 +580,30 @@ testParams.forEach((params) => {
       const form = new FormData();
       Object.entries(searchParams).forEach(([k, v]) => form.append(k, v));
 
-      const resp = await fetch(`${baseUrl}/post`, { method, body: form });
+      const resp = await fetch(`${server.origin}/inspect`, { method, body: form });
       assert.strictEqual(resp.status, 200);
       assert.strictEqual(resp.httpVersion, httpVersion);
       assert.strictEqual(resp.headers.get('content-type'), 'application/json');
-      const jsonResponseBody = await resp.json();
-      assert(jsonResponseBody !== null && typeof jsonResponseBody === 'object');
-      const { form: reqForm, headers } = jsonResponseBody;
-      assert(headers['Content-Type'].startsWith('multipart/form-data; boundary='));
-      assert.deepStrictEqual(reqForm, searchParams);
+      const json = await resp.json();
+      assert(typeof json === 'object');
+      assert.strictEqual(json.method, method);
+      assert(json.headers['content-type'].startsWith('multipart/form-data; boundary='));
+      const reqForm = parseMultiPartFormData(json.headers['content-type'], Buffer.from(json.base64Body, 'base64'));
+      assert.deepStrictEqual(searchParams, reqForm);
     });
 
     it('returns Set-Cookie headers', async () => {
-      const resp = await fetch(`${baseUrl}/cookies/set?a=1&b=2`, { redirect: 'manual' });
-      // Response headers:
-      // set-cookie: a=1; [Secure; ]Path=/
-      // set-cookie: b=2; [Secure; ]Path=/
-      assert.strictEqual(resp.status, 302);
-      assert(/a=1; (Secure; )?Path=\/, b=2; (Secure; )?Path=\//.test(resp.headers.get('set-cookie')));
-      assert(/a=1; (Secure; )?Path=\//.test(resp.headers.raw()['set-cookie'][0]));
-      assert(/b=2; (Secure; )?Path=\//.test(resp.headers.raw()['set-cookie'][1]));
+      const resp = await fetch(`${server.origin}/cookies/set?a=1&b=2`);
+      assert.strictEqual(resp.status, 200);
+      assert.strictEqual(resp.headers.get('set-cookie'), 'a=1, b=2');
+      assert.strictEqual(resp.headers.raw()['set-cookie'][0], 'a=1');
+      assert.strictEqual(resp.headers.raw()['set-cookie'][1], 'b=2');
     });
 
     if (protocol === 'https') {
       it('supports self signed certificate', async () => {
-        const server = await Server.launch(httpVersion === '2.0' ? 2 : 1, true, HELLO_WORLD);
-
         // self signed certificates are rejected by default
-        assert.rejects(() => defaultFetchContext.fetch(`${server.origin}/hello`, { cache: 'no-store' }));
+        await assert.rejects(() => defaultFetchContext.fetch(`${server.origin}/hello`, { cache: 'no-store' }));
 
         const ctx = context({ rejectUnauthorized: false });
         try {
