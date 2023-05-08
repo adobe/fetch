@@ -121,12 +121,12 @@ class CacheableResponse extends Response {
 const cacheableResponse = async (res) => {
   const buf = await res.buffer();
   const {
-    url, status, statusText, headers, httpVersion, decoded, counter,
+    url, status, statusText, headers, httpVersion, decoded, redirected,
   } = res;
   return new CacheableResponse(
     buf,
     {
-      url, status, statusText, headers, httpVersion, decoded, counter,
+      url, status, statusText, headers, httpVersion, decoded, counter: redirected ? 1 : 0,
     },
   );
 };

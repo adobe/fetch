@@ -56,9 +56,11 @@ testParams.forEach((params) => {
     });
 
     it(`forcing HTTP/1.1 using context option works' (${name})`, async () => {
-      const { fetch, reset } = context({ alpnProtocols: [ALPN_HTTP1_1] });
+      const { fetch, reset } = context(
+        { alpnProtocols: [ALPN_HTTP1_1], rejectUnauthorized: false },
+      );
       try {
-        const resp = await fetch(`${protocol}://httpbin.org/status/200`);
+        const resp = await fetch(`${server.origin}/status/200`);
         assert.strictEqual(resp.status, 200);
         assert.strictEqual(resp.httpVersion, '1.1');
       } finally {
@@ -67,9 +69,9 @@ testParams.forEach((params) => {
     });
 
     it(`forcing HTTP/1.1 using h1() works' (${name})`, async () => {
-      const { fetch, reset } = h1();
+      const { fetch, reset } = h1({ rejectUnauthorized: false });
       try {
-        const resp = await fetch(`${protocol}://httpbin.org/status/200`);
+        const resp = await fetch(`${server.origin}/status/200`);
         assert.strictEqual(resp.status, 200);
         assert.strictEqual(resp.httpVersion, '1.1');
       } finally {
@@ -78,13 +80,13 @@ testParams.forEach((params) => {
     });
 
     it(`supports h1NoCache() (${name})`, async () => {
-      const { fetch, cacheStats, reset } = h1NoCache();
+      const { fetch, cacheStats, reset } = h1NoCache({ rejectUnauthorized: false });
       try {
-        let resp = await fetch(`${protocol}://httpbin.org/cache/60`);
+        let resp = await fetch(`${server.origin}/cache?max_age=60`);
         assert.strictEqual(resp.status, 200);
         assert.strictEqual(resp.httpVersion, '1.1');
         // re-fetch (force reuse of custom agent => coverage)
-        resp = await fetch(`${protocol}://httpbin.org/cache/60`);
+        resp = await fetch(`${server.origin}/cache?max_age=60`);
         assert.strictEqual(resp.status, 200);
         assert.strictEqual(resp.httpVersion, '1.1');
         assert(!resp.fromCache);
@@ -98,9 +100,11 @@ testParams.forEach((params) => {
     });
 
     it(`defaults to 'no keep-alive' (${name})`, async () => {
-      const { fetch, reset } = context({ alpnProtocols: [ALPN_HTTP1_1] });
+      const { fetch, reset } = context(
+        { alpnProtocols: [ALPN_HTTP1_1], rejectUnauthorized: false },
+      );
       try {
-        const resp = await fetch(`${protocol}://httpbin.org/status/200`);
+        const resp = await fetch(`${server.origin}/status/200`);
         assert.strictEqual(resp.status, 200);
         assert.strictEqual(resp.httpVersion, '1.1');
         assert.strictEqual(resp.headers.get('connection'), 'close');
@@ -110,14 +114,16 @@ testParams.forEach((params) => {
     });
 
     it(`supports h1.keepAlive context option (${name})`, async () => {
-      const { fetch, reset } = context({ alpnProtocols: [ALPN_HTTP1_1], h1: { keepAlive: true } });
+      const { fetch, reset } = context(
+        { alpnProtocols: [ALPN_HTTP1_1], h1: { keepAlive: true }, rejectUnauthorized: false },
+      );
       try {
-        let resp = await fetch(`${protocol}://httpbin.org/status/200`, { cache: 'no-store' });
+        let resp = await fetch(`${server.origin}/status/200`, { cache: 'no-store' });
         assert.strictEqual(resp.status, 200);
         assert.strictEqual(resp.httpVersion, '1.1');
         assert.strictEqual(resp.headers.get('connection'), 'keep-alive');
         // re-fetch (force reuse of custom agent => coverage)
-        resp = await fetch(`${protocol}://httpbin.org/status/200`, { cache: 'no-store' });
+        resp = await fetch(`${server.origin}/status/200`, { cache: 'no-store' });
         assert.strictEqual(resp.status, 200);
         assert.strictEqual(resp.httpVersion, '1.1');
         assert.strictEqual(resp.headers.get('connection'), 'keep-alive');
@@ -127,14 +133,14 @@ testParams.forEach((params) => {
     });
 
     it(`supports keepAlive() (${name})`, async () => {
-      const { fetch, reset } = keepAlive();
+      const { fetch, reset } = keepAlive({ rejectUnauthorized: false });
       try {
-        let resp = await fetch(`${protocol}://httpbin.org/status/200`, { cache: 'no-store' });
+        let resp = await fetch(`${server.origin}/status/200`, { cache: 'no-store' });
         assert.strictEqual(resp.status, 200);
         assert.strictEqual(resp.httpVersion, '1.1');
         assert.strictEqual(resp.headers.get('connection'), 'keep-alive');
         // re-fetch (force reuse of custom agent => coverage)
-        resp = await fetch(`${protocol}://httpbin.org/status/200`, { cache: 'no-store' });
+        resp = await fetch(`${server.origin}/status/200`, { cache: 'no-store' });
         assert.strictEqual(resp.status, 200);
         assert.strictEqual(resp.httpVersion, '1.1');
         assert.strictEqual(resp.headers.get('connection'), 'keep-alive');
@@ -144,14 +150,14 @@ testParams.forEach((params) => {
     });
 
     it(`supports keepAliveNoCache() (${name})`, async () => {
-      const { fetch, reset, cacheStats } = keepAliveNoCache();
+      const { fetch, reset, cacheStats } = keepAliveNoCache({ rejectUnauthorized: false });
       try {
-        let resp = await fetch(`${protocol}://httpbin.org/cache/60`);
+        let resp = await fetch(`${server.origin}/cache?max_age=60`);
         assert.strictEqual(resp.status, 200);
         assert.strictEqual(resp.httpVersion, '1.1');
         assert.strictEqual(resp.headers.get('connection'), 'keep-alive');
         // re-fetch (force reuse of custom agent => coverage)
-        resp = await fetch(`${protocol}://httpbin.org/cache/60`);
+        resp = await fetch(`${server.origin}/cache?max_age=60`);
         assert.strictEqual(resp.status, 200);
         assert.strictEqual(resp.httpVersion, '1.1');
         assert.strictEqual(resp.headers.get('connection'), 'keep-alive');
@@ -166,9 +172,11 @@ testParams.forEach((params) => {
     });
 
     it(`supports HTTP/1.0 (${name})`, async () => {
-      const { fetch, reset } = context({ alpnProtocols: [ALPN_HTTP1_0] });
+      const { fetch, reset } = context(
+        { alpnProtocols: [ALPN_HTTP1_0], rejectUnauthorized: false },
+      );
       try {
-        const resp = await fetch(`${protocol}://httpbin.org/status/200`);
+        const resp = await fetch(`${server.origin}/status/200`);
         assert.strictEqual(resp.status, 200);
         assert(['1.0', '1.1'].includes(resp.httpVersion));
       } finally {
@@ -177,9 +185,11 @@ testParams.forEach((params) => {
     });
 
     it(`negotiates protocol (${name})`, async () => {
-      const { fetch, reset } = context({ alpnProtocols: [ALPN_HTTP1_0, ALPN_HTTP1_1] });
+      const { fetch, reset } = context(
+        { alpnProtocols: [ALPN_HTTP1_0, ALPN_HTTP1_1], rejectUnauthorized: false },
+      );
       try {
-        const resp = await fetch(`${protocol}://httpbin.org/status/200`);
+        const resp = await fetch(`${server.origin}/status/200`);
         assert.strictEqual(resp.status, 200);
         assert(['1.0', '1.1'].includes(resp.httpVersion));
       } finally {
@@ -188,7 +198,7 @@ testParams.forEach((params) => {
     });
 
     it(`concurrent HTTP/1.1 requests to same origin (${name})`, async () => {
-      const { fetch, reset } = h1NoCache(protocol === 'https' ? { rejectUnauthorized: false } : {});
+      const { fetch, reset } = h1NoCache({ rejectUnauthorized: false });
       const N = 50; // # of parallel requests
       const TEST_URL = `${server.origin}/bytes`;
       // generete array of 'randomized' urls
@@ -238,7 +248,7 @@ testParams.forEach((params) => {
       const doFetch = async (ctx, url) => ctx.fetch(url);
 
       const N = 50; // # of parallel requests
-      const contexts = Array.from({ length: N }, () => h1NoCache(protocol === 'https' ? { rejectUnauthorized: false } : {}));
+      const contexts = Array.from({ length: N }, () => h1NoCache({ rejectUnauthorized: false }));
       const TEST_URL = `${server.origin}/bytes`;
       // generete array of 'randomized' urls
       const args = contexts

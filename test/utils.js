@@ -11,6 +11,7 @@
  */
 
 /* eslint-disable no-underscore-dangle */
+import { parse, getBoundary } from 'parse-multipart-data';
 
 // misc. test helpers
 
@@ -21,5 +22,14 @@ const isReadableStream = (val) => val !== null
   && typeof val._read === 'function'
   && typeof val._readableState === 'object';
 
-// eslint-disable-next-line import/prefer-default-export
-export { isReadableStream };
+const parseMultiPartFormData = (contentType, body) => {
+  const boundary = getBoundary(contentType);
+  const parts = parse(body, boundary);
+  const form = {};
+  for (const { name, data } of parts) {
+    form[name] = data.toString();
+  }
+  return form;
+};
+
+export { isReadableStream, parseMultiPartFormData };
