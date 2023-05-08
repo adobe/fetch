@@ -145,6 +145,7 @@ export class Response extends Body {
   readonly httpVersion: string;
   readonly decoded: boolean;
   headers: Headers;
+  clone(): Response;
 
   // non-spec extensions
   /**
