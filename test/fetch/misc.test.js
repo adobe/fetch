@@ -20,7 +20,7 @@ import { createUrl, timeoutSignal } from '../../src/index.js';
 
 describe('Misc. Tests', () => {
   it('createUrl encodes query paramters', async () => {
-    const EXPECTED = 'https://httpbin.org/json?foo=42&dummy=true&name=Andr%C3%A9+Citro%C3%ABn&rumple=stiltskin&nephews=Huey&nephews=Louie&nephews=Dewey';
+    const EXPECTED = 'https://example.com/test?foo=42&dummy=true&name=Andr%C3%A9+Citro%C3%ABn&rumple=stiltskin&nephews=Huey&nephews=Louie&nephews=Dewey';
     const qs = {
       foo: 42,
       dummy: true,
@@ -28,21 +28,21 @@ describe('Misc. Tests', () => {
       rumple: 'stiltskin',
       nephews: ['Huey', 'Louie', 'Dewey'],
     };
-    const ACTUAL = createUrl('https://httpbin.org/json', qs);
+    const ACTUAL = createUrl('https://example.com/test', qs);
     assert.strictEqual(ACTUAL, EXPECTED);
   });
 
   it('createUrl works without qs object', async () => {
-    const EXPECTED = 'https://httpbin.org/json';
-    const ACTUAL = createUrl('https://httpbin.org/json');
+    const EXPECTED = 'https://example.com/test';
+    const ACTUAL = createUrl('https://example.com/test');
     assert.strictEqual(ACTUAL, EXPECTED);
   });
 
   it('createUrl checks arguments types', async () => {
     assert.throws(() => createUrl(true));
-    assert.throws(() => createUrl('https://httpbin.org/json', 'abc'));
-    assert.throws(() => createUrl('https://httpbin.org/json', 123));
-    assert.throws(() => createUrl('https://httpbin.org/json', ['foo', 'bar']));
+    assert.throws(() => createUrl('https://example.com/test', 'abc'));
+    assert.throws(() => createUrl('https://example.com/test', 123));
+    assert.throws(() => createUrl('https://example.com/test', ['foo', 'bar']));
   });
 
   it('timeoutSignal works', async () => {
