@@ -1,3 +1,10 @@
+## [3.6.4](https://github.com/adobe/fetch/compare/v3.6.3...v3.6.4) (2023-05-09)
+
+
+### Bug Fixes
+
+* minor backports ([2bb8531](https://github.com/adobe/fetch/commit/2bb853100cf2ca076f1c289034cd7e6495e918cb))
+
 ## [3.6.3](https://github.com/adobe/fetch/compare/v3.6.2...v3.6.3) (2023-04-24)
 
 
