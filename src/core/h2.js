@@ -18,7 +18,7 @@ import debugFactory from 'debug';
 import { RequestAbortedError } from './errors.js';
 import { decodeStream } from '../common/utils.js';
 
-const debug = debugFactory('helix-fetch:h2');
+const debug = debugFactory('adobe/fetch:h2');
 
 const { NGHTTP2_CANCEL } = constants;
 

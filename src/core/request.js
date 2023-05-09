@@ -32,7 +32,7 @@ const { version } = pkg;
 
 const { isAnyArrayBuffer } = types;
 
-const debug = debugFactory('helix-fetch:core');
+const debug = debugFactory('adobe/fetch:core');
 
 const ALPN_HTTP2 = 'h2';
 const ALPN_HTTP2C = 'h2c';

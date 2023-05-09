@@ -19,7 +19,7 @@ import debugFactory from 'debug';
 import { RequestAbortedError } from './errors.js';
 import { decodeStream } from '../common/utils.js';
 
-const debug = debugFactory('helix-fetch:h1');
+const debug = debugFactory('adobe/fetch:h1');
 
 const getAgent = (ctx, protocol) => {
   // getAgent is synchronous, no need for lock/mutex

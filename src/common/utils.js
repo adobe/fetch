@@ -19,7 +19,7 @@ import {
 } from 'zlib';
 import debugFactory from 'debug';
 
-const debug = debugFactory('helix-fetch:utils');
+const debug = debugFactory('adobe/fetch:utils');
 const { MAX_LENGTH: maxBufferLength } = bufferConstants;
 const { Z_SYNC_FLUSH } = zlibConstants;
 
