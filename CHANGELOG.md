@@ -1,3 +1,10 @@
+## [4.0.12](https://github.com/adobe/fetch/compare/v4.0.11...v4.0.12) (2023-05-09)
+
+
+### Bug Fixes
+
+* debug namespace is "adobe/fetch" ([#408](https://github.com/adobe/fetch/issues/408)) ([9f2e083](https://github.com/adobe/fetch/commit/9f2e0830be17caa2bfa7ad47de606de2b830ce65))
+
 ## [4.0.11](https://github.com/adobe/fetch/compare/v4.0.10...v4.0.11) (2023-05-09)
 
 
