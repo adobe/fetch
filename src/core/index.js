@@ -23,7 +23,7 @@ import {
   ALPN_HTTP1_0,
 } from './request.js';
 
-const debug = debugFactory('helix-fetch:core');
+const debug = debugFactory('adobe/fetch:core');
 
 class RequestContext {
   constructor(options) {

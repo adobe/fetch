@@ -30,7 +30,7 @@ import { isFormData } from '../common/formData.js';
 import core from '../core/index.js';
 
 const { context, RequestAbortedError } = core;
-const debug = debugFactory('helix-fetch');
+const debug = debugFactory('adobe/fetch');
 
 const CACHEABLE_METHODS = ['GET', 'HEAD'];
 const DEFAULT_MAX_CACHE_ITEMS = 500;
