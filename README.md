@@ -446,6 +446,15 @@ You can however add a listener which will be notified on every pushed (and cache
   console.log(`Http version: ${resp.httpVersion}`);
 ```
 
+### Use h2c (http2 cleartext w/prior-knowledge) protocol
+
+```javascript
+  import { fetch } from '@adobe/fetch';
+
+  const resp = await fetch('http2://nghttp2.org');
+  console.log(`Http version: ${resp.httpVersion}`);
+```
+
 ### Force HTTP/1(.1) protocol
 
 ```javascript
