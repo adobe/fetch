@@ -35,6 +35,7 @@
   - [Cache](#cache)
 - [Advanced Usage Examples](#advanced-usage-examples)
   - [HTTP/2 Server Push](#http2-server-push)
+  - [Use h2c (http2 cleartext w/prior-knowledge) protocol](#use-h2c-http2-cleartext-wprior-knowledge-protocol)
   - [Force HTTP/1(.1) protocol](#force-http11-protocol)
   - [HTTP/1.1 Keep-Alive](#http11-keep-alive)
   - [Extract Set-Cookie Header](#extract-set-cookie-header)
@@ -436,6 +437,15 @@ You can however add a listener which will be notified on every pushed (and cache
   onPush((url, response) => console.log(`received server push: ${url} status ${response.status}`));
 
   const resp = await fetch('https://nghttp2.org');
+  console.log(`Http version: ${resp.httpVersion}`);
+```
+
+### Use h2c (http2 cleartext w/prior-knowledge) protocol
+
+```javascript
+  const { fetch } = require('@adobe/fetch');
+
+  const resp = await fetch('http2://nghttp2.org');
   console.log(`Http version: ${resp.httpVersion}`);
 ```
 
