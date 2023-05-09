@@ -1,3 +1,10 @@
+## [4.0.11](https://github.com/adobe/fetch/compare/v4.0.10...v4.0.11) (2023-05-09)
+
+
+### Bug Fixes
+
+* Add Response.clone() typedef ([#406](https://github.com/adobe/fetch/issues/406)) ([#407](https://github.com/adobe/fetch/issues/407)) ([7ed9047](https://github.com/adobe/fetch/commit/7ed9047ceac88136890e00e53c15ed90ae13d1c1))
+
 ## [4.0.10](https://github.com/adobe/fetch/compare/v4.0.9...v4.0.10) (2023-04-15)
 
 
