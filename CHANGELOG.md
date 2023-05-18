@@ -1,3 +1,10 @@
+## [4.0.13](https://github.com/adobe/fetch/compare/v4.0.12...v4.0.13) (2023-05-18)
+
+
+### Bug Fixes
+
+* protocol determination ([8f50fa5](https://github.com/adobe/fetch/commit/8f50fa52225359ba021b38b1cdc1974dac971d43))
+
 ## [4.0.12](https://github.com/adobe/fetch/compare/v4.0.11...v4.0.12) (2023-05-09)
 
 
