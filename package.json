@@ -52,7 +52,7 @@
   "dependencies": {
     "debug": "4.3.4",
     "http-cache-semantics": "4.1.1",
-    "lru-cache": "9.0.1"
+    "lru-cache": "7.18.3"
   },
   "devDependencies": {
     "@semantic-release/changelog": "6.0.3",
@@ -61,21 +61,21 @@
     "chai-as-promised": "7.1.1",
     "chai-bytes": "0.1.2",
     "chai-iterator": "3.0.2",
-    "eslint": "8.38.0",
+    "eslint": "8.40.0",
     "eslint-config-airbnb-base": "15.0.0",
     "eslint-plugin-header": "3.1.1",
     "eslint-plugin-import": "2.27.5",
     "formdata-node": "4.4.1",
     "husky": "8.0.3",
-    "lint-staged": "13.2.1",
+    "lint-staged": "13.2.2",
     "mocha": "10.2.0",
     "mocha-multi-reporters": "1.5.1",
-    "nock": "13.3.0",
+    "nock": "13.3.1",
     "nyc": "15.1.0",
     "parse-cache-control": "1.0.1",
     "parse-multipart-data": "1.5.0",
-    "semantic-release": "21.0.1",
-    "sinon": "15.0.3",
+    "semantic-release": "21.0.2",
+    "sinon": "15.0.4",
     "stream-buffers": "3.0.2"
   },
   "lint-staged": {

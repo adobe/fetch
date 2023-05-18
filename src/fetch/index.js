@@ -16,7 +16,7 @@ const { EventEmitter } = require('events');
 const { Readable } = require('stream');
 
 const debug = require('debug')('adobe/fetch');
-const { LRUCache } = require('lru-cache');
+const LRUCache = require('lru-cache');
 
 const { Body } = require('./body');
 const { Headers } = require('./headers');

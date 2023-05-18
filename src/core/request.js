@@ -16,7 +16,7 @@ const { Readable } = require('stream');
 const tls = require('tls');
 const { types: { isAnyArrayBuffer } } = require('util');
 
-const { LRUCache } = require('lru-cache');
+const LRUCache = require('lru-cache');
 const debug = require('debug')('adobe/fetch:core');
 
 const { RequestAbortedError } = require('./errors');
