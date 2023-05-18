@@ -6,7 +6,6 @@
   <a href="https://circleci.com/gh/adobe/fetch"><img src="https://img.shields.io/circleci/project/github/adobe/fetch.svg" alt="CircleCI"></a>
   <a href="https://github.com/adobe/fetch/blob/main/LICENSE.txt"><img src="https://img.shields.io/github/license/adobe/fetch.svg" alt="GitHub license"></a>
   <a href="https://github.com/adobe/fetch/issues"><img src="https://img.shields.io/github/issues/adobe/fetch.svg" alt="GitHub issues"></a>
-  <a href="https://lgtm.com/projects/g/adobe/fetch"><img src="https://img.shields.io/lgtm/grade/javascript/g/adobe/fetch.svg?logo=lgtm&logoWidth=18" alt="LGTM Code Quality Grade: JavaScript"></a>
   <a href="https://renovatebot.com/"><img src="https://img.shields.io/badge/renovate-enabled-brightgreen.svg" alt="Renovate enabled"></a>
   <a href="https://github.com/semantic-release/semantic-release"><img src="https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg" alt="semantic-release"></a>
 	<a href="https://packagephobia.now.sh/result?p=@adobe/fetch"><img src="https://badgen.net/packagephobia/install/@adobe/fetch" alt="Install size"></a>
