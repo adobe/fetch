@@ -9,6 +9,10 @@
   "branchPrefix": "renovate-",
   "packageRules": [
     {
+      "matchPackageNames": ["lru-cache"],
+      "allowedVersions": "<8.0.0"
+    },
+    {
       "packageNames": ["circleci/node"],
       "allowedVersions": "<15"
     },

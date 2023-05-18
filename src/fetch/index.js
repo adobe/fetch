@@ -14,7 +14,7 @@ import { EventEmitter } from 'events';
 import { Readable } from 'stream';
 
 import debugFactory from 'debug';
-import { LRUCache } from 'lru-cache';
+import LRUCache from 'lru-cache';
 
 import { Body } from './body.js';
 import Headers from './headers.js';
