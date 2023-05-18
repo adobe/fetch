@@ -15,7 +15,7 @@ import { types } from 'util';
 import { Readable } from 'stream';
 import tls from 'tls';
 
-import { LRUCache } from 'lru-cache';
+import LRUCache from 'lru-cache';
 import debugFactory from 'debug';
 
 import { RequestAbortedError } from './errors.js';
