@@ -57,7 +57,7 @@
   "devDependencies": {
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
-    "c8": "7.14.0",
+    "c8": "8.0.0",
     "chai": "4.3.7",
     "chai-as-promised": "7.1.1",
     "chai-bytes": "0.1.2",
