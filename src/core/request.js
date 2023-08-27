@@ -123,11 +123,11 @@ const determineProtocol = async (ctx, url, signal) => {
     case 'http:':
       // for simplicity, we assume unencrypted HTTP to be HTTP/1.1
       // (although, theoretically, it could also be plain-text HTTP/2 (h2c))
-      return { ALPN_HTTP1_1 };
+      return { protocol: ALPN_HTTP1_1 };
 
     case 'http2:':
       // HTTP/2 over TCP (h2c)
-      return { ALPN_HTTP2C };
+      return { protocol: ALPN_HTTP2C };
 
     case 'https:':
       // need to negotiate protocol
@@ -140,7 +140,7 @@ const determineProtocol = async (ctx, url, signal) => {
   if (ctx.alpnProtocols.length === 1
     && (ctx.alpnProtocols[0] === ALPN_HTTP1_1 || ctx.alpnProtocols[0] === ALPN_HTTP1_0)) {
     // shortcut: forced HTTP/1.X, default to HTTP/1.1 (no need to use ALPN to negotiate protocol)
-    return { ALPN_HTTP1_1 };
+    return { protocol: ALPN_HTTP1_1 };
   }
 
   // lookup ALPN cache
