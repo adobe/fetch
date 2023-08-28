@@ -118,24 +118,16 @@ const connect = async (url, options) => {
 const determineProtocol = async (ctx, url, signal) => {
   // url.origin is null if url.protocol is neither 'http:' nor 'https:' ...
   const origin = `${url.protocol}//${url.host}`;
-  // lookup ALPN cache
-  let protocol = ctx.alpnCache.get(origin);
-  if (protocol) {
-    return { protocol };
-  }
+
   switch (url.protocol) {
     case 'http:':
-      // for simplicity we assume unencrypted HTTP to be HTTP/1.1
+      // for simplicity, we assume unencrypted HTTP to be HTTP/1.1
       // (although, theoretically, it could also be plain-text HTTP/2 (h2c))
-      protocol = ALPN_HTTP1_1;
-      ctx.alpnCache.set(origin, protocol);
-      return { protocol };
+      return { protocol: ALPN_HTTP1_1 };
 
     case 'http2:':
       // HTTP/2 over TCP (h2c)
-      protocol = ALPN_HTTP2C;
-      ctx.alpnCache.set(origin, protocol);
-      return { protocol };
+      return { protocol: ALPN_HTTP2C };
 
     case 'https:':
       // need to negotiate protocol
@@ -148,12 +140,16 @@ const determineProtocol = async (ctx, url, signal) => {
   if (ctx.alpnProtocols.length === 1
     && (ctx.alpnProtocols[0] === ALPN_HTTP1_1 || ctx.alpnProtocols[0] === ALPN_HTTP1_0)) {
     // shortcut: forced HTTP/1.X, default to HTTP/1.1 (no need to use ALPN to negotiate protocol)
-    protocol = ALPN_HTTP1_1;
-    ctx.alpnCache.set(origin, protocol);
+    return { protocol: ALPN_HTTP1_1 };
+  }
+
+  // lookup ALPN cache
+  let protocol = ctx.alpnCache.get(origin);
+  if (protocol) {
     return { protocol };
   }
 
-  // negotioate via ALPN
+  // negotiate via ALPN
   const {
     options: {
       rejectUnauthorized: _rejectUnauthorized,
