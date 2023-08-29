@@ -1,3 +1,10 @@
+## [3.6.5](https://github.com/adobe/fetch/compare/v3.6.4...v3.6.5) (2023-08-29)
+
+
+### Bug Fixes
+
+* protocol determination ([5561a9e](https://github.com/adobe/fetch/commit/5561a9e28f2e5da3f87a90c63cfaeff21f4554b3))
+
 ## [3.6.4](https://github.com/adobe/fetch/compare/v3.6.3...v3.6.4) (2023-05-09)
 
 
