@@ -175,7 +175,7 @@ const request = async (ctx, url, options) => {
       }
 
       const enablePush = !!(pushPromiseHandler || pushHandler);
-      session = connect(origin, { ...connectOptions, settings: { enablePush } });
+      session = connect(origin, { ...connectOptions, settings: { ...connectOptions.settings, enablePush } });
       session.setMaxListeners(1000);
       session.setTimeout(idleSessionTimeout, () => {
         debug(`closing session ${origin} after ${idleSessionTimeout} ms of inactivity`);
