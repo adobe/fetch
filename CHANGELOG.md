@@ -1,3 +1,10 @@
+# [4.1.0](https://github.com/adobe/fetch/compare/v4.0.13...v4.1.0) (2023-09-13)
+
+
+### Features
+
+* force release ([d7daffe](https://github.com/adobe/fetch/commit/d7daffe39b2b24124fddf8ad68af6a77aa554fc1))
+
 ## [4.0.13](https://github.com/adobe/fetch/compare/v4.0.12...v4.0.13) (2023-05-18)
 
 
