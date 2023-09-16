@@ -74,7 +74,7 @@
     "nock": "13.3.3",
     "parse-cache-control": "1.0.1",
     "parse-multipart-data": "1.5.0",
-    "semantic-release": "21.1.1",
+    "semantic-release": "21.1.2",
     "sinon": "15.2.0",
     "stream-buffers": "3.0.2"
   },
