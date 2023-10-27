@@ -181,6 +181,17 @@ class Server {
             }
             break;
 
+          case '/authorize':
+            await sleep(+(searchParams.get('delay') || 0));
+            if (req.headers.authorization != null) {
+              res.writeHead(+(searchParams.get('status_code') || 200), { 'Content-Type': 'text/plain; charset=utf-8' });
+              res.end(this.helloMsg);
+            } else {
+              res.writeHead(+(searchParams.get('status_code') || 401));
+              res.end('Unauthorized');
+            }
+            break;
+
           case '/redirect-to':
             await sleep(+(searchParams.get('delay') || 0));
             res.writeHead(+(searchParams.get('status_code') || 302), { Location: searchParams.get('url') });

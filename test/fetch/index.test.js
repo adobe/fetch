@@ -81,14 +81,17 @@ testParams.forEach((params) => {
 
   describe(`Fetch Tests: ${name}`, () => {
     let server;
+    let redirectServer;
 
     before(async () => {
+      redirectServer = await Server.launch(httpVersion === '2.0' ? 2 : 1, protocol === 'https', HELLO_WORLD);
       server = await Server.launch(httpVersion === '2.0' ? 2 : 1, protocol === 'https', HELLO_WORLD);
     });
 
     after(async () => {
       await reset();
       process.kill(server.pid);
+      process.kill(redirectServer.pid);
     });
 
     it('rejects on non-string method option', async () => {
@@ -408,6 +411,56 @@ testParams.forEach((params) => {
       );
       assert.strictEqual(resp.status, 307);
       assert.strictEqual(resp.headers.get('location'), location);
+      assert.strictEqual(resp.redirected, false);
+    });
+
+    it('redirect keeps authorization header when redirecting to same origin', async () => {
+      const location = `${server.origin}/authorize`;
+      const url = `${server.origin}/redirect-to?url=${encodeURIComponent(location)}`;
+      let resp = await fetch(url, {
+        cache: 'no-store',
+        headers: {
+          authorization: 'Bearer sample',
+        },
+      });
+      assert.strictEqual(resp.status, 200);
+      assert.strictEqual(resp.redirected, true);
+      // same with a signal (code coverage)
+      const controller = new AbortController();
+      const { signal } = controller;
+      resp = await fetch(url, {
+        cache: 'no-store',
+        headers: {
+          authorization: 'Bearer sample',
+        },
+        signal,
+      });
+      assert.strictEqual(resp.status, 200);
+      assert.strictEqual(resp.redirected, true);
+    });
+
+    it('redirect strips authorization header when redirecting to same origin', async () => {
+      const location = `${redirectServer.origin}/authorize`;
+      const url = `${server.origin}/redirect-to?url=${encodeURIComponent(location)}`;
+      let resp = await fetch(url, {
+        cache: 'no-store',
+        headers: {
+          authorization: 'Bearer sample',
+        },
+      });
+      assert.strictEqual(resp.status, 401);
+      assert.strictEqual(resp.redirected, false);
+      // same with a signal (code coverage)
+      const controller = new AbortController();
+      const { signal } = controller;
+      resp = await fetch(url, {
+        cache: 'no-store',
+        headers: {
+          authorization: 'Bearer sample',
+        },
+        signal,
+      });
+      assert.strictEqual(resp.status, 401);
       assert.strictEqual(resp.redirected, false);
     });
 
