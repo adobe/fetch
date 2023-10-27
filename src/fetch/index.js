@@ -178,7 +178,7 @@ const fetch = async (ctx, url, options) => {
           throw new FetchError('Cannot follow redirect with body being a readable stream', 'unsupported-redirect');
         }
 
-        // https://fetch.spec.whatwg.org/#http-redirect-fetch step 10
+        // https://fetch.spec.whatwg.org/#http-redirect-fetch step 13
         const requestUrl = new URL(req.url);
         if (locationURL.origin !== requestUrl.origin) {
           requestOptions.headers.delete('authorization');
