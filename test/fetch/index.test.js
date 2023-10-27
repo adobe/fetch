@@ -449,7 +449,7 @@ testParams.forEach((params) => {
         },
       });
       assert.strictEqual(resp.status, 401);
-      assert.strictEqual(resp.redirected, false);
+      assert.strictEqual(resp.redirected, true);
       // same with a signal (code coverage)
       const controller = new AbortController();
       const { signal } = controller;
@@ -461,7 +461,7 @@ testParams.forEach((params) => {
         signal,
       });
       assert.strictEqual(resp.status, 401);
-      assert.strictEqual(resp.redirected, false);
+      assert.strictEqual(resp.redirected, true);
     });
 
     it('supports follow option (max-redirect limit)', async () => {
