@@ -431,6 +431,49 @@ testParams.forEach((params) => {
       ), FetchError);
     });
 
+    it('rejects redirect with non-http location', async () => {
+      const location = 'ftp://acme.com/foo';
+      await assert.rejects(() => fetch(
+        `${server.origin}/redirect-to?url=${encodeURIComponent(location)}&status_code=307`,
+      ), FetchError);
+    });
+
+    it('does not strip Authorization header when redirecting to same origin', async () => {
+      const location = `${server.origin}/inspect`;
+      const authorization = 'Bearer foo';
+      const resp = await fetch(`${server.origin}/redirect-to?url=${encodeURIComponent(location)}&status_code=307`, {
+        cache: 'no-store',
+        headers: { authorization },
+      });
+      assert.strictEqual(resp.status, 200);
+      assert.strictEqual(resp.redirected, true);
+      assert.strictEqual(resp.headers.get('content-type'), 'application/json');
+      const json = await resp.json();
+      assert(json !== null && typeof json === 'object');
+      assert.strictEqual(json.headers.authorization, authorization);
+    });
+
+    it('strips Authorization header when redirecting to different origin', async () => {
+      const targetServer = await Server.launch(1, false);
+      try {
+        const location = `${targetServer.origin}/inspect`;
+        const resp = await fetch(`${server.origin}/redirect-to?url=${encodeURIComponent(location)}&status_code=307`, {
+          cache: 'no-store',
+          headers: {
+            authorization: 'Bearer test',
+          },
+        });
+        assert.strictEqual(resp.status, 200);
+        assert.strictEqual(resp.redirected, true);
+        assert.strictEqual(resp.headers.get('content-type'), 'application/json');
+        const json = await resp.json();
+        assert(json !== null && typeof json === 'object');
+        assert.strictEqual(json.headers.authorization, undefined);
+      } finally {
+        process.kill(targetServer.pid);
+      }
+    });
+
     it('supports redirect: error', async () => {
       const location = `${server.origin}/status/200`;
       await assert.rejects(() => fetch(
