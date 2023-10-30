@@ -1,3 +1,10 @@
+## [4.1.1](https://github.com/adobe/fetch/compare/v4.1.0...v4.1.1) (2023-10-30)
+
+
+### Bug Fixes
+
+* redirect behaviour according to current fetch spec ([#449](https://github.com/adobe/fetch/issues/449)) ([a53ede6](https://github.com/adobe/fetch/commit/a53ede65cf5c8b836955aa3d0c6b3f58a79a846b))
+
 # [4.1.0](https://github.com/adobe/fetch/compare/v4.0.13...v4.1.0) (2023-09-13)
 
 
