@@ -142,12 +142,16 @@ const fetch = async (ctx, url, options) => {
         }
         throw new FetchError(`uri requested responds with a redirect, redirect mode is set to 'error': ${req.url}`, 'no-redirect');
       case 'follow': {
-        // https://fetch.spec.whatwg.org/#http-redirect-fetch step 2
+        // https://fetch.spec.whatwg.org/#http-redirect-fetch step 4
         if (locationURL === null) {
           break;
         }
+        // https://fetch.spec.whatwg.org/#http-redirect-fetch step 6
+        if (!(locationURL.protocol === 'http:' || locationURL.protocol === 'https:')) {
+          throw new FetchError('Cannot follow redirect with a non http location url', 'unsupported-redirect');
+        }
 
-        // https://fetch.spec.whatwg.org/#http-redirect-fetch step 5
+        // https://fetch.spec.whatwg.org/#http-redirect-fetch step 7
         if (req.counter >= req.follow) {
           if (signal) {
             // deregister from signal
@@ -156,7 +160,7 @@ const fetch = async (ctx, url, options) => {
           throw new FetchError(`maximum redirect reached at: ${req.url}`, 'max-redirect');
         }
 
-        // https://fetch.spec.whatwg.org/#http-redirect-fetch step 6 (counter increment)
+        // https://fetch.spec.whatwg.org/#http-redirect-fetch step 8 (counter increment)
         // Create a new Request object.
         const requestOptions = {
           headers: new Headers(req.headers),
@@ -169,7 +173,7 @@ const fetch = async (ctx, url, options) => {
           signal: req.signal,
         };
 
-        // https://fetch.spec.whatwg.org/#http-redirect-fetch step 9
+        // https://fetch.spec.whatwg.org/#http-redirect-fetch step 11
         if (statusCode !== 303 && req.body && req.init.body instanceof Readable) {
           if (signal) {
             // deregister from signal
@@ -178,14 +182,24 @@ const fetch = async (ctx, url, options) => {
           throw new FetchError('Cannot follow redirect with body being a readable stream', 'unsupported-redirect');
         }
 
-        // https://fetch.spec.whatwg.org/#http-redirect-fetch step 11
-        if (statusCode === 303 || ((statusCode === 301 || statusCode === 302) && req.method === 'POST')) {
+        // https://fetch.spec.whatwg.org/#http-redirect-fetch step 12
+        if ((statusCode === 303 && !['GET', 'HEAD'].includes(req.method))
+          || ((statusCode === 301 || statusCode === 302) && req.method === 'POST')) {
           requestOptions.method = 'GET';
           requestOptions.body = undefined;
           requestOptions.headers.delete('content-length');
+          requestOptions.headers.delete('content-encoding');
+          requestOptions.headers.delete('content-language');
+          requestOptions.headers.delete('content-location');
+          requestOptions.headers.delete('content-type');
         }
 
-        // https://fetch.spec.whatwg.org/#http-redirect-fetch step 15
+        // https://fetch.spec.whatwg.org/#http-redirect-fetch step 13
+        if (locationURL.origin !== new URL(req.url).origin) {
+          requestOptions.headers.delete('authorization');
+        }
+
+        // https://fetch.spec.whatwg.org/#http-redirect-fetch step 22
         if (signal) {
           // deregister from signal
           signal.removeEventListener('abort', abortHandler);
