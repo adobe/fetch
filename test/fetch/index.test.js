@@ -516,6 +516,8 @@ testParams.forEach((params) => {
       assert(json !== null && typeof json === 'object');
       assert.strictEqual(json.body, '');
       assert.strictEqual(json.method, 'GET');
+      assert.strictEqual(json.headers['content-type'], undefined);
+      assert.strictEqual(json.headers['content-length'], undefined);
     });
 
     it('follows redirected POST with json body', async () => {
