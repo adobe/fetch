@@ -14,13 +14,10 @@
 /* eslint-disable no-unused-expressions */
 /* eslint-disable guard-for-in */
 
-import { expect, use } from 'chai';
-import chaiIterator from 'chai-iterator';
-
+import { expect, assert } from 'chai';
 import { Headers } from '../../src/index.js';
 
-use(chaiIterator);
-// const { expect } = chai;
+const isIterable = (obj) => obj != null && typeof obj[Symbol.iterator] === 'function';
 
 describe('Headers Tests', () => {
   it('overrides toStringTag', () => {
@@ -83,7 +80,7 @@ describe('Headers Tests', () => {
       ['a', '1'],
     ]);
     headers.append('b', '3');
-    expect(headers).to.be.iterable;
+    assert(isIterable(headers));
 
     const result = [];
     for (const pair of headers) {
@@ -105,12 +102,18 @@ describe('Headers Tests', () => {
     ]);
     headers.append('b', '3');
 
-    expect(headers.entries()).to.be.iterable
-      .and.to.deep.iterate.over([
-        ['a', '1'],
-        ['b', '2, 3'],
-        ['c', '4'],
-      ]);
+    assert(isIterable(headers.entries()));
+
+    const result = [];
+    for (const entry of headers.entries()) {
+      result.push(entry);
+    }
+
+    expect(result).to.deep.equal([
+      ['a', '1'],
+      ['b', '2, 3'],
+      ['c', '4'],
+    ]);
   });
 
   it('should allow iterating through all headers with keys()', () => {
@@ -121,8 +124,14 @@ describe('Headers Tests', () => {
     ]);
     headers.append('b', '3');
 
-    expect(headers.keys()).to.be.iterable
-      .and.to.iterate.over(['a', 'b', 'c']);
+    assert(isIterable(headers.keys()));
+
+    const result = [];
+    for (const key of headers.keys()) {
+      result.push(key);
+    }
+
+    expect(result).to.deep.equal(['a', 'b', 'c']);
   });
 
   it('should allow iterating through all headers with values()', () => {
@@ -133,8 +142,14 @@ describe('Headers Tests', () => {
     ]);
     headers.append('b', '3');
 
-    expect(headers.values()).to.be.iterable
-      .and.to.iterate.over(['1', '2, 3', '4']);
+    assert(isIterable(headers.values()));
+
+    const result = [];
+    for (const val of headers.values()) {
+      result.push(val);
+    }
+
+    expect(result).to.deep.equal(['1', '2, 3', '4']);
   });
 
   it('should reject illegal header', () => {
