@@ -14,13 +14,13 @@
 /* eslint-disable no-unused-expressions */
 /* eslint-disable guard-for-in */
 
-import chai from 'chai';
+import { expect, use } from 'chai';
 import chaiIterator from 'chai-iterator';
 
 import { Headers } from '../../src/index.js';
 
-chai.use(chaiIterator);
-const { expect } = chai;
+use(chaiIterator);
+// const { expect } = chai;
 
 describe('Headers Tests', () => {
   it('overrides toStringTag', () => {

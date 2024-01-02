@@ -16,14 +16,10 @@
 
 import { Readable } from 'stream';
 
-import chai from 'chai';
-import chaiAsPromised from 'chai-as-promised';
+import { expect } from 'chai';
 import { FormData } from 'formdata-node';
 
 import { Response } from '../../src/index.js';
-
-chai.use(chaiAsPromised);
-const { expect } = chai;
 
 describe('Response Tests', () => {
   it('overrides toStringTag', () => {
@@ -229,11 +225,13 @@ describe('Response Tests', () => {
     expect(res.url).to.equal('');
   });
 
-  it('should reject if error on stream', () => {
+  it('should reject if error on stream', async () => {
     const stream = Readable.from('a=1');
     const res = new Response(stream);
     stream.emit('error', new Error('test'));
-    expect(res.text()).to.be.rejectedWith(TypeError);
+    res.text().catch((e) => {
+      expect(e).to.be.an.instanceof(TypeError);
+    });
   });
 
   it('should set bodyUsed', () => {
@@ -252,7 +250,9 @@ describe('Response Tests', () => {
       expect(res.bodyUsed).to.be.true;
       expect(result).to.equal('a=1');
       // repeated access should fail
-      expect(res.text()).to.be.rejectedWith(TypeError);
+      res.text().catch((e) => {
+        expect(e).to.be.an.instanceof(TypeError);
+      });
     });
   });
 

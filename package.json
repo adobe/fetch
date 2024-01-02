@@ -52,15 +52,13 @@
   "dependencies": {
     "debug": "4.3.4",
     "http-cache-semantics": "4.1.1",
-    "lru-cache": "7.18.3"
+    "lru-cache": "10.1.0"
   },
   "devDependencies": {
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
     "c8": "8.0.1",
     "chai": "5.0.0",
-    "chai-as-promised": "7.1.1",
-    "chai-bytes": "0.1.2",
     "chai-iterator": "3.0.2",
     "eslint": "8.56.0",
     "eslint-config-airbnb-base": "15.0.0",
