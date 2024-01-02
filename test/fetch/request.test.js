@@ -15,14 +15,10 @@
 
 import { Readable } from 'stream';
 
-import chai from 'chai';
-import chaiBytes from 'chai-bytes';
+import { expect } from 'chai';
 import { FormData } from 'formdata-node';
 
 import { Request, AbortController } from '../../src/index.js';
-
-chai.use(chaiBytes);
-const { expect } = chai;
 
 const BASE_URL = 'https://example.com/';
 
@@ -289,7 +285,7 @@ describe('Request Tests', () => {
     // eslint-disable-next-line no-unused-expressions
     expect(req.headers.get('content-type')).to.be.null;
     return req.arrayBuffer().then((result) => {
-      expect(new Uint8Array(result)).to.equalBytes(data);
+      expect(new Uint8Array(result)).to.deep.equal(Buffer.from(data));
     });
   });
 
