@@ -58,7 +58,7 @@
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
     "c8": "8.0.1",
-    "chai": "4.4.0",
+    "chai": "4.4.1",
     "chai-as-promised": "7.1.1",
     "chai-bytes": "0.1.2",
     "chai-iterator": "3.0.2",
