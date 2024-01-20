@@ -71,7 +71,7 @@
     "lint-staged": "15.2.0",
     "mocha": "10.2.0",
     "mocha-multi-reporters": "1.5.1",
-    "nock": "13.4.0",
+    "nock": "13.5.0",
     "parse-cache-control": "1.0.1",
     "parse-multipart-data": "1.5.0",
     "semantic-release": "22.0.12",
