@@ -79,6 +79,18 @@ testParams.forEach((params) => {
       }
     });
 
+    it(`h1() defaults to 'no keep-alive' (${name})`, async () => {
+      const { fetch, reset } = h1({ rejectUnauthorized: false });
+      try {
+        const resp = await fetch(`${server.origin}/status/200`);
+        assert.strictEqual(resp.status, 200);
+        assert.strictEqual(resp.httpVersion, '1.1');
+        assert.strictEqual(resp.headers.get('connection'), 'close');
+      } finally {
+        await reset();
+      }
+    });
+
     it(`supports h1NoCache() (${name})`, async () => {
       const { fetch, cacheStats, reset } = h1NoCache({ rejectUnauthorized: false });
       try {
@@ -94,20 +106,6 @@ testParams.forEach((params) => {
         const { size, count } = cacheStats();
         assert(size === 0);
         assert(count === 0);
-      } finally {
-        await reset();
-      }
-    });
-
-    it(`defaults to 'no keep-alive' (${name})`, async () => {
-      const { fetch, reset } = context(
-        { alpnProtocols: [ALPN_HTTP1_1], rejectUnauthorized: false },
-      );
-      try {
-        const resp = await fetch(`${server.origin}/status/200`);
-        assert.strictEqual(resp.status, 200);
-        assert.strictEqual(resp.httpVersion, '1.1');
-        assert.strictEqual(resp.headers.get('connection'), 'close');
       } finally {
         await reset();
       }

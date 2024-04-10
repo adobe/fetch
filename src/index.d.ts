@@ -36,8 +36,9 @@ export declare function context(options?: ContextOptions): FetchAPI;
 export declare function noCache(options?: ContextOptions): FetchAPI;
  
  /**
-  * Convenience function which creates a new context with enforced HTTP/1.1 protocol,
-  * the equivalent of `context({ alpnProtocols: [ALPN_HTTP1_1] })`.
+  * Convenience function which creates a new context with enforced HTTP/1.1 protocol
+  * and disabled persistent connections (keep-alive), the equivalent of
+  * `context({ alpnProtocols: [ALPN_HTTP1_1], h1: { keepAlive: false } })`.
   *
   * The optional `options` parameter allows to specify further options.
   *
@@ -57,8 +58,9 @@ export declare function noCache(options?: ContextOptions): FetchAPI;
  export declare function keepAlive(options?: ContextOptions): FetchAPI;
  
  /**
-  * Convenience function which creates a new context with disabled caching
-  * and enforced HTTP/1.1 protocol, a combination of `h1()` and `noCache()`.
+  * Convenience function which creates a new context with disabled caching,
+  * and enforced HTTP/1.1 protocol with disabled persistent connections (keep-alive),
+  * a combination of `h1()` and `noCache()`.
   *
   * The optional `options` parameter allows to specify further options.
   *
