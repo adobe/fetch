@@ -63,8 +63,8 @@ describe('Fetch Resiliance Tests', () => {
       process.kill(server.pid);
       // start h1 server
       server = await Server.launch(1, true, HELLO_MSG, server.port);
-      // expect FetchError: Protocol error
-      await assert.rejects(ctx.fetch(`${server.origin}/hello`), { name: 'FetchError', message: 'Protocol error' });
+      // expect FetchError: Protocol error (message depends on node version)
+      await assert.rejects(ctx.fetch(`${server.origin}/hello`), { name: 'FetchError' });
       // the fetch context should have recovered by now, next request should succeed
       resp = await ctx.fetch(`${server.origin}/hello`);
       assert.strictEqual(resp.status, 200);
