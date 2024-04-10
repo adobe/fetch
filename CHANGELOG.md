@@ -1,3 +1,10 @@
+## [4.1.2](https://github.com/adobe/fetch/compare/v4.1.1...v4.1.2) (2024-04-10)
+
+
+### Bug Fixes
+
+* disable h1 keep-alive by default ([#469](https://github.com/adobe/fetch/issues/469)) ([58c69e6](https://github.com/adobe/fetch/commit/58c69e63af126e032430ffeb757c52fa8054d3bd))
+
 ## [4.1.1](https://github.com/adobe/fetch/compare/v4.1.0...v4.1.1) (2023-10-30)
 
 
