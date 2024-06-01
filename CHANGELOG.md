@@ -1,3 +1,10 @@
+## [4.1.3](https://github.com/adobe/fetch/compare/v4.1.2...v4.1.3) (2024-06-01)
+
+
+### Bug Fixes
+
+* **deps:** update dependency debug to v4.3.5 ([7bc0c80](https://github.com/adobe/fetch/commit/7bc0c80275e059c6ea53fd20842db27e6cdde7ba))
+
 ## [4.1.2](https://github.com/adobe/fetch/compare/v4.1.1...v4.1.2) (2024-04-10)
 
 
