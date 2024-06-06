@@ -1,3 +1,10 @@
+## [4.1.4](https://github.com/adobe/fetch/compare/v4.1.3...v4.1.4) (2024-06-06)
+
+
+### Bug Fixes
+
+* deal with node v19 breaking change (keep-alive enabled on global agent) ([#476](https://github.com/adobe/fetch/issues/476)) ([6586b31](https://github.com/adobe/fetch/commit/6586b3156879c0e331538ced4b5003bb4fc2b08c))
+
 ## [4.1.3](https://github.com/adobe/fetch/compare/v4.1.2...v4.1.3) (2024-06-01)
 
 
