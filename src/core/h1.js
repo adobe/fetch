@@ -62,7 +62,7 @@ const getAgent = (ctx, protocol) => {
     // use default (global) agent
     /* c8 ignore next 13 */
     /* => code coverage depends on the node version */
-    if (https.globalAgent.keepAlive) /* node >= 19 */ {
+    if (http.globalAgent.keepAlive) /* node >= 19 */ {
       // As of Node.js v19 the global agent has keep-alive enabled by default:
       // https://nodejs.org/api/http.html#class-httpagent
       // https://github.com/nodejs/node/issues/37184
