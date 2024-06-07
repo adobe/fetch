@@ -1,3 +1,10 @@
+## [4.1.5](https://github.com/adobe/fetch/compare/v4.1.4...v4.1.5) (2024-06-07)
+
+
+### Bug Fixes
+
+* revert PR [#476](https://github.com/adobe/fetch/issues/476) due to potential regression ([#477](https://github.com/adobe/fetch/issues/477)) ([2fe94d4](https://github.com/adobe/fetch/commit/2fe94d46f9ee830e09486b059fa9fa72c4963393))
+
 ## [4.1.4](https://github.com/adobe/fetch/compare/v4.1.3...v4.1.4) (2024-06-06)
 
 
