@@ -36,20 +36,7 @@ const getAgent = (ctx, protocol) => {
       return h1.httpsAgent;
     }
     // use default (global) agent
-    /* c8 ignore next 13 */
-    /* => code coverage depends on the node version */
-    if (https.globalAgent.keepAlive) /* node >= 19 */ {
-      // As of Node.js v19 the global agent has keep-alive enabled by default:
-      // https://nodejs.org/api/http.html#class-httpagent
-      // https://github.com/nodejs/node/issues/37184
-      // https://github.com/nodejs/node/pull/43522/files#diff-494d2deee304c672124ecd82d090283595fd3d8c5a80a1825d972a2d229e4944L334-R334
-      // In order to guarantee consistent behavior across node versions we
-      // always create a new agent with keep-alive enabled on Node.js v19+.
-      h1.httpsAgent = new https.Agent({ keepAlive: false });
-      return h1.httpsAgent;
-    } else /* node <= 18 */ {
-      return undefined;
-    }
+    return undefined;
   } else {
     // plain http
     if (h1.httpAgent) {
@@ -60,20 +47,7 @@ const getAgent = (ctx, protocol) => {
       return h1.httpAgent;
     }
     // use default (global) agent
-    /* c8 ignore next 13 */
-    /* => code coverage depends on the node version */
-    if (http.globalAgent.keepAlive) /* node >= 19 */ {
-      // As of Node.js v19 the global agent has keep-alive enabled by default:
-      // https://nodejs.org/api/http.html#class-httpagent
-      // https://github.com/nodejs/node/issues/37184
-      // https://github.com/nodejs/node/pull/43522/files#diff-494d2deee304c672124ecd82d090283595fd3d8c5a80a1825d972a2d229e4944L334-R334
-      // In order to guarantee consistent behavior across node versions we
-      // always create a new agent with keep-alive enabled on Node.js v19+.
-      h1.httpAgent = new http.Agent({ keepAlive: false });
-      return h1.httpAgent;
-    } else /* node <= 18 */ {
-      return undefined;
-    }
+    return undefined;
   }
 };
 
