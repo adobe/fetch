@@ -1,3 +1,10 @@
+## [4.1.7](https://github.com/adobe/fetch/compare/v4.1.6...v4.1.7) (2024-06-07)
+
+
+### Reverts
+
+* Revert "fix: deal with node v19 breaking change (keep-alive enabled on global agent)" ([5d575a1](https://github.com/adobe/fetch/commit/5d575a1402124f13941de19ef8a32cdf0f327654))
+
 ## [4.1.6](https://github.com/adobe/fetch/compare/v4.1.5...v4.1.6) (2024-06-07)
 
 
