@@ -68,7 +68,7 @@
     "eslint-plugin-import": "2.29.1",
     "formdata-node": "6.0.3",
     "husky": "8.0.3",
-    "lint-staged": "15.2.5",
+    "lint-staged": "15.2.7",
     "mocha": "10.4.0",
     "mocha-multi-reporters": "1.5.1",
     "nock": "13.5.4",
