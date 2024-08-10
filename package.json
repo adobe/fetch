@@ -69,7 +69,7 @@
     "formdata-node": "6.0.3",
     "husky": "8.0.3",
     "lint-staged": "15.2.8",
-    "mocha": "10.7.0",
+    "mocha": "10.7.3",
     "mocha-multi-reporters": "1.5.1",
     "nock": "13.5.4",
     "parse-cache-control": "1.0.1",
