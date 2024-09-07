@@ -50,7 +50,7 @@
     "cache"
   ],
   "dependencies": {
-    "debug": "4.3.6",
+    "debug": "4.3.7",
     "http-cache-semantics": "4.1.1",
     "lru-cache": "7.18.3"
   },
@@ -65,10 +65,10 @@
     "eslint": "8.57.0",
     "eslint-config-airbnb-base": "15.0.0",
     "eslint-plugin-header": "3.1.1",
-    "eslint-plugin-import": "2.29.1",
+    "eslint-plugin-import": "2.30.0",
     "formdata-node": "6.0.3",
     "husky": "8.0.3",
-    "lint-staged": "15.2.9",
+    "lint-staged": "15.2.10",
     "mocha": "10.7.3",
     "mocha-multi-reporters": "1.5.1",
     "nock": "13.5.5",
