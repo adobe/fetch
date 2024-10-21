@@ -275,7 +275,9 @@ const request = async (ctx, uri, options) => {
         return await h2.request(ctx, url, socket ? { ...opts, socket } : opts);
       } catch (err) {
         const { code, message } = err;
-        if (code === 'ERR_HTTP2_ERROR' && message === 'Protocol error') {
+        /* c8 ignore next 2 */
+        if ((code === 'ERR_HTTP2_ERROR' && message === 'Protocol error')
+          || code === 'ERR_HTTP2_STREAM_CANCEL') {
           // server potentially downgraded from h2 to h1: clear alpn cache entry
           ctx.alpnCache.delete(`${url.protocol}//${url.host}`);
         }

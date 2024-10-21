@@ -1,5 +1,5 @@
 # !README.md and !CHANGELOG.md are implicit
-*.md 
+*.md
 *.tgz
 /.*
 banner.jpeg
@@ -11,3 +11,4 @@ node_modules
 snykmocha.jsl
 test
 test-results.xml
+renovate.json

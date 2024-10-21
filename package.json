@@ -1,6 +1,6 @@
 {
   "name": "@adobe/fetch",
-  "version": "4.1.1",
+  "version": "4.1.9",
   "description": "Light-weight Fetch implementation transparently supporting both HTTP/1(.1) and HTTP/2",
   "main": "./src/index.js",
   "module": "./src/index.js",
@@ -11,7 +11,8 @@
     "test": "c8 mocha",
     "test-ci": "c8 mocha",
     "semantic-release": "semantic-release",
-    "prepare": "husky install"
+    "semantic-release-dry": "semantic-release --dry-run --branches $CI_BRANCH",
+    "prepare": "husky"
   },
   "mocha": {
     "timeout": "5000",
@@ -50,7 +51,7 @@
     "cache"
   ],
   "dependencies": {
-    "debug": "4.3.4",
+    "debug": "4.3.7",
     "http-cache-semantics": "4.1.1",
     "lru-cache": "7.18.3"
   },
@@ -59,21 +60,21 @@
     "@semantic-release/git": "10.0.1",
     "c8": "8.0.1",
     "chai": "5.0.0",
-    "eslint": "8.56.0",
+    "eslint": "8.57.1",
     "eslint-config-airbnb-base": "15.0.0",
     "eslint-plugin-header": "3.1.1",
-    "eslint-plugin-import": "2.29.1",
+    "eslint-plugin-import": "2.31.0",
     "formdata-node": "6.0.3",
     "husky": "8.0.3",
-    "lint-staged": "15.2.0",
-    "mocha": "10.2.0",
+    "lint-staged": "15.2.10",
+    "mocha": "10.7.3",
     "mocha-multi-reporters": "1.5.1",
-    "nock": "13.4.0",
+    "nock": "13.5.5",
     "parse-cache-control": "1.0.1",
     "parse-multipart-data": "1.5.0",
     "semantic-release": "22.0.12",
-    "sinon": "17.0.1",
-    "stream-buffers": "3.0.2"
+    "sinon": "17.0.2",
+    "stream-buffers": "3.0.3"
   },
   "lint-staged": {
     "*.js": "eslint"

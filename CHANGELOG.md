@@ -1,3 +1,59 @@
+## [4.1.9](https://github.com/adobe/fetch/compare/v4.1.8...v4.1.9) (2024-09-21)
+
+
+### Bug Fixes
+
+* **deps:** update external fixes ([f4f7d9b](https://github.com/adobe/fetch/commit/f4f7d9bad1aedf5e59a035d18950c055ecd5afcf))
+
+## [4.1.8](https://github.com/adobe/fetch/compare/v4.1.7...v4.1.8) (2024-06-07)
+
+
+### Bug Fixes
+
+* deal with node v19 breaking change (keep-alive enabled on global agent) ([#478](https://github.com/adobe/fetch/issues/478)) ([89d982d](https://github.com/adobe/fetch/commit/89d982d8df7d6e0d12a0460217ac6e43708712d8))
+
+## [4.1.7](https://github.com/adobe/fetch/compare/v4.1.6...v4.1.7) (2024-06-07)
+
+
+### Reverts
+
+* Revert "fix: deal with node v19 breaking change (keep-alive enabled on global agent)" ([5d575a1](https://github.com/adobe/fetch/commit/5d575a1402124f13941de19ef8a32cdf0f327654))
+
+## [4.1.6](https://github.com/adobe/fetch/compare/v4.1.5...v4.1.6) (2024-06-07)
+
+
+### Bug Fixes
+
+* deal with node v19 breaking change (keep-alive enabled on global agent) ([d699d2f](https://github.com/adobe/fetch/commit/d699d2f92eabb8e330788985a328d831978fff49))
+
+## [4.1.5](https://github.com/adobe/fetch/compare/v4.1.4...v4.1.5) (2024-06-07)
+
+
+### Bug Fixes
+
+* revert PR [#476](https://github.com/adobe/fetch/issues/476) due to potential regression ([#477](https://github.com/adobe/fetch/issues/477)) ([2fe94d4](https://github.com/adobe/fetch/commit/2fe94d46f9ee830e09486b059fa9fa72c4963393))
+
+## [4.1.4](https://github.com/adobe/fetch/compare/v4.1.3...v4.1.4) (2024-06-06)
+
+
+### Bug Fixes
+
+* deal with node v19 breaking change (keep-alive enabled on global agent) ([#476](https://github.com/adobe/fetch/issues/476)) ([6586b31](https://github.com/adobe/fetch/commit/6586b3156879c0e331538ced4b5003bb4fc2b08c))
+
+## [4.1.3](https://github.com/adobe/fetch/compare/v4.1.2...v4.1.3) (2024-06-01)
+
+
+### Bug Fixes
+
+* **deps:** update dependency debug to v4.3.5 ([7bc0c80](https://github.com/adobe/fetch/commit/7bc0c80275e059c6ea53fd20842db27e6cdde7ba))
+
+## [4.1.2](https://github.com/adobe/fetch/compare/v4.1.1...v4.1.2) (2024-04-10)
+
+
+### Bug Fixes
+
+* disable h1 keep-alive by default ([#469](https://github.com/adobe/fetch/issues/469)) ([58c69e6](https://github.com/adobe/fetch/commit/58c69e63af126e032430ffeb757c52fa8054d3bd))
+
 ## [4.1.1](https://github.com/adobe/fetch/compare/v4.1.0...v4.1.1) (2023-10-30)
 
 
