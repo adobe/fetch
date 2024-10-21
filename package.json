@@ -11,7 +11,8 @@
     "test": "c8 mocha",
     "test-ci": "c8 mocha",
     "semantic-release": "semantic-release",
-    "prepare": "husky install"
+    "semantic-release-dry": "semantic-release --dry-run --branches $CI_BRANCH",
+    "prepare": "husky"
   },
   "mocha": {
     "timeout": "5000",
