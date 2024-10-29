@@ -17,14 +17,6 @@
       "allowedVersions": "<8.0.0"
     },
     {
-      "packageNames": ["circleci/node"],
-      "allowedVersions": "<15"
-    },
-    {
-      "packageNames": ["cimg/node"],
-      "allowedVersions": "<15"
-    },
-    {
       "groupName": "external fixes",
       "updateTypes": ["patch", "pin", "digest", "minor"],
       "automerge": true,
