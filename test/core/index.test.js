@@ -236,6 +236,7 @@ describe('Core Tests', () => {
       await defaultCtx.request('https://example.com:81/', { signal });
       assert.fail();
     } catch (err) {
+      console.log(err);
       assert(err instanceof RequestAbortedError);
     }
     const ts1 = Date.now();
