@@ -9,6 +9,10 @@
   "branchPrefix": "renovate-",
   "packageRules": [
     {
+      "matchPackageNames": ["eslint"],
+      "allowedVersions": "<9.0.0"
+    },
+    {
       "matchPackageNames": ["lru-cache"],
       "allowedVersions": "<8.0.0"
     },
