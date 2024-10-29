@@ -18,6 +18,7 @@ import fs from 'fs';
 import { finished } from 'stream';
 import { fileURLToPath } from 'url';
 import { promisify } from 'util';
+import { setDefaultResultOrder } from 'dns';
 
 import { FormData } from 'formdata-node';
 import { WritableStreamBuffer } from 'stream-buffers';
@@ -229,6 +230,8 @@ describe('Core Tests', () => {
     const controller = new AbortController();
     setTimeout(() => controller.abort(), 1000);
     const { signal } = controller;
+
+    setDefaultResultOrder('ipv4first');
 
     const ts0 = Date.now();
     try {
