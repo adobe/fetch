@@ -9,6 +9,7 @@ permissions:
 env:
   CI_BUILD_NUM: ${{ github.run_id }}
   CI_BRANCH: ${{ github.ref_name }}
+  NODE_OPTIONS: --dns-result-order=ipv4first
 
 jobs:
   test:
