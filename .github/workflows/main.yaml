@@ -15,25 +15,11 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - name: Set NODE_OPTIONS
-        run: |
-          # Your logic to generate NODE_OPTIONS
-          NODE_OPTIONS="--dns-result-order=ipv4first"
-          
-          echo "NODE_OPTIONS=${NODE_OPTIONS}" >> $GITHUB_ENV
-
-      - name: Check NODE_OPTIONS
-        run: |
-          echo "NODE_OPTIONS: $NODE_OPTIONS"
-          # Continue with your workflow steps
-
       - uses: actions/checkout@v4
       - name: Use Node.js 20.x
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-        env:
-          NODE_OPTIONS: --dns-result-order=ipv4first
       - run: npm ci
       - run: npm run lint
       - run: npm test
@@ -59,8 +45,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-        env:
-          NODE_OPTIONS: "--dns-result-order=ipv4first"
       - run: npm ci
       - run: npm run semantic-release
         env:
