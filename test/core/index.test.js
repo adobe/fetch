@@ -233,7 +233,7 @@ describe('Core Tests', () => {
     const ts0 = Date.now();
     try {
       // the TLS connect to the server hangs, fetch is aborted after 1 second.
-      await defaultCtx.request('https://example.com:81/', { signal });
+      await defaultCtx.request('https://http-me.glitch.me:81/', { signal });
       assert.fail();
     } catch (err) {
       assert(err instanceof RequestAbortedError);

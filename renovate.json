@@ -9,16 +9,12 @@
   "branchPrefix": "renovate-",
   "packageRules": [
     {
+      "matchPackageNames": ["eslint"],
+      "allowedVersions": "<9.0.0"
+    },
+    {
       "matchPackageNames": ["lru-cache"],
       "allowedVersions": "<8.0.0"
-    },
-    {
-      "packageNames": ["circleci/node"],
-      "allowedVersions": "<15"
-    },
-    {
-      "packageNames": ["cimg/node"],
-      "allowedVersions": "<15"
     },
     {
       "groupName": "external fixes",

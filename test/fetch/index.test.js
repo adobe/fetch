@@ -311,7 +311,7 @@ testParams.forEach((params) => {
       const ts0 = Date.now();
       try {
         // the TLS connect to the server hangs, fetch is aborted after 1 second.
-        await fetch(`${protocol}://example.com:81/`, { signal });
+        await fetch(`${protocol}://http-me.glitch.me:81/`, { signal });
         assert.fail();
       } catch (err) {
         assert(err instanceof AbortError);
