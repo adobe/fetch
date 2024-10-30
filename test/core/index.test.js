@@ -225,7 +225,7 @@ describe('Core Tests', () => {
     assert((ts1 - ts0) < 1000 * 1.1);
   });
 
-  it.only('AbortController works (slow connect)', async () => {
+  it('AbortController works (slow connect)', async () => {
     const controller = new AbortController();
     setTimeout(() => controller.abort(), 1000);
     const { signal } = controller;
@@ -233,12 +233,10 @@ describe('Core Tests', () => {
     const ts0 = Date.now();
     try {
       // the TLS connect to the server hangs, fetch is aborted after 1 second.
-      // await defaultCtx.request('https://example.com:81/', { signal });
       await defaultCtx.request('https://http-me.glitch.me:81/', { signal });
       assert.fail();
     } catch (err) {
-      console.log(err);
-      // assert(err instanceof RequestAbortedError);
+      assert(err instanceof RequestAbortedError);
     }
     const ts1 = Date.now();
     assert((ts1 - ts0) < 1000 * 1.1);
