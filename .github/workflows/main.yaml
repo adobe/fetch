@@ -23,7 +23,7 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm test
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
       - name: Semantic Release (Dry Run)
