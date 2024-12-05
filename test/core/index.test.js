@@ -26,6 +26,7 @@ import { isReadableStream, parseMultiPartFormData } from '../utils.js';
 import { AbortController } from '../../src/fetch/abort.js';
 import { RequestAbortedError } from '../../src/core/errors.js';
 import core from '../../src/core/index.js';
+import pkg from '../../src/package.cjs';
 import Server from '../server.js';
 
 const HELLO_WORLD = 'Hello, World!';
@@ -240,6 +241,23 @@ describe('Core Tests', () => {
     }
     const ts1 = Date.now();
     assert((ts1 - ts0) < 1000 * 1.1);
+  });
+
+  it('standard user agent contains package version', async () => {
+    const customCtx = context({
+      rejectUnauthorized: false,
+    });
+    try {
+      const resp = await customCtx.request(`${server.origin}/inspect`);
+      assert.strictEqual(resp.statusCode, 200);
+      assert.strictEqual(resp.headers['content-type'], 'application/json');
+
+      const buf = await readStream(resp.readable);
+      const json = JSON.parse(buf);
+      assert.strictEqual(json.headers['user-agent'], `adobe-fetch/${pkg.version}`);
+    } finally {
+      await customCtx.reset();
+    }
   });
 
   it('overriding user-agent works (context)', async () => {
