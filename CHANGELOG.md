@@ -1,3 +1,10 @@
+## [4.1.10](https://github.com/adobe/fetch/compare/v4.1.9...v4.1.10) (2024-12-05)
+
+
+### Bug Fixes
+
+* use package.cjs import instead of requiring package.json ([#506](https://github.com/adobe/fetch/issues/506)) ([fad8a1e](https://github.com/adobe/fetch/commit/fad8a1eb6ee79a840ec0ef0aa17ed289ec185a24))
+
 ## [4.1.9](https://github.com/adobe/fetch/compare/v4.1.8...v4.1.9) (2024-09-21)
 
 
