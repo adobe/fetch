@@ -36,7 +36,7 @@ const {
   ALPN_HTTP1_1,
   ALPN_HTTP2,
   FetchError,
-  AbortController,
+  AbortController: FetchAbortController,
   AbortError,
   timeoutSignal,
 } = defaultFetchContext;
@@ -197,6 +197,29 @@ testParams.forEach((params) => {
     });
 
     it('AbortController works (premature abort)', async () => {
+      const controller = new FetchAbortController();
+      controller.abort();
+      const { signal } = controller;
+      // make sure signal has fired
+      assert(signal.aborted);
+
+      const method = 'POST';
+      const body = stream.Readable.from('Hello, World!');
+
+      const ts0 = Date.now();
+      try {
+        await fetch(`${server.origin}/status/200`, { signal, method, body });
+        assert.fail();
+      } catch (err) {
+        assert(err instanceof AbortError);
+      }
+      const ts1 = Date.now();
+      assert((ts1 - ts0) < 10);
+      // make sure request body (stream) is destroyed
+      assert(body.destroyed);
+    });
+
+    it('built-in AbortController works (premature abort)', async () => {
       const controller = new AbortController();
       controller.abort();
       const { signal } = controller;
@@ -240,6 +263,28 @@ testParams.forEach((params) => {
     });
 
     it('AbortController works (slow response)', async () => {
+      const controller = new FetchAbortController();
+      setTimeout(() => controller.abort(), 1000);
+      const { signal } = controller;
+
+      const method = 'POST';
+      const body = stream.Readable.from('Hello, World!');
+
+      const ts0 = Date.now();
+      try {
+        // the server responds with a 2 second delay, fetch is aborted after 1 second.
+        await fetch(`${server.origin}/hello?delay=2000`, { signal, method, body });
+        assert.fail();
+      } catch (err) {
+        assert(err instanceof AbortError);
+      }
+      const ts1 = Date.now();
+      assert((ts1 - ts0) < 1000 * 1.1);
+      // make sure request body (stream) is destroyed
+      assert(body.destroyed);
+    });
+
+    it('built-in AbortController works (slow response)', async () => {
       const controller = new AbortController();
       setTimeout(() => controller.abort(), 1000);
       const { signal } = controller;
@@ -262,6 +307,22 @@ testParams.forEach((params) => {
     });
 
     it('AbortController works (POST with string body)', async () => {
+      const controller = new FetchAbortController();
+      setTimeout(() => controller.abort(), 1);
+      const { signal } = controller;
+
+      const method = 'POST';
+      const body = 'Hello, World!';
+
+      try {
+        await fetch(`${server.origin}/inspect`, { signal, method, body });
+        assert.fail();
+      } catch (err) {
+        assert(err instanceof AbortError);
+      }
+    });
+
+    it('built-n AbortController works (POST with string body)', async () => {
       const controller = new AbortController();
       setTimeout(() => controller.abort(), 1);
       const { signal } = controller;
@@ -278,6 +339,32 @@ testParams.forEach((params) => {
     });
 
     it('AbortController works (dripping response)', async () => {
+      const FETCH_TIMEOUT = 1000; // ms
+      const DRIPPING_DURATION = 2; // seconds
+      const TEST_URL = `${protocol}://httpbingo.org/drip?duration=${DRIPPING_DURATION}&numbytes=10&code=200&delay=0`;
+
+      const controller = new FetchAbortController();
+      setTimeout(() => controller.abort(), FETCH_TIMEOUT);
+      const { signal } = controller;
+
+      const method = 'POST';
+      const body = stream.Readable.from('Hello, World!');
+
+      const ts0 = Date.now();
+      try {
+        const res = await fetch(TEST_URL, { signal, method, body });
+        await res.buffer();
+        assert.fail();
+      } catch (err) {
+        assert(err instanceof AbortError);
+      }
+      const ts1 = Date.now();
+      assert((ts1 - ts0) < FETCH_TIMEOUT * 1.1);
+      // make sure request body (stream) is destroyed
+      assert(body.destroyed);
+    });
+
+    it('built-in AbortController works (dripping response)', async () => {
       const FETCH_TIMEOUT = 1000; // ms
       const DRIPPING_DURATION = 2; // seconds
       const TEST_URL = `${protocol}://httpbingo.org/drip?duration=${DRIPPING_DURATION}&numbytes=10&code=200&delay=0`;
@@ -304,6 +391,23 @@ testParams.forEach((params) => {
     });
 
     it('AbortController works (slow connect)', async () => {
+      const controller = new FetchAbortController();
+      setTimeout(() => controller.abort(), 1000);
+      const { signal } = controller;
+
+      const ts0 = Date.now();
+      try {
+        // the TLS connect to the server hangs, fetch is aborted after 1 second.
+        await fetch(`${protocol}://http-me.glitch.me:81/`, { signal });
+        assert.fail();
+      } catch (err) {
+        assert(err instanceof AbortError);
+      }
+      const ts1 = Date.now();
+      assert((ts1 - ts0) < 1000 * 1.1);
+    });
+
+    it('built-in AbortController works (slow connect)', async () => {
       const controller = new AbortController();
       setTimeout(() => controller.abort(), 1000);
       const { signal } = controller;

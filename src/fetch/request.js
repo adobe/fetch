@@ -10,7 +10,6 @@
  * governing permissions and limitations under the License.
  */
 
-import { AbortSignal } from './abort.js';
 import { Body, cloneStream, guessContentType } from './body.js';
 import Headers from './headers.js';
 import { isPlainObject } from '../common/utils.js';
@@ -85,8 +84,11 @@ class Request extends Body {
       signal = init.signal;
     }
 
-    if (signal && !(signal instanceof AbortSignal)) {
-      throw new TypeError('signal needs to be an instance of AbortSignal');
+    if (signal
+      && (typeof signal !== 'object'
+        || typeof signal.aborted !== 'boolean'
+        || typeof signal.addEventListener !== 'function')) {
+      throw new TypeError('signal must be an AbortSignal');
     }
 
     const redirect = init.redirect || (req && req.redirect) || 'follow';
