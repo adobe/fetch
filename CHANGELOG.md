@@ -1,3 +1,10 @@
+# [4.2.0](https://github.com/adobe/fetch/compare/v4.1.11...v4.2.0) (2025-03-04)
+
+
+### Features
+
+* support node built-in AbortController & AbortSignal ([#518](https://github.com/adobe/fetch/issues/518)) ([f627a17](https://github.com/adobe/fetch/commit/f627a17c03594273bfa1f5bf472fa6fcc88ace67))
+
 ## [4.1.11](https://github.com/adobe/fetch/compare/v4.1.10...v4.1.11) (2024-12-07)
 
 
