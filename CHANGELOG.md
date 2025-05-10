@@ -1,3 +1,10 @@
+## [4.2.1](https://github.com/adobe/fetch/compare/v4.2.0...v4.2.1) (2025-05-10)
+
+
+### Bug Fixes
+
+* **deps:** update external fixes ([#523](https://github.com/adobe/fetch/issues/523)) ([23a801e](https://github.com/adobe/fetch/commit/23a801e4fa3953356a650a9f2ee3713380295d91))
+
 # [4.2.0](https://github.com/adobe/fetch/compare/v4.1.11...v4.2.0) (2025-03-04)
 
 
