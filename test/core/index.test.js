@@ -237,6 +237,7 @@ describe('Core Tests', () => {
       await defaultCtx.request('https://http-me.glitch.me:81/', { signal });
       assert.fail();
     } catch (err) {
+      console.error(err);
       assert(err instanceof RequestAbortedError);
     }
     const ts1 = Date.now();
