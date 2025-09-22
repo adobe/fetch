@@ -65,7 +65,9 @@ describe('Misc. Core Tests (edge cases to improve code coverage)', () => {
       assert(err instanceof RequestAbortedError);
     } finally {
       await customCtx.reset();
-      process.kill(server.pid);
+      try {
+        process.kill(server.pid);
+      } catch (ignore) { /* ignore */ }
     }
     const ts1 = Date.now();
     assert((ts1 - ts0) < 10);
@@ -93,7 +95,9 @@ describe('Misc. Core Tests (edge cases to improve code coverage)', () => {
       assert.strictEqual(json.body, body);
     } finally {
       await customCtx.reset();
-      process.kill(server.pid);
+      try {
+        process.kill(server.pid);
+      } catch (ignore) { /* ignore */ }
     }
   });
 });

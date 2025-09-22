@@ -43,7 +43,9 @@ describe('unencrypted HTTP/2 (h2c)-specific Core Tests', () => {
 
   after(async () => {
     await reset();
-    process.kill(server.pid);
+    try {
+      process.kill(server.pid);
+    } catch (ignore) { /* ignore */ }
   });
 
   it('supports unencrypted HTTP/2 (h2c)', async () => {

@@ -33,7 +33,9 @@ describe('Fetch Resiliance Tests', () => {
       assert.strictEqual(body, HELLO_MSG);
 
       // restart server
-      process.kill(server.pid);
+      try {
+        process.kill(server.pid);
+      } catch (ignore) { /* ignore */ }
       server = await Server.launch(2, true, HELLO_MSG, server.port);
 
       resp = await ctx.fetch(`${server.origin}/hello`);
@@ -43,7 +45,9 @@ describe('Fetch Resiliance Tests', () => {
       assert.strictEqual(body, HELLO_MSG);
     } finally {
       await ctx.reset();
-      process.kill(server.pid);
+      try {
+        process.kill(server.pid);
+      } catch (ignore) { /* ignore */ }
     }
   });
 
@@ -60,7 +64,9 @@ describe('Fetch Resiliance Tests', () => {
       assert.strictEqual(body, HELLO_MSG);
 
       // stop h2 server
-      process.kill(server.pid);
+      try {
+        process.kill(server.pid);
+      } catch (ignore) { /* ignore */ }
       // start h1 server
       server = await Server.launch(1, true, HELLO_MSG, server.port);
       // expect FetchError: Protocol error (message depends on node version)
@@ -73,7 +79,9 @@ describe('Fetch Resiliance Tests', () => {
       assert.strictEqual(body, HELLO_MSG);
     } finally {
       await ctx.reset();
-      process.kill(server.pid);
+      try {
+        process.kill(server.pid);
+      } catch (ignore) { /* ignore */ }
     }
   });
 
@@ -100,7 +108,9 @@ describe('Fetch Resiliance Tests', () => {
       assert.strictEqual(body, HELLO_MSG);
     } finally {
       await ctx.reset();
-      process.kill(server.pid);
+      try {
+        process.kill(server.pid);
+      } catch (ignore) { /* ignore */ }
     }
   });
 });

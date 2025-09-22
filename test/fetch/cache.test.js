@@ -71,7 +71,9 @@ describe('Cache Tests', () => {
   });
 
   after(async () => {
-    process.kill(server.pid);
+    try {
+      process.kill(server.pid);
+    } catch (ignore) { /* ignore */ }
   });
 
   afterEach(async () => {
