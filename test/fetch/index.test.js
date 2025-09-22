@@ -88,7 +88,9 @@ testParams.forEach((params) => {
 
     after(async () => {
       await reset();
-      process.kill(server.pid);
+      try {
+        process.kill(server.pid);
+      } catch (ignore) { /* ignore */ }
     });
 
     it('rejects on non-string method option', async () => {
