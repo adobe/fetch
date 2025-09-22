@@ -38,7 +38,9 @@ describe('HTTP/2-specific Fetch Tests', () => {
   });
 
   after(async () => {
-    process.kill(server.pid);
+    try {
+      process.kill(server.pid);
+    } catch (ignore) { /* ignore */ }
   });
 
   afterEach(async () => {

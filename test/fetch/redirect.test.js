@@ -40,7 +40,9 @@ describe('Redirect-specific Fetch Tests', () => {
     } finally {
       await ctx.reset();
       // shutdown server
-      process.kill(server.pid);
+      try {
+        process.kill(server.pid);
+      } catch (ignore) { /* ignore */ }
     }
   });
 
@@ -66,7 +68,9 @@ describe('Redirect-specific Fetch Tests', () => {
     } finally {
       await ctx.reset();
       // shutdown server
-      process.kill(server.pid);
+      try {
+        process.kill(server.pid);
+      } catch (ignore) { /* ignore */ }
     }
   });
 });

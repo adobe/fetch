@@ -60,7 +60,9 @@ describe('Core Tests', () => {
 
   after(async () => {
     await defaultCtx.reset();
-    process.kill(server.pid);
+    try {
+      process.kill(server.pid);
+    } catch (ignore) { /* ignore */ }
   });
 
   it('supports HTTP/1(.1)', async () => {
@@ -72,7 +74,9 @@ describe('Core Tests', () => {
       assert.strictEqual(resp.statusCode, 200);
       assert.strictEqual(resp.httpVersionMajor, 1);
     } finally {
-      process.kill(h1Server.pid);
+      try {
+        process.kill(h1Server.pid);
+      } catch (ignore) { /* ignore */ }
     }
   });
 
@@ -336,7 +340,9 @@ describe('Core Tests', () => {
       assert.strictEqual(ok.length, N);
     } finally {
       await ctx.reset();
-      process.kill(testServer.pid);
+      try {
+        process.kill(testServer.pid);
+      } catch (ignore) { /* ignore */ }
     }
   });
 

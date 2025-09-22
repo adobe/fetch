@@ -52,7 +52,9 @@ testParams.forEach((params) => {
     });
 
     after(async () => {
-      process.kill(server.pid);
+      try {
+        process.kill(server.pid);
+      } catch (ignore) { /* ignore */ }
     });
 
     it(`forcing HTTP/1.1 using context option works' (${name})`, async () => {

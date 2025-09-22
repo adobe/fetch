@@ -88,7 +88,9 @@ testParams.forEach((params) => {
 
     after(async () => {
       await reset();
-      process.kill(server.pid);
+      try {
+        process.kill(server.pid);
+      } catch (ignore) { /* ignore */ }
     });
 
     it('rejects on non-string method option', async () => {
@@ -334,6 +336,9 @@ testParams.forEach((params) => {
         await fetch(`${server.origin}/inspect`, { signal, method, body });
         assert.fail();
       } catch (err) {
+        if (!(err instanceof AbortError)) {
+          console.error(err);
+        }
         assert(err instanceof AbortError);
       }
     });
@@ -574,7 +579,9 @@ testParams.forEach((params) => {
         assert(json !== null && typeof json === 'object');
         assert.strictEqual(json.headers.authorization, undefined);
       } finally {
-        process.kill(targetServer.pid);
+        try {
+          process.kill(targetServer.pid);
+        } catch (ignore) { /* ignore */ }
       }
     });
 
@@ -773,7 +780,9 @@ testParams.forEach((params) => {
           assert.strictEqual(body, HELLO_WORLD);
         } finally {
           await ctx.reset();
-          process.kill(server.pid);
+          try {
+            process.kill(server.pid);
+          } catch (ignore) { /* ignore */ }
         }
       });
     }
