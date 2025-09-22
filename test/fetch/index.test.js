@@ -336,7 +336,9 @@ testParams.forEach((params) => {
         await fetch(`${server.origin}/inspect`, { signal, method, body });
         assert.fail();
       } catch (err) {
-        console.error(err);
+        if (!(err instanceof AbortError)) {
+          console.error(err);
+        }
         assert(err instanceof AbortError);
       }
     });
