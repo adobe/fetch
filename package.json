@@ -26,7 +26,7 @@
   "types": "src/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/adobe/fetch"
+    "url": "https://github.com/adobe/fetch.git"
   },
   "author": "",
   "license": "Apache-2.0",
