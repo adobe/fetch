@@ -16,7 +16,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v5
-      - name: Use Node.js 20.x
+      - name: Use Node.js 22.x
         uses: actions/setup-node@v5
         with:
           node-version: '22.x'
@@ -36,15 +36,20 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      id-token: write # needed for npm trusted publishers with OIDC
     needs: test
     steps:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
-      - name: Use Node.js 20.x
+      - name: Use Node.js 24.x
         uses: actions/setup-node@v5
         with:
-          node-version: '22.x'
+          node-version: '24.x'
       - run: npm ci
       - run: npm run semantic-release
         env:
