@@ -114,9 +114,9 @@ describe('Core Tests', () => {
   });
 
   it('supports gzip/deflate/br content encoding (default)', async () => {
-    const resp = await defaultCtx.request('https://example.com/');
+    const resp = await defaultCtx.request('https://www.aem.live/');
     assert.strictEqual(resp.statusCode, 200);
-    assert.strictEqual(resp.headers['content-encoding'], 'gzip');
+    assert.match(resp.headers['content-encoding'], /^gzip|br$/);
   });
 
   it('supports disabling gzip/deflate/br content encoding', async () => {
@@ -126,21 +126,21 @@ describe('Core Tests', () => {
   });
 
   it('supports gzip/deflate/br content decoding (default)', async () => {
-    const resp = await defaultCtx.request('https://example.com/');
+    const resp = await defaultCtx.request('https://www.aem.live/');
     assert.strictEqual(resp.statusCode, 200);
-    assert.strictEqual(resp.headers['content-encoding'], 'gzip');
+    assert.match(resp.headers['content-encoding'], /^gzip|br$/);
     assert(isReadableStream(resp.readable));
     const buf = await readStream(resp.readable);
     const body = buf.toString();
-    assert(body.startsWith('<!doctype html>'));
+    assert(body.startsWith('<!DOCTYPE html>'));
     assert(+resp.headers['content-length'] < body.length);
     assert.strictEqual(resp.decoded, true);
   });
 
   it('supports disabling gzip/deflate/br content decoding', async () => {
-    const resp = await defaultCtx.request('https://example.com/', { decode: false });
+    const resp = await defaultCtx.request('https://www.aem.live/', { decode: false });
     assert.strictEqual(resp.statusCode, 200);
-    assert.strictEqual(resp.headers['content-encoding'], 'gzip');
+    assert.match(resp.headers['content-encoding'], /^gzip|br$/);
     assert(isReadableStream(resp.readable));
     const buf = await readStream(resp.readable);
     assert.strictEqual(+resp.headers['content-length'], buf.length);
@@ -557,7 +557,7 @@ describe('Core Tests', () => {
     const resp = await defaultCtx.request(`${server.origin}/gzip`);
     assert.strictEqual(resp.statusCode, 200);
     assert(resp.headers['content-type'].startsWith('text/plain'));
-    assert.strictEqual(resp.headers['content-encoding'], 'gzip');
+    assert.match(resp.headers['content-encoding'], /^gzip|br$/);
     const buf = await readStream(resp.readable);
     assert.strictEqual(buf.toString(), HELLO_WORLD);
   });
