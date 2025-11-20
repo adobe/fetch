@@ -3,8 +3,9 @@ on: [push]
 
 permissions:
   contents: write  # semantic-release-dry verifies the write permissions
-  issues: read # needed by semantic-release
+  issues: write # needed by semantic-release
   pull-requests: write # needed by semantic-release
+  id-token: write # needed for npm trusted publishers with OIDC
 
 env:
   CI_BUILD_NUM: ${{ github.run_id }}
@@ -36,11 +37,6 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
-      id-token: write # needed for npm trusted publishers with OIDC
     needs: test
     steps:
       - uses: actions/checkout@v5
