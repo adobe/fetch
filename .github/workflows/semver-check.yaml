@@ -4,7 +4,8 @@ on:
       - 'main'
 
 permissions:
-  issues: write # needed by semantic-release
+  issues: write
+  pull-requests: write
 
 jobs:
   ci_trigger:
