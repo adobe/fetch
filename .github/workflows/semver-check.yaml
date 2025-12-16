@@ -3,6 +3,9 @@ on:
     branches-ignore:
       - 'main'
 
+permissions:
+  issues: write # needed by semantic-release
+
 jobs:
   ci_trigger:
     runs-on: ubuntu-latest
