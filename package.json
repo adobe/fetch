@@ -74,7 +74,7 @@
     "parse-cache-control": "1.0.1",
     "parse-multipart-data": "1.5.0",
     "semantic-release": "25.0.2",
-    "sinon": "21.0.0",
+    "sinon": "21.0.1",
     "stream-buffers": "3.0.3"
   },
   "lint-staged": {
