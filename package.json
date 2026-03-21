@@ -67,14 +67,14 @@
     "eslint-plugin-import": "2.32.0",
     "formdata-node": "6.0.3",
     "husky": "9.1.7",
-    "lint-staged": "16.3.2",
+    "lint-staged": "16.4.0",
     "mocha": "11.7.5",
     "mocha-multi-reporters": "1.5.1",
     "nock": "13.5.6",
     "parse-cache-control": "1.0.1",
     "parse-multipart-data": "1.5.0",
     "semantic-release": "25.0.3",
-    "sinon": "21.0.2",
+    "sinon": "21.0.3",
     "stream-buffers": "3.0.3"
   },
   "lint-staged": {
