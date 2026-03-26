@@ -310,8 +310,8 @@ testParams.forEach((params) => {
 
     it('AbortController works (POST with string body)', async () => {
       const controller = new FetchAbortController();
-      setTimeout(() => controller.abort(), 1);
       const { signal } = controller;
+      controller.abort();
 
       const method = 'POST';
       const body = 'Hello, World!';
@@ -326,8 +326,8 @@ testParams.forEach((params) => {
 
     it('built-in AbortController works (POST with string body)', async () => {
       const controller = new AbortController();
-      setTimeout(() => controller.abort(), 1);
       const { signal } = controller;
+      controller.abort();
 
       const method = 'POST';
       const body = 'Hello, World!';
@@ -336,10 +336,21 @@ testParams.forEach((params) => {
         await fetch(`${server.origin}/inspect`, { signal, method, body });
         assert.fail();
       } catch (err) {
-        if (!(err instanceof AbortError)) {
-          // eslint-disable-next-line no-console
-          console.error(err);
-        }
+        assert(err instanceof AbortError);
+      }
+    });
+
+    it('built-in AbortController works (abort during fetch)', async () => {
+      const controller = new AbortController();
+      const { signal } = controller;
+
+      const fetchPromise = fetch(`${server.origin}/status/200?delay=5000`, { signal });
+      setTimeout(() => controller.abort(), 50);
+
+      try {
+        await fetchPromise;
+        assert.fail();
+      } catch (err) {
         assert(err instanceof AbortError);
       }
     });
