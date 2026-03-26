@@ -241,6 +241,7 @@ class Server {
           return this.secure
             ? https.createServer(options, handler) : http.createServer(options, handler);
         } else {
+          options = { ...options, allowHTTP1: true };
           return this.secure
             ? http2.createSecureServer(options, handler) : http2.createServer(options, handler);
         }

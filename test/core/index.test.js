@@ -299,7 +299,7 @@ describe('Core Tests', () => {
 
   it('forcing HTTP/1.1 works', async () => {
     // endpoint supporting http2 & http1
-    const url = 'https://www.nghttp2.org/httpbin/status/200';
+    const url = `${server.origin}/status/200`;
     // default context defaults to http2
     let resp = await defaultCtx.request(url);
     assert.strictEqual(resp.statusCode, 200);
@@ -308,6 +308,7 @@ describe('Core Tests', () => {
     // custom context forces http1
     const h1Ctx = context({
       alpnProtocols: [ALPN_HTTP1_1],
+      rejectUnauthorized: false,
     });
     try {
       resp = await h1Ctx.request(url);
