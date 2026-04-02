@@ -301,6 +301,26 @@ describe('Request Tests', () => {
     });
   });
 
+  it('should serialize plain object body to JSON', () => {
+    const method = 'POST';
+    const body = { foo: 42 };
+    const req = new Request(BASE_URL, { method, body });
+    expect(req.headers.get('content-type')).to.equal('application/json');
+    return req.json().then((result) => {
+      expect(result).to.deep.equal(body);
+    });
+  });
+
+  it('should serialize array body to JSON', () => {
+    const method = 'POST';
+    const body = [1, 2, 3];
+    const req = new Request(BASE_URL, { method, body });
+    expect(req.headers.get('content-type')).to.equal('application/json');
+    return req.json().then((result) => {
+      expect(result).to.deep.equal(body);
+    });
+  });
+
   it('wrapping requests preserves init options', () => {
     const method = 'POST';
     const body = { foo: 'bar', baz: { count: 313 } };
