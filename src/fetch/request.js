@@ -64,8 +64,8 @@ class Request extends Body {
     }
 
     if (!headers.has('content-type')) {
-      if (isPlainObject(body)) {
-        // non-spec extension: support plain js object body (JSON serialization)
+      if (isPlainObject(body) || Array.isArray(body)) {
+        // non-spec extension: support plain js object/array body (JSON serialization)
         body = JSON.stringify(body);
         headers.set('content-type', 'application/json');
       } else {

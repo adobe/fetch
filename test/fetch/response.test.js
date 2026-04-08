@@ -193,6 +193,16 @@ describe('Response Tests', () => {
     // plain js object body
     res = new Response({ foo: 42 });
     expect(res.headers.get('content-type')).to.equal('application/json');
+    // array body
+    res = new Response([1, 2, 3]);
+    expect(res.headers.get('content-type')).to.equal('application/json');
+  });
+
+  it('should serialize array body to JSON', () => {
+    const res = new Response([1, 2, 3]);
+    return res.json().then((result) => {
+      expect(result).to.deep.equal([1, 2, 3]);
+    });
   });
 
   it('should not override content-type header', () => {
