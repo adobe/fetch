@@ -1,3 +1,10 @@
+# [4.3.0](https://github.com/adobe/fetch/compare/v4.2.3...v4.3.0) (2026-04-08)
+
+
+### Features
+
+* serialize array body to JSON in Request and Response ([#584](https://github.com/adobe/fetch/issues/584)) ([d813aa5](https://github.com/adobe/fetch/commit/d813aa5bf3fd296b329cb96412f42e52dadc956a)), closes [#583](https://github.com/adobe/fetch/issues/583)
+
 ## [4.2.3](https://github.com/adobe/fetch/compare/v4.2.2...v4.2.3) (2025-09-15)
 
 
