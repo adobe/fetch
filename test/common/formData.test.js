@@ -15,6 +15,7 @@
 
 import assert from 'assert';
 import { fileURLToPath } from 'url';
+import { Readable } from 'stream';
 
 import { FormData, File, Blob } from 'formdata-node';
 // eslint-disable-next-line import/no-unresolved
@@ -56,5 +57,48 @@ describe('FormData Helpers Test', () => {
     const buf = await streamToBuffer(fds.stream());
     assert.strictEqual(fds.length(), buf.length);
     assert(fds.contentType().startsWith('multipart/form-data; boundary='));
+  });
+
+  it('FormDataSerializer escapes CRLF in field names, file names and blob type', async () => {
+    // A CRLF-laden blob-like value. We drive the serializer with a hand-rolled
+    // form iterable because both a spec Blob and formdata-node normalize/strip
+    // these values before our serializer would ever see them; the duck-typed
+    // isBlob() check, however, accepts an arbitrary blob-like object.
+    const blob = {
+      [Symbol.toStringTag]: 'Blob',
+      name: 'evil\r\nX-Injected: filename.txt',
+      type: 'text/plain\r\n\r\ninjected part',
+      size: 4,
+      arrayBuffer: async () => new ArrayBuffer(4),
+      stream: () => Readable.from('data'),
+      text: async () => 'data',
+      slice: () => {},
+    };
+    const form = {
+      * [Symbol.iterator]() {
+        yield ['field\r\nX-Injected: name', 'value'];
+        yield ['blob', blob];
+      },
+    };
+
+    const fds = new FormDataSerializer(form);
+    const buf = await streamToBuffer(fds.stream());
+    const boundary = fds.contentType().slice('multipart/form-data; boundary='.length);
+    const body = buf.toString();
+
+    // The tainted values must not introduce raw CRLF into the body: a real
+    // "\r\nX-Injected" / "\r\n\r\ninjected part" sequence would break out of the
+    // intended part header / body framing.
+    assert(!body.includes('\r\nX-Injected'));
+    assert(!body.includes('\r\n\r\ninjected part'));
+    // instead the CR/LF must be percent-escaped (names) or stripped (type)
+    assert(body.includes('name="field%0D%0AX-Injected: name"'));
+    assert(body.includes('filename="evil%0D%0AX-Injected: filename.txt"'));
+    assert(body.includes('Content-Type: text/plaininjected part'));
+
+    // sanity: the declared length still matches the produced body
+    assert.strictEqual(fds.length(), buf.length);
+    // and no rogue boundary was injected
+    assert.strictEqual(body.split(`--${boundary}`).length - 1, 2 /* parts */ + 1 /* footer */);
   });
 });
