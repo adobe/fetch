@@ -51,15 +51,28 @@ const isFormData = (obj) => (obj != null // neither null nor undefined
 
 const getFooter = (boundary) => `--${boundary}--\r\n\r\n`;
 
+// Escape field names and file names per the WHATWG multipart/form-data
+// serialization algorithm, preventing CR/LF (and `"`) injection into the
+// multipart body. See https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#multipart-form-data
+const escapeName = (str) => String(str)
+  .replace(/\r/g, '%0D')
+  .replace(/\n/g, '%0A')
+  .replace(/"/g, '%22');
+
+// Strip CR/LF from a part's Content-Type. Unlike a spec-compliant Blob, the
+// duck-typed blob check accepts an arbitrary `type` string, so sanitize it to
+// avoid injecting additional part headers/body into the multipart payload.
+const sanitizeContentType = (str) => String(str).replace(/[\r\n]/g, '');
+
 const getHeader = (boundary, name, field) => {
   let header = '';
 
   header += `--${boundary}\r\n`;
-  header += `Content-Disposition: form-data; name="${name}"`;
+  header += `Content-Disposition: form-data; name="${escapeName(name)}"`;
 
   if (isBlob(field)) {
-    header += `; filename="${field.name}"\r\n`;
-    header += `Content-Type: ${field.type || 'application/octet-stream'}`;
+    header += `; filename="${escapeName(field.name)}"\r\n`;
+    header += `Content-Type: ${sanitizeContentType(field.type || 'application/octet-stream')}`;
   }
 
   return `${header}\r\n\r\n`;
