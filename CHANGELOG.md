@@ -1,3 +1,10 @@
+## [4.3.1](https://github.com/adobe/fetch/compare/v4.3.0...v4.3.1) (2026-08-06)
+
+
+### Bug Fixes
+
+* escape CRLF in multipart/form-data field name, filename and blob type ([#605](https://github.com/adobe/fetch/issues/605)) ([b6571db](https://github.com/adobe/fetch/commit/b6571dbf8cfea52dacbe4ba5c9bc068a199799ce))
+
 # [4.3.0](https://github.com/adobe/fetch/compare/v4.2.3...v4.3.0) (2026-04-08)
 
 
