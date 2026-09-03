@@ -16,9 +16,7 @@
   },
   "mocha": {
     "timeout": "5000",
-    "recursive": "true",
-    "reporter": "mocha-multi-reporters",
-    "reporter-options": "configFile=.mocha-multi.json"
+    "recursive": "true"
   },
   "engines": {
     "node": ">=14.16"
@@ -68,8 +66,7 @@
     "formdata-node": "6.0.3",
     "husky": "9.1.7",
     "lint-staged": "17.4.1",
-    "mocha": "11.8.0",
-    "mocha-multi-reporters": "1.5.1",
+    "mocha": "12.0.0",
     "nock": "13.5.6",
     "parse-cache-control": "1.0.1",
     "parse-multipart-data": "1.5.0",
