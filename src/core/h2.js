@@ -93,6 +93,11 @@ const handlePush = (ctx, origin, decode, pushedStream, requestHeaders, flags) =>
     // similar to 'response' event on ClientHttp2Stream
     debug(`received push headers for ${origin}${path}, stream #${pushedStream.id}, headers: ${JSON.stringify(responseHeaders)}, flags: ${flgs}`);
 
+    if (pushedStream.closed) {
+      // push has been rejected (headers might arrive along with the PUSH_PROMISE frame)
+      return;
+    }
+
     // set timeout to automatically discard pushed streams that aren't consumed for some time
     pushedStream.setTimeout(pushedStreamIdleTimeout, () => {
       /* c8 ignore next 2 */

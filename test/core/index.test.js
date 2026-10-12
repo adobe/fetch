@@ -587,12 +587,11 @@ describe('Core Tests', () => {
       const pushHandler = (url, headers, response) => {
         resolve({ url, response });
       };
-      customCtx = context({ h2: { pushHandler } });
+      customCtx = context({ rejectUnauthorized: false, h2: { pushHandler } });
     });
 
     try {
-      // see https://nghttp2.org/blog/2015/02/10/nghttp2-dot-org-enabled-http2-server-push/
-      const resp = await customCtx.request('https://nghttp2.org');
+      const resp = await customCtx.request(`${server.origin}/push`);
       assert.strictEqual(resp.httpVersionMajor, 2);
       assert.strictEqual(resp.statusCode, 200);
       assert.strictEqual(resp.headers['content-type'], 'text/html');
@@ -600,7 +599,7 @@ describe('Core Tests', () => {
       assert.strictEqual(+resp.headers['content-length'], buf.length);
       // pushed resource
       const { url, response } = await pushedResource;
-      assert.strictEqual(url, 'https://nghttp2.org/stylesheets/screen.css');
+      assert.strictEqual(url, `${server.origin}/stylesheets/screen.css`);
       assert.strictEqual(response.statusCode, 200);
       assert.strictEqual(response.headers['content-type'], 'text/css');
       buf = await readStream(response.readable);
@@ -622,12 +621,11 @@ describe('Core Tests', () => {
       const pushHandler = (url, headers, response) => {
         resolve(url);
       };
-      customCtx = context({ h2: { pushPromiseHandler, pushHandler } });
+      customCtx = context({ rejectUnauthorized: false, h2: { pushPromiseHandler, pushHandler } });
     });
 
     try {
-      // see https://nghttp2.org/blog/2015/02/10/nghttp2-dot-org-enabled-http2-server-push/
-      const resp = await customCtx.request('https://nghttp2.org');
+      const resp = await customCtx.request(`${server.origin}/push`);
       assert.strictEqual(resp.httpVersionMajor, 2);
       assert.strictEqual(resp.statusCode, 200);
       assert.strictEqual(resp.headers['content-type'], 'text/html');
@@ -649,12 +647,13 @@ describe('Core Tests', () => {
         resolve({ url, headers, response });
       };
       // automatically close idle pushed streams after 100ms
-      customCtx = context({ h2: { pushHandler, pushedStreamIdleTimeout: 100 } });
+      customCtx = context({
+        rejectUnauthorized: false, h2: { pushHandler, pushedStreamIdleTimeout: 100 },
+      });
     });
 
     try {
-      // see https://nghttp2.org/blog/2015/02/10/nghttp2-dot-org-enabled-http2-server-push/
-      const resp = await customCtx.request('https://nghttp2.org');
+      const resp = await customCtx.request(`${server.origin}/push`);
       assert.strictEqual(resp.httpVersionMajor, 2);
       assert.strictEqual(resp.statusCode, 200);
       assert.strictEqual(resp.headers['content-type'], 'text/html');
@@ -662,7 +661,7 @@ describe('Core Tests', () => {
       assert.strictEqual(+resp.headers['content-length'], buf.length);
       // pushed resource
       const { url, response: pushedResp } = await pushedResource;
-      assert.strictEqual(url, 'https://nghttp2.org/stylesheets/screen.css');
+      assert.strictEqual(url, `${server.origin}/stylesheets/screen.css`);
       assert.strictEqual(pushedResp.statusCode, 200);
       assert.strictEqual(pushedResp.headers['content-type'], 'text/css');
       // verify pushed response stream is ready to be consumed

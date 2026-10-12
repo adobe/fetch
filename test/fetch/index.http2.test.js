@@ -19,7 +19,7 @@ import sinon from 'sinon';
 
 import Server from '../server.js';
 import {
-  fetch, context, noCache, reset, onPush, offPush,
+  fetch, context, noCache, reset,
 } from '../../src/index.js';
 
 const WOKEUP = 'woke up!';
@@ -71,40 +71,44 @@ describe('HTTP/2-specific Fetch Tests', () => {
   });
 
   it('fetch supports HTTP/2 server push', async () => {
+    const ctx = context({ rejectUnauthorized: false });
     // returns a promise which resolves with the url and the pushed response
     const pushedResource = () => new Promise((resolve) => {
       const handler = (url, response) => {
-        offPush(handler);
+        ctx.offPush(handler);
         resolve({ url, response });
       };
-      onPush(handler);
+      ctx.onPush(handler);
     });
 
-    // see https://nghttp2.org/blog/2015/02/10/nghttp2-dot-org-enabled-http2-server-push/
-    const resp = await fetch('https://nghttp2.org');
-    assert.strictEqual(resp.httpVersion, '2.0');
-    assert.strictEqual(resp.status, 200);
-    assert.strictEqual(resp.headers.get('content-type'), 'text/html');
-    let buf = await resp.buffer();
-    assert.strictEqual(+resp.headers.get('content-length'), buf.length);
-    // pushed resource
-    const { url, response } = await pushedResource();
-    assert.strictEqual(url, 'https://nghttp2.org/stylesheets/screen.css');
-    assert.strictEqual(response.status, 200);
-    assert.strictEqual(response.headers.get('content-type'), 'text/css');
-    buf = await response.buffer();
-    assert.strictEqual(+response.headers.get('content-length'), buf.length);
+    try {
+      const pushed = pushedResource();
+      const resp = await ctx.fetch(`${server.origin}/push`);
+      assert.strictEqual(resp.httpVersion, '2.0');
+      assert.strictEqual(resp.status, 200);
+      assert.strictEqual(resp.headers.get('content-type'), 'text/html');
+      let buf = await resp.buffer();
+      assert.strictEqual(+resp.headers.get('content-length'), buf.length);
+      // pushed resource
+      const { url, response } = await pushed;
+      assert.strictEqual(url, `${server.origin}/stylesheets/screen.css`);
+      assert.strictEqual(response.status, 200);
+      assert.strictEqual(response.headers.get('content-type'), 'text/css');
+      buf = await response.buffer();
+      assert.strictEqual(+response.headers.get('content-length'), buf.length);
+    } finally {
+      await ctx.reset();
+    }
   });
 
   it('HTTP/2 server push can be disabled', async () => {
-    const ctx = context({ h2: { enablePush: false } });
+    const ctx = context({ rejectUnauthorized: false, h2: { enablePush: false } });
 
     const handler = sinon.fake();
     ctx.onPush(handler);
 
     try {
-      // see https://nghttp2.org/blog/2015/02/10/nghttp2-dot-org-enabled-http2-server-push/
-      const resp = await ctx.fetch('https://nghttp2.org');
+      const resp = await ctx.fetch(`${server.origin}/push`);
       assert.strictEqual(resp.httpVersion, '2.0');
       assert.strictEqual(resp.status, 200);
       assert.strictEqual(resp.headers.get('content-type'), 'text/html');

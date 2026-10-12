@@ -24,7 +24,7 @@ import cacheableResponse from '../../src/fetch/cacheableResponse.js';
 import Server from '../server.js';
 
 const {
-  fetch, onPush, offPush, reset, clearCache, cacheStats, context, noCache, Response, Headers,
+  fetch, reset, clearCache, cacheStats, context, noCache, Response, Headers,
 } = fetchAPI;
 
 const HELLO_WORLD = 'Hello, World!';
@@ -353,79 +353,106 @@ describe('Cache Tests', () => {
     assert.strictEqual(text, HELLO_WORLD);
   });
 
-  it('fetch supports HTTP/2 server push', async () => {
-    // returns a promise which resolves with the url of the pushed resource
-    const receivedPush = () => new Promise((resolve) => {
-      // eslint-disable-next-line no-unused-vars
-      const handler = (url, response) => {
-        offPush(handler);
-        resolve(url);
-      };
-      onPush(handler);
+  describe('HTTP/2 server push', () => {
+    let h2Server;
+    let ctx;
+
+    before(async () => {
+      h2Server = await Server.launch(2, true, HELLO_WORLD);
     });
 
-    const [resp, url] = await Promise.all([
-      // see https://nghttp2.org/blog/2015/02/10/nghttp2-dot-org-enabled-http2-server-push/
-      fetch('https://nghttp2.org'),
-      // resolves with either WOKEUP or the url of the pushed resource
-      Promise.race([sleep(2000), receivedPush()]),
-    ]);
-    assert.strictEqual(resp.httpVersion, '2.0');
-    assert.strictEqual(resp.status, 200);
-    assert.strictEqual(resp.headers.get('content-type'), 'text/html');
-    assert.strictEqual(+resp.headers.get('content-length'), (await resp.text()).length);
-    assert.notStrictEqual(url, WOKEUP);
+    after(async () => {
+      try {
+        process.kill(h2Server.pid);
+      } catch (ignore) { /* ignore */ }
+    });
 
-    // check cache for pushed resource (stylesheets/screen.css)
-    nock.disableNetConnect();
-    try {
-      const pushedResp = await fetch(url);
-      assert.strictEqual(pushedResp.httpVersion, '2.0');
-      assert.strictEqual(pushedResp.status, 200);
-      assert(pushedResp.fromCache);
-    } finally {
-      nock.cleanAll();
-      nock.enableNetConnect();
-    }
-  });
+    beforeEach(() => {
+      ctx = context({ rejectUnauthorized: false });
+    });
 
-  it('test redundant server push', async () => {
-    let pushedResponse;
-    const receivedPush = () => new Promise((resolve) => {
-      onPush((url, response) => {
-        pushedResponse = response;
-        resolve(response);
+    afterEach(async () => {
+      ctx.clearCache();
+      await ctx.reset();
+    });
+
+    it('fetch supports HTTP/2 server push', async () => {
+      // returns a promise which resolves with the url of the pushed resource
+      const receivedPush = () => new Promise((resolve) => {
+        // eslint-disable-next-line no-unused-vars
+        const handler = (url, response) => {
+          ctx.offPush(handler);
+          resolve(url);
+        };
+        ctx.onPush(handler);
       });
+
+      const [resp, url] = await Promise.all([
+        ctx.fetch(`${h2Server.origin}/push`),
+        // resolves with either WOKEUP or the url of the pushed resource
+        Promise.race([sleep(2000), receivedPush()]),
+      ]);
+      assert.strictEqual(resp.httpVersion, '2.0');
+      assert.strictEqual(resp.status, 200);
+      assert.strictEqual(resp.headers.get('content-type'), 'text/html');
+      assert.strictEqual(+resp.headers.get('content-length'), (await resp.text()).length);
+      assert.notStrictEqual(url, WOKEUP);
+
+      // check cache for pushed resource (stylesheets/screen.css)
+      nock.disableNetConnect();
+      try {
+        const pushedResp = await ctx.fetch(url);
+        assert.strictEqual(pushedResp.httpVersion, '2.0');
+        assert.strictEqual(pushedResp.status, 200);
+        assert(pushedResp.fromCache);
+      } finally {
+        nock.cleanAll();
+        nock.enableNetConnect();
+      }
     });
 
-    let [resp, result] = await Promise.all([
-      // see https://nghttp2.org/blog/2015/02/10/nghttp2-dot-org-enabled-http2-server-push/
-      fetch('https://nghttp2.org', { cache: 'no-store' }),
-      // resolves with either WOKEUP or a Response representing the pushed resource
-      Promise.race([sleep(3000), receivedPush()]),
-    ]);
-    assert.strictEqual(resp.httpVersion, '2.0');
-    assert.strictEqual(resp.status, 200);
-    assert(!resp.fromCache);
-    assert.notStrictEqual(result, WOKEUP);
-    // result is a Response representing the pushed resource
-    assert.strictEqual(result, pushedResponse);
+    it('test redundant server push', async () => {
+      let pushedResponse;
+      let pushHandler;
+      const receivedPush = () => new Promise((resolve) => {
+        if (pushHandler) {
+          ctx.offPush(pushHandler);
+        }
+        pushHandler = (url, response) => {
+          pushedResponse = response;
+          resolve(response);
+        };
+        ctx.onPush(pushHandler);
+      });
 
-    // fetch again -> push rejected since resource is already cached
-    [resp, result] = await Promise.all([
-      fetch('https://nghttp2.org', { cache: 'no-store' }),
-      Promise.race([sleep(3000), receivedPush()]),
-    ]);
-    assert.strictEqual(resp.httpVersion, '2.0');
-    assert.strictEqual(resp.status, 200);
-    assert(!resp.fromCache);
-    assert.strictEqual(result, WOKEUP);
+      let [resp, result] = await Promise.all([
+        ctx.fetch(`${h2Server.origin}/push`, { cache: 'no-store' }),
+        // resolves with either WOKEUP or a Response representing the pushed resource
+        Promise.race([sleep(3000), receivedPush()]),
+      ]);
+      assert.strictEqual(resp.httpVersion, '2.0');
+      assert.strictEqual(resp.status, 200);
+      assert(!resp.fromCache);
+      assert.notStrictEqual(result, WOKEUP);
+      // result is a Response representing the pushed resource
+      assert.strictEqual(result, pushedResponse);
 
-    // fetch pushed resource -> should be delivered from cache
-    resp = await fetch(pushedResponse.url);
-    assert.strictEqual(resp.httpVersion, '2.0');
-    assert.strictEqual(resp.status, 200);
-    assert.strictEqual(resp.fromCache, true);
+      // fetch again -> push rejected since resource is already cached
+      [resp, result] = await Promise.all([
+        ctx.fetch(`${h2Server.origin}/push`, { cache: 'no-store' }),
+        Promise.race([sleep(3000), receivedPush()]),
+      ]);
+      assert.strictEqual(resp.httpVersion, '2.0');
+      assert.strictEqual(resp.status, 200);
+      assert(!resp.fromCache);
+      assert.strictEqual(result, WOKEUP);
+
+      // fetch pushed resource -> should be delivered from cache
+      resp = await ctx.fetch(pushedResponse.url);
+      assert.strictEqual(resp.httpVersion, '2.0');
+      assert.strictEqual(resp.status, 200);
+      assert.strictEqual(resp.fromCache, true);
+    });
   });
 
   it('resp.headers is wrapped on cached response', async () => {

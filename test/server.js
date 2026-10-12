@@ -36,6 +36,10 @@ const sleep = (ms) => new Promise((resolve) => {
 
 const HELLO_WORLD = 'Hello, World!';
 
+const PUSH_HTML = '<!DOCTYPE html><html><head><link rel="stylesheet" href="/stylesheets/screen.css"></head><body>Hello, World!</body></html>';
+// exceeds the default h2 flow-control window (64KB): pushed stream stays open until consumed
+const PUSHED_CSS = 'body { color: black; }\n'.repeat(5000);
+
 const writeChunked = (buf, out, chunkSize) => {
   let off = 0;
   let processed = 0;
@@ -220,6 +224,30 @@ class Server {
             });
             writeChunked(randomBytes(count), res, 128);
             res.end();
+            break;
+
+          case '/push':
+            // h2 server push (emulates former nghttp2.org behavior)
+            if (req.stream && req.stream.pushAllowed) {
+              req.stream.pushStream({ ':path': '/stylesheets/screen.css' }, (err, pushStream) => {
+                if (err) {
+                  return;
+                }
+                pushStream.on('error', () => {}); // ignore (e.g. push rejected by client)
+                pushStream.respond({
+                  ':status': 200,
+                  'content-type': 'text/css',
+                  'content-length': `${Buffer.byteLength(PUSHED_CSS)}`,
+                  'cache-control': 'public, max-age=3600',
+                });
+                pushStream.end(PUSHED_CSS);
+              });
+            }
+            res.writeHead(200, {
+              'Content-Type': 'text/html',
+              'Content-Length': `${Buffer.byteLength(PUSH_HTML)}`,
+            });
+            res.end(PUSH_HTML);
             break;
 
           default:
