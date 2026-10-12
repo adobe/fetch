@@ -1,3 +1,10 @@
+## [4.3.2](https://github.com/adobe/fetch/compare/v4.3.1...v4.3.2) (2026-10-12)
+
+
+### Bug Fixes
+
+* **deps:** update dependency http-cache-semantics to v4.3.0 ([#622](https://github.com/adobe/fetch/issues/622)) ([d5d8538](https://github.com/adobe/fetch/commit/d5d8538c2f4eab804de0a87d73cb9eaa77e72d29))
+
 ## [4.3.1](https://github.com/adobe/fetch/compare/v4.3.0...v4.3.1) (2026-08-06)
 
 
