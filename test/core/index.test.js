@@ -213,6 +213,17 @@ describe('Core Tests', () => {
     assert((ts1 - ts0) < 10);
   });
 
+  it('request with non-aborted signal works (fresh context)', async () => {
+    const { signal } = new AbortController();
+    const customCtx = context({ rejectUnauthorized: false });
+    try {
+      const resp = await customCtx.request(`${server.origin}/status/200`, { signal });
+      assert.strictEqual(resp.statusCode, 200);
+    } finally {
+      await customCtx.reset();
+    }
+  });
+
   it('AbortController works (slow response)', async () => {
     const controller = new AbortController();
     setTimeout(() => controller.abort(), 1000);
