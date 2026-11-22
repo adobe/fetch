@@ -358,7 +358,7 @@ testParams.forEach((params) => {
     it('AbortController works (dripping response)', async () => {
       const FETCH_TIMEOUT = 1000; // ms
       const DRIPPING_DURATION = 2; // seconds
-      const TEST_URL = `${protocol}://httpbingo.org/drip?duration=${DRIPPING_DURATION}&numbytes=10&code=200&delay=0`;
+      const TEST_URL = `${server.origin}/drip?duration=${DRIPPING_DURATION}&numbytes=10&code=200&delay=0`;
 
       const controller = new FetchAbortController();
       setTimeout(() => controller.abort(), FETCH_TIMEOUT);
@@ -384,7 +384,7 @@ testParams.forEach((params) => {
     it('built-in AbortController works (dripping response)', async () => {
       const FETCH_TIMEOUT = 1000; // ms
       const DRIPPING_DURATION = 2; // seconds
-      const TEST_URL = `${protocol}://httpbingo.org/drip?duration=${DRIPPING_DURATION}&numbytes=10&code=200&delay=0`;
+      const TEST_URL = `${server.origin}/drip?duration=${DRIPPING_DURATION}&numbytes=10&code=200&delay=0`;
 
       const controller = new AbortController();
       setTimeout(() => controller.abort(), FETCH_TIMEOUT);

@@ -226,6 +226,26 @@ class Server {
             res.end();
             break;
 
+          case '/drip': {
+            // emulates httpbingo.org/drip: sends numbytes '*' spread over duration seconds
+            await sleep(+(searchParams.get('delay') || 0) * 1000);
+            const numBytes = +(searchParams.get('numbytes') || 10);
+            const pause = (+(searchParams.get('duration') || 2) * 1000) / numBytes;
+            res.writeHead(+(searchParams.get('code') || 200), {
+              'Content-Type': 'application/octet-stream',
+              'Content-Length': `${numBytes}`,
+            });
+            for (let i = 0; i < numBytes && !res.destroyed && !res.writableEnded; i += 1) {
+              res.write('*');
+              // eslint-disable-next-line no-await-in-loop
+              await sleep(pause);
+            }
+            if (!res.destroyed) {
+              res.end();
+            }
+            break;
+          }
+
           case '/push':
             // h2 server push (emulates former nghttp2.org behavior)
             if (req.stream && req.stream.pushAllowed) {
